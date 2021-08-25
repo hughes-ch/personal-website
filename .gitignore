@@ -109,6 +109,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+personal-website/
+this
 
 # Spyder project settings
 .spyderproject
