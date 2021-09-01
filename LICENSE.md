@@ -4,7 +4,7 @@ Source code (excluding blog content) are protected under the MIT license. See fo
 
 MIT License
 
-Copyright (c) 2021 mr-suitcases
+Copyright (c) 2021 Chris Hughes
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

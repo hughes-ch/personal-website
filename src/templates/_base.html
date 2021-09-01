@@ -14,6 +14,7 @@
       :root {
           --max-width: 50em;
           --title-color: #ff7600;
+          --link-block-margin: 1em;
       }
       article {
           max-width: var(--max-width);
@@ -37,8 +38,11 @@
           margin-block-end: 5em;
       }
       nav {
-          display: grid;
-          grid-column-gap: 3em;
+          display: flex;
+          flex-flow: row wrap;
+          justify-content: space-evenly;
+          width: 100%;
+          max-width: 60em;
       }
       nav h1, nav h3, nav p {
           font-size: 1.5em;
@@ -52,18 +56,16 @@
           color: black;
           text-decoration: none;
       }
-      .nav-about {
-          grid-column: 7 / span 1;
-          grid-row: 1 / span 1;
+      .link-block {
+          display: flex;
+          flex-flow: row nowrap;
+          justify-content: center;
+          align-items: center;
       }
-      .nav-archive {
-          grid-column: 8 / span 1;
-          grid-row: 1 / span 1;
-      }
-      .nav-social-media-block {
-          grid-column: 9 / span 1;
-          grid-row: 1 / span 1;
+      .link-block h3, .link-block div {
+          display: inline-block;
           text-align: center;
+          margin-left: var(--link-block-margin);
       }
       .page-content {
           display: flex;
@@ -97,9 +99,9 @@
           color: var(--title-color);
       }
       .title-block {
-          grid-column: 1 / span 3;
-          grid-row: 1 / span 1;
           text-align: center;
+          white-space: nowrap;
+          margin-bottom: 1em;
       }
       #next-nav {
           grid-column: 2 / span 1;
@@ -111,6 +113,14 @@
           grid-row: 1 / span 1;
           text-align: left;
       }
+      @media (max-width: 40em) {
+          :root {
+              --link-block-margin: 2em;
+          }
+          .nav-social-media-block div * {
+              display: none;
+          }
+      }
     </style>
   </head>
   <body>
@@ -120,13 +130,15 @@
           <h1><a href='index' class='link'>Sprinting with Suitcases</a></h1>
           <p class='title-caption'>A software blog</p>
         </div>
-        <h3 class='nav-about'><a href='about' class='link'>About Me</a></h3>
-        <h3 class='nav-archive'><a href='archive' class='link nav-archive'>Archive</a></h3>
-        <div class='nav-social-media-block'>
-          <div>
-            <a href='https://www.linkedin.com/in/hughes-ch/' target='_blank'><img src='static/LI-In-Bug.png' alt='LinkedIn Logo' height='32px'></a>
-            <a href='https://github.com/hughes-ch' target='_blank'><img src='static/GitHub-Mark-64px.png' alt='GitHub Logo' height='32px'></a>
-            <a href='mailto:chris@sprintingwithsuitcases.com'><img src='static/gmail.png' alt='Gmail Logo' height='32px'></a>
+        <div class='link-block'>
+          <h3 class='nav-about'><a href='about' class='link'>About Me</a></h3>
+          <h3 class='nav-archive'><a href='archive' class='link nav-archive'>Archive</a></h3>
+          <div class='nav-social-media-block'>
+            <div>
+              <a href='https://www.linkedin.com/in/hughes-ch/' target='_blank'><img src='static/icon/linkedin.png' alt='LinkedIn Logo' height='32px'></a>
+              <a href='https://github.com/hughes-ch' target='_blank'><img src='static/icon/github.png' alt='GitHub Logo' height='32px'></a>
+              <a href='mailto:chris@sprintingwithsuitcases.com'><img src='static/icon/gmail.png' alt='Gmail Logo' height='32px'></a>
+            </div>
           </div>
         </div>
       </nav>
@@ -205,9 +217,9 @@ a wombat
         <p><strong>Want to get in touch?</strong></p>
         <div>
           <div>
-            <a href='https://www.linkedin.com/in/hughes-ch/' target='_blank'><img src='static/LI-In-Bug.png' alt='LinkedIn Logo' height='32px'></a>
-            <a href='https://github.com/hughes-ch' target='_blank'><img src='static/GitHub-Mark-64px.png' alt='GitHub Logo' height='32px'></a>
-            <a href='mailto:chris@sprintingwithsuitcases.com'><img src='static/gmail.png' alt='Gmail Logo' height='32px'></a>
+            <a href='https://www.linkedin.com/in/hughes-ch/' target='_blank'><img src='static/icon/linkedin.png' alt='LinkedIn Logo' height='32px'></a>
+            <a href='https://github.com/hughes-ch' target='_blank'><img src='static/icon/github.png' alt='GitHub Logo' height='32px'></a>
+            <a href='mailto:chris@sprintingwithsuitcases.com'><img src='static/icon/gmail.png' alt='Gmail Logo' height='32px'></a>
           </div>
         </div>
       </footer>
