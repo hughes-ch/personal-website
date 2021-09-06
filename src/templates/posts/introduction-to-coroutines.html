@@ -1,0 +1,159 @@
+<h3><a href='introduction-to-coroutines' class='link'>Introduction to Coroutines</a></h3>
+<p class='post-caption'>May 15, 2021</p>
+<p>
+  <a href='python-yield-keyword' class='underlined link'>Last week</a>, I wrote about the <span class='mono'>yield</span> keyword in Python. To continue on with a series of posts about my new favorite topic, I'll introduce the basics of coroutines by building on the <span class='mono'>yield</span> keyword.
+</p>
+<p>
+  Every programmer is familiar with functions. A basic coroutine is defined just like a function in Python. Like generator functions, it delegates to the <span class='mono'>yield</span> keyword to do its magic. However, unlike generators, the <span class='mono'>yield</span> keyword is placed on the right side of the assignment operator, and it actually returns a value that can be passed from the calling code.
+</p>
+<p>
+  It might be best to show an example and then to explain the features:
+</p>
+<pre>
+  <code># Define the coroutine
+def accumulate():
+    # Code up to the 'yield' will be executed
+    # upon 'priming' the coroutine
+    total = 0
+    
+    while True:
+        # At this point, the context will switch
+        # to the caller. The caller will receive
+        # the value currently in 'total'. The
+        # caller can then pass 'new_num' to this
+        # coroutine to be added to 'total'
+        new_num = yield total
+        total += new_num
+
+# Create the coroutine. Note that the coroutine
+# must be called - this actually tripped me up
+# the first time (I thought it had to be a handle)
+accumulator = accumulate()
+
+# Call 'next' to 'prime' the coroutine
+next(accumulator)
+
+# Print the cumulative sum of 1 through 10
+for ii in range(10):
+    print(accumulator.send(ii), end=' ')</code>
+</pre>
+<p>
+  This coroutine will then print:
+</p>
+<pre>
+  <code>0 1 3 6 10 15 21 28 36 45</code>
+</pre>
+<p>
+  As you can see, the <span class='mono'>accumulate()</span> coroutine keeps a cumulative sum of each number that is passed to it by the calling function. Each time a new number is passed to it, it returns the current sum. The main method body simply prints the output from accumulating 0 through 9.
+</p>
+<p>
+  Let's start with the syntax of the coroutine body. It looks just like a function, except it does not have a <span class='mono'>return</span> statement. Coroutines can have one, but at that point it stops iterating forever. We'll cover that below. Instead of a <span class='mono'>return</span>, it has a <span class='mono'>yield</span> statement to pass values back to the calling code. Otherwise, coroutine bodies are just like method bodies. The trickiest part is that when the <span class='mono'>yield</span> keyword is encountered, the context is switched back to the calling code. The state of the coroutine is frozen until the calling code calls the coroutine again with <span class='mono'>send()</span> or <span class='mono'>next()</span>.
+</p>
+<p>
+  Note that coroutines don't need to pass anything back to the calling code. Instead, they can be delegated to for their side effects only. For example, an accumulator which simply prints the sum (instead of returning it) would look like this:
+</p>
+<pre>
+  <code>def accumulate():
+    total = 0
+    while True:
+        total += yield
+        print(total)</code>
+</pre>
+<p>
+  This is completely valid, though the syntax looks a little strange.
+</p>
+<p>
+  Before continuing on, it's important to understand the difference between calling <span class='mono'>next()</span> and <span class='mono'>send()</span>. The <span class='mono'>next()</span> function is almost like an alias for <span class='mono'>send(None)</span>. There are two cases to familiarize yourself with here.
+</p>
+<p>
+  The first case is when 'priming' the coroutine. This mechanism is needed to tell the coroutine to execute to the first yield keyword. The only acceptable value that the calling code can pass in this case is <span class='mono'>None</span>. Trying to pass something other than <span class='mono'>None</span> to an un-primed coroutine creates an error:
+</p>
+<pre>
+  <code>>>> def accumulate():
+...     total = 0
+...     while True:
+...         total += yield
+...         print(total)
+... 
+>>> accumulator = accumulate()
+>>> accumulator.send(10)
+Traceback (most recent call last):
+  File "", line 1, in 
+TypeError: can't send non-None value to a just-started generator</code>
+</pre>
+<p>
+  Make sure  to prime those coroutines! A really cool design pattern that is covered by Luciano Ramalho's <em>Fluent Python</em> is to define a priming decorator. That pattern is out of scope for this blog post, but it shouldn't be hard to find online (or just buy his book - he's coming out with a new version soon!).
+</p>
+<p>
+  The second case to note is when <span class='mono'>next()</span> or <span class='mono'>send(None)</span> is called on a coroutine which is expecting a value other than <span class='mono'>None</span>. A coroutine will need to handle this case or a runtime error will result:
+</p>
+<pre>
+  <code>>>> import time
+>>> def state_machine():
+...     states = ['READY', 'SET', 'GO!']
+...     for state in states:
+...         timeout = yield(state)
+...         time.sleep(timeout)
+... 
+>>> state_machine_co = state_machine()
+>>> next(state_machine_co)
+'READY'
+>>> while True:
+...     print(state_machine_co.send(2))
+... 
+SET
+GO!
+Traceback (most recent call last):
+  File "", line 2, in 
+StopIteration</code>
+</pre>
+<p>
+  The above state machine waits for the calling code to pass a timeout value. Before transitioning to the next state, it waits for the timeout and then prints out the next statement to the user. It also shows an interesting point about the flow control of the <span class='mono'>yield</span> keyword. The first call to <span class='mono'>next()</span> actually returns the first state in the list, instead of waiting until the calling code delegates back to the coroutine. This makes sense, since Python executes the entire right side of a statement before assigning to the left side of the assignment operator (in this case 'timeout').
+</p>
+<p>
+  Try this example yourself!
+</p>
+<p>
+  The last topic to cover in this second installment of coroutines is returning a value. Let's go back to our accumulator method. Instead of returning a value with each iteration, suppose that you wanted to return a final value after all numbers have been accumulated. This functionality can be supported with coroutines. We just need to send <span class='mono'>None</span> from the caller to signal that the list has been exhausted. Here's how it would be implemented:
+</p>
+<pre>
+  <code>def accumulate():
+    total = 0
+    while True:
+        new_num = yield
+        if new_num is None:
+            break
+        
+        total += new_num
+
+    return total
+
+accumulator = accumulate()
+accum_inputs = list(range(10))
+accum_inputs.insert(0, None)
+accum_inputs.append(None)
+
+try:
+    for ii in accum_inputs:
+        accumulator.send(ii)
+        
+except StopIteration as exception:
+    print(f'Sum is {exception.value}')</code>
+</pre>
+<p>This code prints the following:</p>
+<pre>
+  <code>Sum is 45</code>
+</pre>
+<p>
+  Let's break this down a little bit, starting with the <span class='mono'>yield</span> keyword. Since it's alone on the right side of the assignment operator, it returns <span class='mono'>None</span> to the calling code, so the return value of <span class='mono'>send()</span> can be ignored. The <span class='mono'>new_num</span> attribute is then checked for <span class='mono'>None</span>. If it is <span class='mono'>None</span>, the <span class='mono'>while</span> loop is exited and the total is returned to the calling code. At this point, the <span class='mono'>StopIteration</span> exception is raised.
+</p>
+<p>
+  As you can see, the return value is actually encapsulated in the exception (if you think that's a little bit ugly, I'd have to agree). To access the return value is through the value attribute of the <span class='mono'>StopIteration</span> exception. Any object can be encapsulated in the exception, including tuples which can be used to return multiple values.
+</p>
+<p>
+  After reading about coroutines, I was pretty disappointed that this was the best that Python could do to return a value. However, I was proved wrong. Python has a much better way to return values from coroutines. It will be the subject of next week's post. 
+</p>
+    
+  
+
+    

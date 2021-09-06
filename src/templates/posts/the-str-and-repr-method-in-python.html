@@ -1,0 +1,89 @@
+<h3><a href='the-str-and-repr-method-in-python' class='link'>The __str__ and __repr__ Method in Python</a></h3>
+<p class='post-caption'>Apr 24, 2021</p>
+<p>
+  Next week, I'd like to cover operator overloading in Python. However, first, it seems appropriate to cover some of the more basic overloading that can be done with Python, starting with the methods that print an object as a string.
+</p>
+<p>
+  Coming from C++ land, it was confusing to me to have two methods which can be used to represent a string. In C++, I might have had a few options on how to implement a 'print' method, but it always came down to passing a string to an overridden method of <span class='mono'><<</span>, whether it was overridden by my own class or by <span class='mono'>std::cout</span>. Regardless of how it was done, the same procedure could be used. First, break the object into plain-old-data which could be represented by a string. Second, convert those underlying types to a string. Simple as that. Once you had a string, it would be used for any string-related methods, regardless of purpose (unless there were two user-defined print methods, but that just sounds like bad design). 
+</p>
+<p>
+  When I saw that Python has two methods used to convert complex types to strings, I was confused. I just assumed one might be a low-level function that never was implemented, and the other was the function that I actually needed to override in my class. I wasn't quite right. 
+</p>
+<p>
+  First, let me explain what the <span class='mono'>__str__</span> and <span class='mono'>__repr__</span> methods in Python are actually used for...
+</p>
+<p>
+Like <span class='mono'>operator<<</span> in C++ (though both more explicit and exclusive than <span class='mono'><<</span>), <span class='mono'>__str__</span> and <span class='mono'>__repr__</span> are Python magic methods (AKA dunder methods) which convert complex objects into string representations of those objects. A really simple example using <span class='mono'>__str__</span>:
+</p>
+<pre>
+  <code>class IncrementingVector:
+    """ A vector of length 'n' which increments from 0 to N
+    
+    def __init__(self, n):
+        """ Constructor method"""
+        self.vec = list(range(n))
+
+    def __str__(self):
+        """ Converts IncrementingVector to string"""
+        return '[' + ' '.join([str(ii) for ii in self.vec]) + ']'
+
+# Main method creates a IncrementingVector and prints it
+if __name__ == '__main__':
+    vector = IncrementingVector(10)
+    print(vector)</code>
+</pre>
+<p>This program results in:</p>
+<pre>
+  <code>chris@desktop: ~# python print_incrementing_vector.py
+[0 1 2 3 4 5 6 7 8 9]</code>
+</pre>
+<p>
+  However, if I did the same thing, substituting <span class='mono'>__repr__</span> for <span class='mono'>__str__</span>, I get the same thing. What gives? Is <span class='mono'>__repr__</span> just an alias for <span class='mono'>__str__</span>? No!
+</p>
+<p>
+  Though they do very similar things, <span class='mono'>__str__</span> and <span class='mono'>__repr__</span> are not the same. The best way I've heard it explained are that they are used for different audiences. The <span class='mono'>__str__</span> method is used to satisfy the user audience. The <span class='mono'>__repr__</span> method is used to satisfy the programmer audience (those poor folks who have to debug your code after you are done with it).
+</p>
+<p>
+  What this is really going to come down to is that the <span class='mono'>__str__</span> method is going to meaningfully show the internals of the class as a string (similar to the print_incrementing_vector.py example) and the <span class='mono'>__repr__</span> method is going to be useful for debugging. Most of the time, <span class='mono'>__repr__</span> is going to be the call to <span class='mono'>__init__</span> which would create the class if the string was passed to <span class='mono'>eval()</span>. The <span class='mono'>__str__</span> method will be what you typically would associate with printing a complex class. See the following for a more concrete example:
+</p>
+<pre>
+  <code>>> print(str(IncrementingVector(10)))
+[0 1 2 3 4 5 6 7 8 9]
+>> print(repr(IncrementingVector(10)))
+IncrementingVector(10)</code>
+</pre>
+<p>
+  Just think: the end user is never going to care that the class representing their data is an <span class='mono'>IncrementingVector</span> with length 10. However, they may care that their vector is a list from 0 through 9. A developer may need both pieces of information: how to create the object and what it actually represents under the hood. 
+</p>
+<p>
+  Now when just calling <span class='mono'>print()</span> on an object, the Python intrepreter first tries the <span class='mono'>__str__</span> method. If that's not defined, it tries the <span class='mono'>__repr__</span> as backup. If neither are defined, the interpreter defaults to printing the address, shown in the next example:
+</p>
+<pre>
+  <code>>>> class NewObject:
+...     pass
+... 
+>>> new_object = NewObject()
+>>> print(new_object)
+... 
+<__main__.NewObject object at 0x7f2ecd825310></code>
+</pre>
+<p>... well that's not very helpful.</p>
+<p>
+  Interestingly, if a <span class='mono'>__repr__</span> method is defined for <span class='mono'>NewObject</span>, the Python interpreter will represent the class as the string returned by <span class='mono'>__repr__</span>. This makes sense since the Python interpreter isn't really printing the end-user representation of the object, but the object itself. Here's an example:
+</p>
+<pre>
+  <code>>>> class NewObject:
+...     def __repr__(self):
+...         return 'Hello world'
+... 
+>>> new_object = NewObject()
+>>> new_object
+Hello world</code>
+</pre>
+<p>
+  So in summary, the <span class='mono'>__str__</span> method should define the string representation of the object as if it is being shown to the end user. The <span class='mono'>__repr__</span> method should define the interface to construct the object as if the string was being passed to <span class='mono'>eval()</span>.
+</p>
+<p>
+  Of course, there is no need to implement both methods, unless both are needed by the application or the end-user of a framework. That's the benefit of Python - only define what is practical without all the boilerplate required in other languages. 
+</p>
+

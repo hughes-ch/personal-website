@@ -15,6 +15,7 @@
           --max-width: 50em;
           --title-color: #ff7600;
           --link-block-margin: 1em;
+          --code-background: lightgrey;
       }
       article {
           max-width: var(--max-width);
@@ -23,10 +24,10 @@
           font-family: 'Roboto Mono', monospace;
       }
       code {
-          background-color: lightgrey;
+          background-color: var(--code-background);
           display: block;
           overflow: auto;
-          padding: 0px 20px;
+          padding: 1em;
           white-space: pre-wrap;
       }
       footer {
@@ -36,6 +37,9 @@
       hr {
           margin-block-start: 5em;
           margin-block-end: 5em;
+      }
+      img {
+          max-width: var(--max-width);
       }
       nav {
           display: flex;
@@ -66,6 +70,10 @@
           display: inline-block;
           text-align: center;
           margin-left: var(--link-block-margin);
+      }
+      .mono {
+          font-family: mono;
+          background-color: var(--code-background);
       }
       .page-content {
           display: flex;
@@ -102,6 +110,9 @@
           text-align: center;
           white-space: nowrap;
           margin-bottom: 1em;
+      }
+      .underlined {
+          text-decoration: underline;
       }
       #next-nav {
           grid-column: 2 / span 1;
@@ -144,67 +155,12 @@
       </nav>
       <main>
         <h2 class='page-title'>Latest Blog Posts</h2>
+        {% for post in posts %}
         <article>
-          <h3><a href='gdb.html' class='link'>Troubleshooting Threads with GDB</a></h3>
-          <p class='post-caption'>May 20, 2021</p>
-          <p>
-            A few posts ago, I raved about the benefits of using asynchronous programming over threads due to the difficulty in designing and troubleshooting a multi-threaded system. But what if you find yourself using threads? How can you understand problems like deadlock, thread priorities, and thread interactions in your application?
-          </p>
-          <p>
-            One really simple (yet still powerful) way is through gdb, the GNU debugger. By attaching to a running program or by analyzing a core file, it is able to tell you tons of information about a thread. I'll just go into one application of it in this blog post, one that I used recently in my work to get myself out of a sticky situation.
-          </p>
-          <p>
-            The actual situation that I had to debug was fairly complex, so I won't include all of the code here. However, what it came down to was a few threads which were deadlocked. One thread had locked a shared resource and was waiting for a second thread to release a second shared resource. The second thread was waiting on the first thread to release its shared resource before it continued. Needless to say, neither thread got what it needed to and eventually event queues filled up and crashed the entire program.
-          </p>
+          {% include post %}
         </article>
         <hr>
-        <article>
-          <h3><a href='else.html' class='link'>The Alternate Egos of Python's 'Else'</a></h3>
-          <p class='post-caption'>May 13, 2021</p>
-          <p>
-            Python's 'else' keyword has some neat functionalities that I haven't run into in other programming languages. As someone new to the language, you'll obviously know the if/else block, exemplified in this simplified selection of a preposition (if you go to this article, you can find plenty of examples where this function is inadequate):
-          </p>
-          <code>
-            <span>
-def select_preposition(word):
-    """ Selects a preposition for the given word
-
-    :param word:  String which preposition will be inserted before
-    :return:  Selected preposition (a or an)
-    """
-    if word.lower()[0] in 'aeiou':
-        return 'an'
-    else:
-        return 'a'
-
-# Main function
-if __name__ == '__main__':
-    words = [
-        'Man',
-        'Animal',
-        'House',
-        'Wombat'
-    ]
-
-    for word in words:
-        preposition = select_preposition(word)
-        print(f'{preposition} {word.lower()}')
-            </span>
-          </code>
-          <p>
-            Of course, that gives you:
-          </p>
-          <code>
-a man
-an animal
-a house
-a wombat
-          </code>
-          <p>
-            But did you also know that the else keyword can be used with for loops?
-          </p>
-        </article>
-        <hr>
+        {% endfor %}
       </main>
       <div class='page-control-section'>
         <span class='page-control' id='prev-nav'><span class='page-control-button'>Prev</span></span>

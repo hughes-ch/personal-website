@@ -5,6 +5,7 @@
     :license: MIT License. See LICENSE.md for details
 """
 import flask
+import pathlib
 
 class Blog:
     """ Creates and maintains the Flask app """
@@ -23,5 +24,16 @@ class Blog:
         # Create index page
         @self.app.route('/')
         def index():
-            return flask.render_template('_base.html')
+            # Find active posts
+            posts_dir_name = 'posts'
+            posts_full_path = (
+                pathlib.Path(self.app.root_path) /
+                self.app.template_folder /
+                posts_dir_name)
+
+            posts = [str(pathlib.Path(posts_dir_name) / path.name)
+                     for path in posts_full_path.glob('operator-overloading*.html')]
+            
+            # Render all posts to template
+            return flask.render_template('_base.html', posts=posts)
 

@@ -1,0 +1,222 @@
+<h3><a href='the-with-statement-in-python' class='link'>The 'with' Statement in Python</a></h3>
+<p class='post-caption'>Jun 5, 2021</p>
+<p>
+  Coming from C++, one of the more intimidating features of base Python was the <span class='mono'>with</span> keyword. There's really no equivalent in C++, besides possibly creating something within a local scope and defining a class destructor.
+</p>
+<p>
+  To make matters worse, most Python tutorials just explain that <span class='mono'>with</span> is the accepted way of opening files, but don't describe the mechanisms behind this powerful feature. This led me to believe that there was an entire keyword dedicated to just opening (and closing) files, and there was some magic behind the <span class='mono'>open</span> function that was hidden to developers.
+</p>
+<p>
+  Not until I did a little more digging did I realize that <span class='mono'>with</span> could be used for a wide assortment of applications, and my own classes could implement their own code to execute when using the <span class='mono'>with</span> statement.
+</p>
+<p>
+  First, what does the <span class='mono'>with</span> statement actually do? It enters a context in which an object can be considered active. When entering the context, it performs some action on the object. In the context of the <span class='mono'>open</span> function, it opens a file handle. Upon exiting the context (whether that be through standard code execution, an exception being raised, the program exiting, etc), the <span class='mono'>with</span> statement performs an additional action on the object. I'd assume this is typically the reverse of what was done to enter the context, but in theory, it can actually be anything. In the case of the <span class='mono'>open</span> function, the file handle is closed.
+</p>
+<p>
+  Let's explore the standard example of opening a file:
+</p>
+<pre>
+  <code>with open('city_names.txt') as file_handle:
+    for line in file_handle:
+        print(line, end='')</code>
+</pre>
+<p>This outputs the content of the file 'city_names.txt', shown below:</p>
+<pre>
+  <code>Boston
+New York
+Newark
+Scranton
+Toronto
+...</code>
+</pre>
+<p>So what's happening here?</p>
+<p>
+  When <span class='mono'>open</span> is called on city_names.txt, the <span class='mono'>with</span> statement enters a context where city_names.txt is open for reading. It establishes a contract with the application that it will call <span class='mono'>close</span> on the file handle when the context is exited, no matter how it is exited. It also returns the file handle, which the application can access with the <span class='mono'>as</span> keyword. Theoretically, the application can skip the <span class='mono'>as</span> clause and it can still be completely valid code. However, I'm not sure how useful it would be in this case.
+</p>
+<p>
+  Once the context is entered, the open file handle is looped through line-by-line, printing each. After the loop exits, the <span class='mono'>with</span> block is exited, closing the file handle with it.
+</p>
+<p>
+  It's important to note that if the below code is executed, the file handle will still be closed, even though the program completes with an error:
+</p>
+<pre>
+  <code>with open('city_names.txt') as file_handle:
+    for line in file_handle:
+        print(line, end='')
+    raise Exception</code>
+</pre>
+<p>
+  This is the major benefit of using <span class='mono'>with</span> - the application developer can always be sure that code will be executed (in this case, the <span class='mono'>close</span> function) when a context is exited, even if the exit is not performed cleanly.
+</p>
+<p>To compare, the alternative would be overly verbose and error prone:</p>
+<pre>
+  <code>try:
+    file_handle = open('city_names.txt')
+    for line in file_handle:
+        print(line, end='')
+    raise Exception
+except:
+    if not file_handle.closed:
+        file_handle.close()
+    raise</code>
+</pre>
+<p>
+  Using the <span class='mono'>with</span> statements with your own objects is fairly straightforward and requires defining two dunder methods within a class:
+</p>
+<ul>
+  <li>The <span class='mono'>__enter__</span> method does whatever it needs to enter the context and returns an object to manipulate in the context (or <span class='mono'>None</span> if appropriate).</li>
+  <li>The <span class='mono'>__exit__</span> method presumably cleans up what <span class='mono'>__enter__</span> has created and handles any exceptions which are raised during the processing of the context.</li>
+</ul>
+<p>
+  The function signature for <span class='mono'>__enter__</span> is very simple and takes <span class='mono'>self</span>. The return value can be bound to a variable using the <span class='mono'>as</span> keyword in the <span class='mono'>with</span> statement.
+</p>
+<p>
+  The function signature for <span class='mono'>__exit__</span> is a little bit more complicated since it needs to gather information about any exceptions which are raised during the processing of the context. At its simplest, the <span class='mono'>__exit__</span> method would look like this:
+</p>
+<pre>
+  <code>def __exit__(self, exc_type, exc_value, traceback):
+    return True</code>
+</pre>
+<ul>
+  <li>The <span class='mono'>exc_type</span> argument contains the exception type. If a <span class='mono'>ValueError</span> was raised during processing of the context, <span class='mono'>exc_type</span> would equal <span class='mono'>ValueError</span>.</li>
+  <li>The <span class='mono'>exc_value</span> argument contains the exception instance. This may contain important information about the exception for handling, such as the error message.</li>
+  <li>The <span class='mono'>traceback</span> contains the traceback object.</li>
+</ul>
+<p>
+  The return value of the <span class='mono'>__exit__</span> method tells the interpreter whether an exception was handled successfully. If an exception was raised during the context and <span class='mono'>__exit__</span> returns <span class='mono'>None</span> or anything but <span class='mono'>True</span>, the exception will be propagated forward after <span class='mono'>__exit__</span> completes.
+</p>
+<p>
+  If a context completes without any exceptions, <span class='mono'>exc_type</span>, <span class='mono'>exc_value</span>, and <span class='mono'>traceback</span> are all set to <span class='mono'>None</span> by the interpreter.
+</p>
+<p>
+  Here's a very simple example which wraps the <span class='mono'>open</span> function to show how <span class='mono'>__enter__</span> and <span class='mono'>__exit__</span> are called by the interpreter:
+</p>
+<pre>
+  <code>class OpenWrapper:
+    """ A class which wraps the open function """
+    
+    def __init__(self, file_name):
+        """ Class constructor
+
+            :param file_name:  Path to file
+            :return:  New object
+            """
+        self._file_name = file_name
+        self._file_handle = None
+
+    def __enter__(self):
+        """ Enters context by opening file and returning handle
+
+            :return: 
+            """
+        print('__enter__(self)')
+        self._file_handle = open(self._file_name)
+        return self._file_handle
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        """ Exits context by closing file handle
+
+            :return: None
+            """
+        print(f'__exit__(self, {exc_type}, {exc_value}, {traceback})')
+        self._file_handle.close()
+        return None
+
+# Main function
+if __name__ == '__main__':
+    print('begin program')
+
+    # Construct OpenWrapper
+    wrapper = OpenWrapper('city_names.txt')
+    print('OpenWrapper constructed')
+
+    # Call __enter__ on wrapper, which binds the return value
+    # (OpenWrapper._file_handle) to fh using the 'as' keyword.
+    # 
+    # Note that wrapper could be constructed on this line as
+    # well. I've broken the construction and the 'with' keywords
+    # into two lines for verbosity.
+    with wrapper as fh:
+        for line in fh:
+            print(line, end='')
+
+    # After context exits, OpenWrapper.__exit__() is called
+    print('end program')</code>
+</pre>
+<p>Execution of this script results in:</p>
+<pre>
+  <code>begin program
+OpenWrapper constructed
+__enter__(self)
+Boston
+New York
+Newark
+Scranton
+Toronto
+...
+__exit__(self, None, None, None)
+end program</code>
+</pre>
+<p>
+  Since the context completed without any exceptions, the <span class='mono'>__exit__</span> method was passed <span class='mono'>self, None, None, None</span> and no exception was propagated forward. If this program raised an <span class='mono'>EOFError</span> after the for loop continued, the <span class='mono'>__exit__</span> method could be updated to quietly handle this error and still do its due diligence in closing the file:
+</p>
+<pre>
+  <code># Previous file contents omitted for brevity...
+    def __exit__(self, exc_type, exc_value, traceback):
+        """ Exits context by closing file handle
+
+            :return: None
+            """
+        print(f'__exit__(self, {exc_type}, {exc_value}, {traceback})')
+
+        # Close file regardless of error type
+        self._file_handle.close()
+
+        # If EOFError was encountered, notify interpreter that it has
+        # been successfully handled. Other errors will be propaged
+        # forward. 
+        if exc_type is EOFError:
+            return True
+
+# Main function
+if __name__ == '__main__':
+    with OpenWrapper('city_names.txt') as fh:
+        for line in fh:
+            print(line, end='')
+        raise EOFError('EOF encountered')</code>
+</pre>
+<p>This would result in:</p>
+<pre>
+  <code>__enter__(self)
+Boston
+New York
+Newark
+Scranton
+Toronto
+Manchester
+Augusta
+Denver
+Miami
+__exit__(self, <class 'EOFError'>, EOF encountered, <traceback object at 0x7f4cede049c0>)</code>
+</pre>
+<p>
+  Now that an actual error was encountered, the last three parameters of <span class='mono'>__exit__</span> are populated. Since the <span class='mono'>exc_type</span> is defined to be <span class='mono'>EOFError</span>, <span class='mono'>__exit__</span> does not propagate the exception forward and the program ends without a traceback. If the exception encountered was actually a <span class='mono'>ValueError</span>, the output would have looked like this:
+</p>
+<pre>
+  <code>__enter__(self)
+Boston
+New York
+Newark
+Scranton
+Toronto
+...
+__exit__(self, <class 'ValueError'>, ValueError encountered, <traceback object at 0x7fd284704a00>)
+Traceback (most recent call last):
+  File "test.py", line 43, in 
+    raise ValueError('ValueError encountered')
+ValueError: ValueError encountered</code>
+</pre>
+<p>
+  Although it doesn't have a parallel in other languages I've worked with, I've quickly come to love using the <span class='mono'>with</span> keyword, and I find it's an incredibly important tool to make robust code that's easy to interpret and maintain. Though initially confusing, once I had a visual on the internal workings, I find it was an easy concept to grasp and I find myself wishing it was available in my C++ and MATLAB work.
+</p>
+<p>Time to implement a workaround, I guess...</p>
