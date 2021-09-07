@@ -10,7 +10,7 @@ import pathlib
 class Blog:
     """ Creates and maintains the Flask app """
 
-    def __init__(self):
+    def __init__(self, config=None):
         """ Constructor
         
             Routes each URL to a class method
@@ -20,18 +20,21 @@ class Blog:
             """
         # Create and configure flask instance
         self.app = flask.Flask(__name__)
+        self.app.config['POSTS_DIR'] = 'posts'
+
+        if config is not None:
+            self.app.config.from_mapping(config)
 
         # Create index page
         @self.app.route('/')
         def index():
             # Find active posts
-            posts_dir_name = 'posts'
             posts_full_path = (
                 pathlib.Path(self.app.root_path) /
                 self.app.template_folder /
-                posts_dir_name)
+                self.app.config['POSTS_DIR'])
 
-            posts = [str(pathlib.Path(posts_dir_name) / path.name)
+            posts = [str(pathlib.Path(self.app.config['POSTS_DIR']) / path.name)
                      for path in posts_full_path.glob('*.html')]
             
             # Render all posts to template
