@@ -160,11 +160,17 @@ __pthread_clockjoin_ex (threadid=139760597890816, thread_return=0x0, clockid=<op
   Make sure to use 'sudo' or you will not be able to attach to a running program.
 </p>
 <p>
-  At the bottom of the previous code block is the text (gdb). This is the GNU debugger prompt. To get information on the currently running threads, type <span class='mono'>thread apply all where</span>. It will dump a ton of information, even in a small program like the example above:
+  At the bottom of the previous code block is the text (gdb). This is the GNU debugger prompt. To get information on the currently running threads, type <span class='mono'>thread apply all where</span>. It will dump a ton of information, even in a small program like the example above. Below is the information for each thread, starting with Thread 5:
 </p>
 <img src='static/img/troubleshooting-threads-with-gdb-1.png' alt='Output of "thread apply all where"'>
+<p>Thread 4:</p>
+<img src='static/img/troubleshooting-threads-with-gdb-2.png' alt='Output of "thread apply all where"'>
+<p>Thread 3:</p>
+<img src='static/img/troubleshooting-threads-with-gdb-3.png' alt='Output of "thread apply all where"'>
+<p>Threads 2 and 1:</p>
+<img src='static/img/troubleshooting-threads-with-gdb-4.png' alt='Output of "thread apply all where"'>
 <p>
-  While the example is running, five threads are active. Each thread shows a backtrace of the call stack that got them to the currently executing function. For example, thread 1 (at the bottom) is currently executing line 0: <span class='mono'>__pthread_clockjoin_ex</span>, an OS library call. That might not sound familiar. However, its caller on line 1, <span class='mono'>std::thread::join()</span> is something that we actually coded in our main function. Now we know the main function is stuck on the join calls. 
+  While the example is running, five threads are active. Each thread shows a backtrace of the call stack that got them to the currently executing function. For example, thread 1 is currently executing line 0: <span class='mono'>__pthread_clockjoin_ex</span>, an OS library call. That might not sound familiar. However, its caller on line 1, <span class='mono'>std::thread::join()</span> is something that we actually coded in our main function. Now we know the main function is stuck on the join calls. 
 </p>
 <p>
   Look at the backtraces for the other threads. You'll notice that Thread 2 through Thread 4 are running our <span class='mono'>print_and_update_msg()</span> function. The currently executing line of code for all three is the attempt to lock the shared resource. Thread 5, on the other hand, is still happily executing its <span class='mono'>ruin_everything()</span> function. This is suspicious. If you were unable to reason through this example, this would at least tell you which function is holding the lock for the shared resource and blocking all the other threads. In a more complicated example, this could help to narrow it down to a single function in a codebase of millions of lines of code.

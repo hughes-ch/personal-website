@@ -15,11 +15,15 @@
           --code-background: lightgrey;
           --link-block-margin: 1em;
           --max-width: 50em;
-          --table-font-size: inherit;
+          --variable-font-size: inherit;
           --title-color: #ff7600;
       }
       article {
           max-width: var(--max-width);
+      }
+      article img {
+          max-width: var(--max-width);
+          width: 100%;
       }
       body {
           font-family: 'Roboto Mono', monospace;
@@ -27,7 +31,7 @@
       code {
           background-color: var(--code-background);
           display: block;
-          overflow: auto;
+          font-size: var(--variable-font-size);
           padding: 1em;
           white-space: pre-wrap;
       }
@@ -38,9 +42,6 @@
       hr {
           margin-block-start: 5em;
           margin-block-end: 5em;
-      }
-      img {
-          max-width: var(--max-width);
       }
       nav {
           display: flex;
@@ -56,7 +57,7 @@
       }
       table {
           border-collapse: collapse;
-          font-size: var(--table-font-size);
+          font-size: var(--variable-font-size);
           text-align: center;
           width: 100%;
       }
@@ -147,7 +148,7 @@
       @media (max-width: 40em) {
           :root {
               --link-block-margin: 2em;
-              --table-font-size: 2vw;
+              --variable-font-size: 2vw;
           }
           .nav-social-media-block div * {
               display: none;
