@@ -17,166 +17,178 @@
 </p>
 <h4>Mathematical Operators:</h4>
 <table>
-  <tr>
-    <th>Operator</th>
-    <th>Standard Dunder Method</th>
-    <th>Reverse Operator</th>
-    <th>In-Place Operator</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td>+</td>
-    <td>__add__</td>
-    <td>__radd__</td>
-    <td>__iadd__</td>
-    <td>Addition</td>
-  </tr>
-  <tr>
-    <td>-</td>
-    <td>__sub__</td>
-    <td>__rsub__</td>
-    <td>__isub__</td>
-    <td>Subtraction</td>
-  </tr>
-  <tr>
-    <td>*</td>
-    <td>__mul__</td>
-    <td>__rmul__</td>
-    <td>__imul__</td>
-    <td>Multiplication</td>
-  </tr>
-  <tr>
-    <td>/</td>
-    <td>__truediv__</td>
-    <td>__rtruediv__</td>
-    <td>__itruediv__</td>
-    <td>Division</td>
-  </tr>
-  <tr>
-    <td>//</td>
-    <td>__floordiv__</td>
-    <td>__rfloordiv__</td>
-    <td>__ifloordiv__</td>
-    <td>Floor</td>
-  </tr>
-  <tr>
-    <td>Division</td>
-    <td>__mod__</td>
-    <td>__rmod__</td>
-    <td>__imod__</td>
-    <td>Modulo</td>
-  </tr>
-  <tr>
-    <td>**</td>
-    <td>__pow__</td>
-    <td>__rpow__</td>
-    <td>__ipow__</td>
-    <td>Power</td>
-  </tr>
-  <tr>
-    <td>@</td>
-    <td>__matmul__</td>
-    <td>__rmatmul__</td>
-    <td>__imatmul__</td>
-    <td>Matrix Multiplication</td>
-  </tr>
+  <thead>
+    <tr>
+      <th>Operator</th>
+      <th>Standard Dunder Method</th>
+      <th>Reverse Operator</th>
+      <th>In-Place Operator</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>+</td>
+      <td>__add__</td>
+      <td>__radd__</td>
+      <td>__iadd__</td>
+      <td>Addition</td>
+    </tr>
+    <tr>
+      <td>-</td>
+      <td>__sub__</td>
+      <td>__rsub__</td>
+      <td>__isub__</td>
+      <td>Subtraction</td>
+    </tr>
+    <tr>
+      <td>*</td>
+      <td>__mul__</td>
+      <td>__rmul__</td>
+      <td>__imul__</td>
+      <td>Multiplication</td>
+    </tr>
+    <tr>
+      <td>/</td>
+      <td>__truediv__</td>
+      <td>__rtruediv__</td>
+      <td>__itruediv__</td>
+      <td>Division</td>
+    </tr>
+    <tr>
+      <td>//</td>
+      <td>__floordiv__</td>
+      <td>__rfloordiv__</td>
+      <td>__ifloordiv__</td>
+      <td>Floor Division</td>
+    </tr>
+    <tr>
+      <td>%</td>
+      <td>__mod__</td>
+      <td>__rmod__</td>
+      <td>__imod__</td>
+      <td>Modulo</td>
+    </tr>
+    <tr>
+      <td>**</td>
+      <td>__pow__</td>
+      <td>__rpow__</td>
+      <td>__ipow__</td>
+      <td>Power</td>
+    </tr>
+    <tr>
+      <td>@</td>
+      <td>__matmul__</td>
+      <td>__rmatmul__</td>
+      <td>__imatmul__</td>
+      <td>Matrix Multiplication</td>
+    </tr>
+  </tbody>
 </table>
-<h4>Logical Operators</h4>
+<h4>Bitwise Logical Operators:</h4>
 <table>
-  <tr>
-    <th>Operator</th>
-	<th>Standard Dunder Method</th>
-	<th>Reverse Operator</th>
-	<th>In-Place Operator</th>
-	<th>Description</th>
-  </tr>
-  <tr>
-    <td>&</td>
-    <td>__and__</td>
-    <td>__rand__</td>
-    <td>__iand__</td>
-    <td>Bitwise And</td>
-  </tr>
-  <tr>
-    <td>|</td>
-    <td>__or__</td>
-    <td>__ror__</td>
-    <td>__ior__</td>
-    <td>Bitwise Or</td>
-  </tr>
-  <tr>
-    <td>^</td>
-    <td>__xor__</td>
-    <td>__rxor__</td>
-    <td>__ixor__</td>
-    <td>Bitwise Exclusive Or</td>
-  </tr>
-  <tr>
-    <td><<</td>
-           <td>__lshift__</td>
-    <td>__rlshift__</td>
-    <td>__ilshift__</td>
-    <td>Left Bitshift</td>
-  </tr>
-  <tr>
-    <td>>></td>
-    <td>__rshift__</td>
-    <td>__rrshift__</td>
-    <td>__irshift__</td>
-    <td>Right Bitshift</td>
-  </tr>
+  <thead>
+    <tr>
+      <th>Operator</th>
+	  <th>Standard Dunder Method</th>
+	  <th>Reverse Operator</th>
+	  <th>In-Place Operator</th>
+	  <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>&</td>
+      <td>__and__</td>
+      <td>__rand__</td>
+      <td>__iand__</td>
+      <td>And</td>
+    </tr>
+    <tr>
+      <td>|</td>
+      <td>__or__</td>
+      <td>__ror__</td>
+      <td>__ior__</td>
+      <td>Or</td>
+    </tr>
+    <tr>
+      <td>^</td>
+      <td>__xor__</td>
+      <td>__rxor__</td>
+      <td>__ixor__</td>
+      <td>Exclusive Or</td>
+    </tr>
+    <tr>
+      <td><<</td>
+             <td>__lshift__</td>
+      <td>__rlshift__</td>
+      <td>__ilshift__</td>
+      <td>Left Bitshift</td>
+    </tr>
+    <tr>
+      <td>>></td>
+      <td>__rshift__</td>
+      <td>__rrshift__</td>
+      <td>__irshift__</td>
+      <td>Right Bitshift</td>
+    </tr>
+  </tbody>
 </table>
 <h4>Boolean Operators:</h4>
 <table>
-  <tr>
-    <th>Operator</th>
-	<th>Standard Dunder Method</th>
-	<th>Reverse Operator</th>
-	<th>In-Place Operator</th>
-	<th>Description</th>
-  </tr>
-  <tr>
-    <td>==</td>
-    <td>__eq__</td>
-    <td>__eq__</td>
-    <td>N/A</td>
-    <td>Equality Operator</td>
-  </tr>
-  <tr>
-    <td>!=</td>
-    <td>__ne__</td>
-    <td>__ne__</td>
-    <td>N/A</td>
-    <td>Inverse Equality Operator</td>
-  </tr>
-  <tr>
-    <td>></td>
-    <td>__gt__</td>
-    <td>__lt__</td>
-    <td>N/A</td>
-    <td>Greater-Than Operator</td>
-  </tr>
-  <tr>
-    <td>< />
-    <td>__lt__</td>
-    <td>__gt__</td>
-    <td>N/A</td>
-    <td>Less-Than Operator</td>
-  </tr>
-  <tr>
-    <td>>=</td>
-    <td>__ge__</td>
-    <td>__le__</td>
-    <td>N/A</td>
-    <td>Less-Than-Or-Equal-To Operator</td>
-  </tr>
-  <tr>
-    <td><= />
-    <td>__le__</td>
-    <td>__ge__</td>
-    <td>N/A</td>
-    <td>Greater-Or-Equal-To Operator</td>
-  </tr>
+  <thead>
+    <tr>
+      <th>Operator</th>
+	  <th>Standard Dunder Method</th>
+	  <th>Reverse Operator</th>
+	  <th>In-Place Operator</th>
+	  <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>==</td>
+      <td>__eq__</td>
+      <td>__eq__</td>
+      <td>N/A</td>
+      <td>Equality</td>
+    </tr>
+    <tr>
+      <td>!=</td>
+      <td>__ne__</td>
+      <td>__ne__</td>
+      <td>N/A</td>
+      <td>Inverse Equality</td>
+    </tr>
+    <tr>
+      <td>></td>
+      <td>__gt__</td>
+      <td>__lt__</td>
+      <td>N/A</td>
+      <td>Greater-Than</td>
+    </tr>
+    <tr>
+      <td><</td>
+            <td>__lt__</td>
+      <td>__gt__</td>
+      <td>N/A</td>
+      <td>Less-Than</td>
+    </tr>
+    <tr>
+      <td>>=</td>
+      <td>__ge__</td>
+      <td>__le__</td>
+      <td>N/A</td>
+      <td>Less-Than-Or-Equal</td>
+    </tr>
+    <tr>
+      <td><=</td>
+            <td>__le__</td>
+      <td>__ge__</td>
+      <td>N/A</td>
+      <td>Greater-Or-Equal</td>
+    </tr>
+  </tbody>
 </table>
 <p>
   Let's focus on just the 'Standard Dunder Method' column for now. The process to override any of these methods are pretty much the same. Add a method to the user-defined class which takes <span class='mono'>self</span> and one additional argument. The method should return the result of the operation and not change the class instance or either of the input parameters, as a best practice. This is true for the methods in the 'Reverse Operator' column as well, but may not be true for the methods in the 'In-Place Operator' column, depending on the implementation. 

@@ -12,10 +12,11 @@
     
     <style>
       :root {
-          --max-width: 50em;
-          --title-color: #ff7600;
-          --link-block-margin: 1em;
           --code-background: lightgrey;
+          --link-block-margin: 1em;
+          --max-width: 50em;
+          --table-font-size: inherit;
+          --title-color: #ff7600;
       }
       article {
           max-width: var(--max-width);
@@ -53,6 +54,25 @@
           margin-block-start: 0em;
           margin-block-end: 0em;
       }
+      table {
+          border-collapse: collapse;
+          font-size: var(--table-font-size);
+          text-align: center;
+          width: 100%;
+      }
+      th {
+          padding: 4px 8px;
+      }
+      thead {
+          background-color: var(--title-color);
+          color: white;
+      }
+      tbody tr:nth-child(even) {
+          background-color: var(--code-background);
+      }
+      tbody tr:nth-child(odd) {
+          background-color: white;
+      }
       .footer-title {
           font-size: 1.17em;
       }
@@ -72,13 +92,13 @@
           margin-left: var(--link-block-margin);
       }
       .mono {
-          font-family: mono;
+          font-family: monospace;
           background-color: var(--code-background);
       }
       .page-content {
+          align-items: center;
           display: flex;
           flex-direction: column;
-          align-items: center;
       }
       .page-control {
           padding-left: 1em;
@@ -127,6 +147,7 @@
       @media (max-width: 40em) {
           :root {
               --link-block-margin: 2em;
+              --table-font-size: 2vw;
           }
           .nav-social-media-block div * {
               display: none;

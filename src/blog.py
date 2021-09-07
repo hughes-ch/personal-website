@@ -32,7 +32,7 @@ class Blog:
                 posts_dir_name)
 
             posts = [str(pathlib.Path(posts_dir_name) / path.name)
-                     for path in posts_full_path.glob('operator-overloading*.html')]
+                     for path in posts_full_path.glob('*.html')]
             
             # Render all posts to template
             return flask.render_template('_base.html', posts=posts)
