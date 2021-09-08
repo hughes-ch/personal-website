@@ -20,7 +20,11 @@ class Blog:
             """
         # Create and configure flask instance
         self.app = flask.Flask(__name__)
-        self.app.config['POSTS_DIR'] = 'posts'
+        self.app.config['POSTS_URL'] = 'post'
+        self.app.config['POSTS_DIR'] = (
+            pathlib.Path(self.app.root_path) /
+            self.app.template_folder /
+            self.app.config['POSTS_URL'])
 
         if config is not None:
             self.app.config.from_mapping(config)
@@ -29,14 +33,26 @@ class Blog:
         @self.app.route('/')
         def index():
             # Find active posts
-            posts_full_path = (
-                pathlib.Path(self.app.root_path) /
-                self.app.template_folder /
-                self.app.config['POSTS_DIR'])
+            posts = [str(pathlib.Path(self.app.config['POSTS_URL']) / path.stem)
+                     for path in self.app.config['POSTS_DIR'].glob('*.html')]
 
-            posts = [str(pathlib.Path(self.app.config['POSTS_DIR']) / path.name)
-                     for path in posts_full_path.glob('*.html')]
-            
             # Render all posts to template
             return flask.render_template('_base.html', posts=posts)
+
+        # Create about page
+        @self.app.route('/about')
+        def about():
+            return 'Not Implemented'
+
+        # Create archive page
+        self._ARCHIVE_NAME = 'archive'
+        @self.app.route(f'/{self._ARCHIVE_NAME}')
+        @self.app.route(f'/{self._ARCHIVE_NAME}/<int:page>')
+        def archive(page=1):
+            return 'Not Implemented'
+
+        # Create individual post pages
+        @self.app.route('/post/<name>')
+        def blog_post(name=None):
+            return 'Not Implemented'
 

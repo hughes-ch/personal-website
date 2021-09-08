@@ -5,8 +5,10 @@
     :license: MIT License. See LICENSE.md for details
 """
 import pathlib
+import requests
 import unittest
 
+from bs4 import BeautifulSoup
 from src.blog import Blog
 
 class TestBlog(unittest.TestCase):
@@ -21,17 +23,23 @@ class TestBlog(unittest.TestCase):
         self.blog = Blog({'TESTING': True})
         self.client = self.blog.app.test_client()
 
+    def get_index_page(self):
+        """ Returns the contents of the index page
+
+            :param: None
+            :return: Contents of index (if valid response received)
+            """
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+        return response
+
     def test_index_response(self):
         """ Verify index page returns latest blog posts
 
             :param: None
             :return: None
             """
-        # Verify status code
-        response = self.client.get('/')
-        self.assertEqual(response.status_code, 200)
-
-        # Find latest blog posts within response
+        response = self.get_index_page()
         posts_dir_name = self.blog.app.config['POSTS_DIR']
         posts_full_path = (
             pathlib.Path(self.blog.app.root_path) /
@@ -42,3 +50,31 @@ class TestBlog(unittest.TestCase):
 
         for post in posts:
             self.assertIn(post, str(response.data))
+
+    def test_links_are_valid(self):
+        """ Verifies internal links return a valid response
+
+            :param: None
+            :return: None
+            """
+        bad_status_codes = [400, 404, 408, 410, 421, 501, 502, 503, 504]
+
+        # Find all links on page
+        response = self.get_index_page()
+        soup = BeautifulSoup(response.data, 'html.parser')
+        for a in soup.find_all('a'):
+            href = a.get('href')
+            if 'http' in href:
+                # Do not send external requests during development...
+                #response = requests.head(href)
+                pass
+            elif 'mailto' in href:
+                pass
+            else:
+                response = self.client.get(href)
+
+            self.assertNotIn(
+                response.status_code,
+                bad_status_codes,
+                msg=f'{response.status_code} returned by "{href}"')
+                
