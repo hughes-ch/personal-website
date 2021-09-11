@@ -40,7 +40,7 @@ class TestBlog(unittest.TestCase):
             :return: None
             """
         response = self.get_index_page()
-        posts_dir_name = self.blog.app.config['POSTS_DIR']
+        posts_dir_name = self.blog._POSTS_NAME
         posts_full_path = (
             pathlib.Path(self.blog.app.root_path) /
             self.blog.app.template_folder /

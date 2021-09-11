@@ -1,17 +1,17 @@
 <h3><a href='{{ post }}' class='link'>Operator Overloading in Python</a></h3>
 <p class='post-caption'>Apr 27, 2021</p>
 <p>
-  As a C++ developer, I was familiar with operator overloading and happy to know that Python offered the same feature. Luckily, I hadn't been broken down by some of the poor examples of overuse that plagued the C++ world of operator overloading, like some of the folks who I've encountered online. For me, I was excited that the Python language offered the feature to (for example) add two user-defined matrices classes together with the <span class='mono'>+</span> operator, instead of having to use an overly-verbose <span class='mono'>.add()</span> method, like would be seen in Java.
+  As a C++ developer, I was familiar with operator overloading and happy to know that Python offered the same feature. Luckily, I hadn't been broken down by some of the poor examples of overuse that plagued the C++ world of operator overloading, like some of the folks who I've encountered online. For me, I was excited that the Python language offered the feature to (for example) add two user-defined matrices classes together with the {{ codeify("+") }} operator, instead of having to use an overly-verbose {{ codeify(".add()") }} method, like would be seen in Java.
 </p>
 <p>
   Python, of course, added this language feature because it was practical and increased the readability of the code. As in, it made it clear what the writer of the code wanted to accomplish. However, the Python language implemented operator overloading in a way that could not be as easily abused as C++.
 </p>
 <p>
-  The way Python did this was to implement operators as dunder methods (AKA special methods with double underscores before and after). For example, when executing the code <span class='mono'>5 + 4</span>, Python is really executing:
+  The way Python did this was to implement operators as dunder methods (AKA special methods with double underscores before and after). For example, when executing the code {{ codeify("5 + 4") }}, Python is really executing:
 </p>
-<pre>
-  <code>int.__add__(5, 4)</code>
-</pre>
+{{ codeify("
+int.__add__(5, 4)
+") }}
 <p>
   To overload an operator in Python, a user-defined class needs to override the dunder method which is associated with the operator. The table is shown below. Don't worry if you don't know all of them, or understand what 'Reverse Operator' or 'In-Place Operator' is for now. Only the ones which are applicable to your class needs to be overridden (that's the benefit of Python). Reverse and In-Place operators will be covered below, as well as unary methods, which get their own table further below.
 </p>
@@ -120,7 +120,7 @@
     </tr>
     <tr>
       <td><<</td>
-             <td>__lshift__</td>
+      <td>__lshift__</td>
       <td>__rlshift__</td>
       <td>__ilshift__</td>
       <td>Left Bitshift</td>
@@ -191,11 +191,11 @@
   </tbody>
 </table>
 <p>
-  Let's focus on just the 'Standard Dunder Method' column for now. The process to override any of these methods are pretty much the same. Add a method to the user-defined class which takes <span class='mono'>self</span> and one additional argument. The method should return the result of the operation and not change the class instance or either of the input parameters, as a best practice. This is true for the methods in the 'Reverse Operator' column as well, but may not be true for the methods in the 'In-Place Operator' column, depending on the implementation. 
+  Let's focus on just the 'Standard Dunder Method' column for now. The process to override any of these methods are pretty much the same. Add a method to the user-defined class which takes {{ codeify("self") }} and one additional argument. The method should return the result of the operation and not change the class instance or either of the input parameters, as a best practice. This is true for the methods in the 'Reverse Operator' column as well, but may not be true for the methods in the 'In-Place Operator' column, depending on the implementation. 
 </p>
 <p>An example for adding two angles might look like this:</p>
-<pre>
-  <code>>>> class Angle:
+{{ codeify("
+>>> class Angle:
 ...     def __init__(self, degrees):
 ...         self._degrees = degrees
 
@@ -214,8 +214,8 @@
 >>> angle2 = Angle(180)
 >>> angle3 = angle1 + angle2
 >>> angle3
-Angle(90)</code>
-</pre>
+Angle(90)
+") }}
 <p>
   The Angle class' addition method is really simple, but it adds a step to standard addition. Instead of just adding two numbers, it also checks that the answer is between 0 and 360 degrees. If not, it wraps the answer by adding or subtracting 360 degrees.
 </p>
@@ -223,14 +223,14 @@ Angle(90)</code>
   The last line shows that this angle wrap works as expected. Instead of 270 degrees and 180 degrees becoming 450 degrees, the angle is calculated as 90 degrees.
 </p>
 <p>
-  Let's examine in detail how this worked. The <span class='mono'>__add__</span> dunder method takes <span class='mono'>self</span> and <span class='mono'>angle_to_add</span>. The <span class='mono'>self</span> argument is actually what falls to the left of the <span class='mono'>+</span>. The <span class='mono'>angle_to_add</span> is what falls to the right of the <span class='mono'>+</span> sign. You can see the newly calculated value is then determined by adding the <span class='mono'>_degrees</span> attribute of the objects on both sides of the <span class='mono'>+</span>. After checking that the newly calculated number of degrees is within bounds, a new object is created and returned, meeting the best practice for the <span class='mono'>__add__()</span> method. 
+  Let's examine in detail how this worked. The {{ codeify("__add__") }} dunder method takes {{ codeify("self") }} and {{ codeify("angle_to_add") }}. The {{ codeify("self") }} argument is actually what falls to the left of the {{ codeify("+") }}. The {{ codeify("angle_to_add") }} is what falls to the right of the {{ codeify("+") }} sign. You can see the newly calculated value is then determined by adding the {{ codeify("_degrees") }} attribute of the objects on both sides of the {{ codeify("+") }}. After checking that the newly calculated number of degrees is within bounds, a new object is created and returned, meeting the best practice for the {{ codeify("__add__()") }} method. 
 </p>
 <p>
-  What if you would like to add an integer to an angle object without having to explicitly convert to an Angle? While this may not be the best practice (Python seeks to be explicit rather than implicit), it might be the right choice for your application. It also demonstrates a 'gotcha' while implementing <span class='mono'>__add__</span> between object types. You might think this will work:
+  What if you would like to add an integer to an angle object without having to explicitly convert to an Angle? While this may not be the best practice (Python seeks to be explicit rather than implicit), it might be the right choice for your application. It also demonstrates a 'gotcha' while implementing {{ codeify("__add__") }} between object types. You might think this will work:
 </p>
-<pre>
-  <code>>>> class Angle:
-...     """ Other implementation details removed for brevity"""
+{{ codeify("
+>>> class Angle:
+...     ''' Other implementation details removed for brevity'''
 ...     def __add__(self, int_to_add):
 ...         degrees = self._degrees + int_to_add
 ...         if degrees > 360:
@@ -241,47 +241,47 @@ Angle(90)</code>
 ... 
 >>> angle = Angle(10)
 >>> angle + 10
-Angle(20)</code>
-</pre>
+Angle(20)
+") }}
 <p>
-  It certainly does when the <span class='mono'>Angle</span> is on the left side of the operand. However, placing the <span class='mono'>Angle</span> on the right side of the operand creates a <span class='mono'>TypeError</span>:
+  It certainly does when the {{ codeify("Angle") }} is on the left side of the operand. However, placing the {{ codeify("Angle") }} on the right side of the operand creates a {{ codeify("TypeError") }}:
 </p>
-<pre>
-  <code>>>> 10 + angle
+{{ codeify("
+>>> 10 + angle
 Traceback (most recent call last):
-  File "", line 1, in 
-TypeError: unsupported operand type(s) for +: 'int' and 'Angle'</code>
-</pre>
+  File '', line 1, in 
+TypeError: unsupported operand type(s) for +: 'int' and 'Angle'
+") }}
 <p>
-  If your application needs objects which require commutative operators (the <span class='mono'>Angle</span> type sure does), you will need to implement the 'Reverse Operator', shown above in the operator table. For addition, this would be the rad <span class='mono'>__radd__</span> method. The implementation can be super easy in a lot of cases:
+  If your application needs objects which require commutative operators (the {{ codeify("Angle") }} type sure does), you will need to implement the 'Reverse Operator', shown above in the operator table. For addition, this would be the rad {{ codeify("__radd__") }} method. The implementation can be super easy in a lot of cases:
 </p>
-<pre>
-  <code>>>> class Angle:
-...     """ Other implementation details removed for brevity"""
+{{ codeify("
+>>> class Angle:
+...     ''' Other implementation details removed for brevity'''
 ...     def __radd__(self, int_to_add):
-...         return self + int_to_add</code>
-</pre>
+...         return self + int_to_add
+") }}
 <p>
-  The 'Reverse Operator' is invoked by Python when a user-defined class is on the right side of an operator. The arguments are a little confusing here (they certainly confused me when making this example). The left side of the operator is actually the second argument. The right side of the operator (the user defined class) is <span class='mono'>self</span> or the first argument. The arguments are reversed from the standard operator, but make sense if thinking of it from a purely method-signature standpoint. 
+  The 'Reverse Operator' is invoked by Python when a user-defined class is on the right side of an operator. The arguments are a little confusing here (they certainly confused me when making this example). The left side of the operator is actually the second argument. The right side of the operator (the user defined class) is {{ codeify("self") }} or the first argument. The arguments are reversed from the standard operator, but make sense if thinking of it from a purely method-signature standpoint. 
 </p>
 <p>
-  The <span class='mono'>__radd__</span> method can just delegate to the 'forward' operator <span class='mono'>__add__()</span> in most cases.
+  The {{ codeify("__radd__") }} method can just delegate to the 'forward' operator {{ codeify("__add__()") }} in most cases.
 </p>
 <p>
-  The last operator is the 'In-Place' operator types. Many classes will not need to implement these operators. Python will automatically use the associated 'forward' operator and then assign to a new object. For example, the <span class='mono'>int</span> class does not implement <span class='mono'>__iadd__</span> but <span class='mono'>+=</span> is a valid operator. 
+  The last operator is the 'In-Place' operator types. Many classes will not need to implement these operators. Python will automatically use the associated 'forward' operator and then assign to a new object. For example, the {{ codeify("int") }} class does not implement {{ codeify("__iadd__") }} but {{ codeify("+=") }} is a valid operator. 
 </p>
 <p>
   The side effect of not implementing 'In-Place' operators is that Python will create a new object after completing the new calculation. This isn't always desirable (for example, if objects are mutable or expensive to create). In those cases, it is best to implement the 'In-Place' operators so that the same objects can be modified.
 </p>
 <p>
-  Like the 'forward' and 'reverse' operators, 'In-Place' operators must take two parameters: <span class='mono'>self</span> and the object to perform the operation with. Unlike 'forward' and 'reverse' operators, they must return self to work correctly.
+  Like the 'forward' and 'reverse' operators, 'In-Place' operators must take two parameters: {{ codeify("self") }} and the object to perform the operation with. Unlike 'forward' and 'reverse' operators, they must return self to work correctly.
 </p>
 <p>
-  An example of the 'In-Place' operator <span class='mono'>+=</span> for our <span class='mono'>Angle</span> class:
+  An example of the 'In-Place' operator {{ codeify("+=") }} for our {{ codeify("Angle") }} class:
 </p>
-<pre>
-  <code>>>> class Angle:
-...    """ Other implementation details removed for brevity"""
+{{ codeify("
+>>> class Angle:
+...    ''' Other implementation details removed for brevity'''
 ...     def __iadd__(self, angle_to_add):
 ...         self._degrees += angle_to_add._degrees
 ...         if self._degrees > 360:
@@ -293,46 +293,46 @@ TypeError: unsupported operand type(s) for +: 'int' and 'Angle'</code>
 >>> angle = Angle(10)
 >>> angle += Angle(40)
 >>> angle
-Angle(50)</code>
-</pre>
+Angle(50)
+") }}
 <p>
-  The equality operators are defined exactly the same as the math-y operators like addition, subtraction, etc. However, instead of returning an instance of the class, they return a <span class='mono'>True</span> or <span class='mono'>False</span> value. Like the forward and reverse operators, it is not expected that the class itself or either input parameter is changed by a equality operator.
+  The equality operators are defined exactly the same as the math-y operators like addition, subtraction, etc. However, instead of returning an instance of the class, they return a {{ codeify("True") }} or {{ codeify("False") }} value. Like the forward and reverse operators, it is not expected that the class itself or either input parameter is changed by a equality operator.
 </p>
 <p>
   Python also provides unary operators that didn't quite fit into the table that I placed above. There are only three:
 </p>
-<pre>
-  <code>- (__neg__): Used to negate an object
+{{ codeify("
+- (__neg__): Used to negate an object
 + (__pos__): Used to reference the positive value of an object
-~ (__invert__): Used to find bitwise inverse</code>
-</pre>
+~ (__invert__): Used to find bitwise inverse
+") }}
 <p>
-  Of course, this is where my <span class='mono'>Angle</span> class example falls apart... 
+  Of course, this is where my {{ codeify("Angle") }} class example falls apart... 
 </p>
 <p>
-  To demonstrate <span class='mono'>__neg__()</span>, <span class='mono'>Angle</span> will have to be satisfied with a negative _degrees value, something it wasn't satisfied with in the addition examples above. That's fine I guess...
+  To demonstrate {{ codeify("__neg__()") }}, {{ codeify("Angle") }} will have to be satisfied with a negative _degrees value, something it wasn't satisfied with in the addition examples above. That's fine I guess...
 </p>
 <p>
-  Unary operators are fairly simple to implement from a syntax perspective. They just take a single argument <span class='mono'>self</span> and return the representation of the object after it has been operated on. Most of the time, this will be a new object of the same type. Note that like the forward and reverse operators above, the unary operators are expected to return a new object and not modify the one being operated on. 
+  Unary operators are fairly simple to implement from a syntax perspective. They just take a single argument {{ codeify("self") }} and return the representation of the object after it has been operated on. Most of the time, this will be a new object of the same type. Note that like the forward and reverse operators above, the unary operators are expected to return a new object and not modify the one being operated on. 
 </p>
 <p>
-  Here's an example of <span class='mono'>__neg__()</span> for <span class='mono'>Angle</span>:
+  Here's an example of {{ codeify("__neg__()") }} for {{ codeify("Angle") }}:
 </p>
-<pre>
-  <code>>>> class Angle:
-...    """ Other implementation details removed for brevity"""
+{{ codeify("
+>>> class Angle:
+...    ''' Other implementation details removed for brevity'''
 ...     def __neg__(self):
 ...         return Angle(-self._degrees)
 ... 
 >>> angle = Angle(10)
 >>> -angle
-Angle(-10)</code>
-</pre>
+Angle(-10)
+") }}
 <p>
   The other two unary operators can be defined similarly for your user-defined class, as applicable.
 </p>
 <p>
-  I've covered quite a bit here, and skipped over some of the more interesting operators like <span class='mono'>__pow__</span> and <span class='mono'>__matmul__</span> (introduced in Python 3.5), but I hope this served as a good primer. If I find myself using <span class='mono'>__pow__</span> and <span class='mono'>__matmul__</span> frequently in my code and come to understand and love them, I'm sure I'll write a more detailed article about them in the future. 
+  I've covered quite a bit here, and skipped over some of the more interesting operators like {{ codeify("__pow__") }} and {{ codeify("__matmul__") }} (introduced in Python 3.5), but I hope this served as a good primer. If I find myself using {{ codeify("__pow__") }} and {{ codeify("__matmul__") }} frequently in my code and come to understand and love them, I'm sure I'll write a more detailed article about them in the future. 
 </p>
 <p>
   For now, remember to only implement what is practical and what will help you clearly convey what you are trying to accomplish. That's what moved me to Python, and I hope it stays that way. 

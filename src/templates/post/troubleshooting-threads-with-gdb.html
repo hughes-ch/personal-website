@@ -12,8 +12,8 @@
 <p>
   The deadlock can be exemplified in the following C++ program. In this program, the shared resource is a string which is printed to the screen. Four threads are created. Three of the threads simply output the previous thread's message and create their own message for the next thread to print. The fourth thread calls the 'ruin_everything' method, which locks the shared resource and then loops forever, never unlocking the resource. This eventually causes a deadlock-like situation. Here's the code:
 </p>
-<pre>
-  <code>#include <iostream>
+{{ codeify("
+#include <iostream>
 #include <mutex>
 #include <sstream>
 #include <string>
@@ -21,7 +21,7 @@
 
 // Define the shared resource (the string to output to the screen
 // and the lock used to guard the shared resource.
-std::string screen_output("I got here first!");
+std::string screen_output(\"I got here first!\");
 std::mutex screen_output_mutex;
 
 // Define two functions which each thread will run
@@ -41,11 +41,11 @@ void print_and_update_msg(const int thread_num)
         std::lock_guard<std::mutex> guard(screen_output_mutex);
 
         // Print and update message
-        std::cout << "Thread " << thread_num << ": "
+        std::cout << \"Thread \" << thread_num << \": \"
                   << screen_output << std::endl;
 
         std::stringstream sstream;
-        sstream << "Thread " << thread_num << " wuz here!";
+        sstream << \"Thread \" << thread_num << \" wuz here!\";
         screen_output = sstream.str();
     }
 }
@@ -80,19 +80,19 @@ int main()
     t2.join();
     t3.join();
     t4.join();
-}</code>
-</pre>
+}
+") }}
 <p>
   What this gets you is a program that prints five lines and then loops forever:
 </p>
-<pre>
-  <code>Thread 1: I got here first!
+{{ codeify("
+Thread 1: I got here first!
 Thread 2: Thread 1 wuz here!
 Thread 1: Thread 2 wuz here!
 Thread 3: Thread 1 wuz here!
 Thread 1: Thread 3 wuz here!
-...</code>
-</pre>
+...
+") }}
 <p>
   So what happened?
 </p>
@@ -112,37 +112,37 @@ Thread 1: Thread 3 wuz here!
 <p>
   First, find the running process ID with the ps command:
 </p>
-<pre>
-  <code>ps -ef | grep <prog_name></prog_name></code>
-</pre>
+{{ codeify("
+ps -ef | grep <prog_name></prog_name>
+") }}
 <p>
   My program was named 'test', so my output was:
 </p>
-<pre>
-  <code>chris       4480    3894 73 21:24 pts/0    00:00:11 ./test
-chris       4487    3894  0 21:24 pts/0    00:00:00 grep --color=auto test</code>
-</pre>
+{{ codeify("
+chris       4480    3894 73 21:24 pts/0    00:00:11 ./test
+chris       4487    3894  0 21:24 pts/0    00:00:00 grep --color=auto test
+") }}
 <p>
   Using a process ID of 4480, I can attach to my deadlocked program:
 </p>
-<pre>
-  <code>chris@desktop:/proj/skratch$ sudo gdb test -p 4480
+{{ codeify("
+chris@desktop:/proj/skratch$ sudo gdb test -p 4480
 
 GNU gdb (Ubuntu 9.2-0ubuntu1~20.04) 9.2
 Copyright (C) 2020 Free Software Foundation, Inc.
 License GPLv3+: GNU GPL version 3 or later 
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
-Type "show copying" and "show warranty" for details.
-This GDB was configured as "x86_64-linux-gnu".
-Type "show configuration" for configuration details.
+Type \"show copying\" and \"show warranty\" for details.
+This GDB was configured as \"x86_64-linux-gnu\".
+Type \"show configuration\" for configuration details.
 For bug reporting instructions, please see:
 <http://www.gnu.org/software/gdb/bugs/>.
 Find the GDB manual and other documentation resources online at:
     <http://www.gnu.org/software/gdb/documentation/>.
 
-For help, type "help".
-Type "apropos word" to search for commands related to "word"...
+For help, type \"help\".
+Type \"apropos word\" to search for commands related to \"word\"...
 Reading symbols from test...
 (No debugging symbols found in test)
 Attaching to program: /proj/skratch/test, process 4480
@@ -151,16 +151,16 @@ Attaching to program: /proj/skratch/test, process 4480
 [New LWP 4483]
 [New LWP 4484]
 [Thread debugging using libthread_db enabled]
-Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Using host libthread_db library \"/lib/x86_64-linux-gnu/libthread_db.so.1\".
 __pthread_clockjoin_ex (threadid=139760597890816, thread_return=0x0, clockid=<optimized out>, abstime=<optimized out>, block=<optimized out>) at pthread_join_common.c:145
 145	pthread_join_common.c: No such file or directory.
-(gdb)</code>
-</pre>
+(gdb)
+") }}
 <p>
   Make sure to use 'sudo' or you will not be able to attach to a running program.
 </p>
 <p>
-  At the bottom of the previous code block is the text (gdb). This is the GNU debugger prompt. To get information on the currently running threads, type <span class='mono'>thread apply all where</span>. It will dump a ton of information, even in a small program like the example above. Below is the information for each thread, starting with Thread 5:
+  At the bottom of the previous code block is the text (gdb). This is the GNU debugger prompt. To get information on the currently running threads, type {{ codeify("thread apply all where") }}. It will dump a ton of information, even in a small program like the example above. Below is the information for each thread, starting with Thread 5:
 </p>
 <img src='static/img/troubleshooting-threads-with-gdb-1.png' alt='Output of "thread apply all where"'>
 <p>Thread 4:</p>
@@ -170,26 +170,26 @@ __pthread_clockjoin_ex (threadid=139760597890816, thread_return=0x0, clockid=<op
 <p>Threads 2 and 1:</p>
 <img src='static/img/troubleshooting-threads-with-gdb-4.png' alt='Output of "thread apply all where"'>
 <p>
-  While the example is running, five threads are active. Each thread shows a backtrace of the call stack that got them to the currently executing function. For example, thread 1 is currently executing line 0: <span class='mono'>__pthread_clockjoin_ex</span>, an OS library call. That might not sound familiar. However, its caller on line 1, <span class='mono'>std::thread::join()</span> is something that we actually coded in our main function. Now we know the main function is stuck on the join calls. 
+  While the example is running, five threads are active. Each thread shows a backtrace of the call stack that got them to the currently executing function. For example, thread 1 is currently executing line 0: {{ codeify("__pthread_clockjoin_ex") }}, an OS library call. That might not sound familiar. However, its caller on line 1, {{ codeify("std::thread::join()") }} is something that we actually coded in our main function. Now we know the main function is stuck on the join calls. 
 </p>
 <p>
-  Look at the backtraces for the other threads. You'll notice that Thread 2 through Thread 4 are running our <span class='mono'>print_and_update_msg()</span> function. The currently executing line of code for all three is the attempt to lock the shared resource. Thread 5, on the other hand, is still happily executing its <span class='mono'>ruin_everything()</span> function. This is suspicious. If you were unable to reason through this example, this would at least tell you which function is holding the lock for the shared resource and blocking all the other threads. In a more complicated example, this could help to narrow it down to a single function in a codebase of millions of lines of code.
+  Look at the backtraces for the other threads. You'll notice that Thread 2 through Thread 4 are running our {{ codeify("print_and_update_msg()") }} function. The currently executing line of code for all three is the attempt to lock the shared resource. Thread 5, on the other hand, is still happily executing its {{ codeify("ruin_everything()") }} function. This is suspicious. If you were unable to reason through this example, this would at least tell you which function is holding the lock for the shared resource and blocking all the other threads. In a more complicated example, this could help to narrow it down to a single function in a codebase of millions of lines of code.
 </p>
 <p>
-  The <span class='mono'>thread apply all where</span> command can be run post-mortem as well. If a core file was generated as a result of the unfortunate thread interaction, gdb can be run with:
+  The {{ codeify("thread apply all where") }} command can be run post-mortem as well. If a core file was generated as a result of the unfortunate thread interaction, gdb can be run with:
 </p>
-<pre>
-  <code>gdb <prog_name> <core></code>
-</pre>
+{{ codeify("
+gdb <prog_name> <core>
+") }}
 <p>
   Once at the gdb prompt, the thread dump can be done in the same way as with a running program. This also has the added benefit of not needing to be run as 'sudo'. For an introduction on how to get an executable to generate a core file, see <a class='underlined link' href='https://stackoverflow.com/questions/6152232/how-to-generate-core-dump-file-in-ubuntu' target='_blank'>this Stack Overflow question</a>.
 </p>
 <p>
   Finally, I'd like to leave you with a nifty little command which runs the previous command and outputs the results into a file without needing to enter the gdb prompt:
 </p>
-<pre>
-  <code>gdb -ex 'thread apply all where' <prog_name> <core> -batch >! thread_dump.txt</code>
-</pre>
+{{ codeify("
+gdb -ex 'thread apply all where' <prog_name> <core> -batch >! thread_dump.txt
+") }}
 <p>
   Now you'll be a thread-troubleshooting pro!
 </p>

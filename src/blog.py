@@ -4,13 +4,17 @@
     :copyright: Copyright (c) 2021 Chris Hughes
     :license: MIT License. See LICENSE.md for details
 """
+from .render import Renderer
+
 import flask
 import pathlib
 
 class Blog:
     """ Creates and maintains the Flask app """
 
-    def __init__(self, config=None):
+    def __init__(self,
+                 config=None, base_template='_base.html',
+                 root_path=None, template_path='templates'):
         """ Constructor
         
             Routes each URL to a class method
@@ -19,40 +23,45 @@ class Blog:
             :return: New instance
             """
         # Create and configure flask instance
-        self.app = flask.Flask(__name__)
-        self.app.config['POSTS_URL'] = 'post'
-        self.app.config['POSTS_DIR'] = (
-            pathlib.Path(self.app.root_path) /
-            self.app.template_folder /
-            self.app.config['POSTS_URL'])
-
+        self.app = flask.Flask(
+            __name__,
+            root_path=root_path,
+            template_folder=template_path)
+        
         if config is not None:
             self.app.config.from_mapping(config)
+
+        # Create renderer object
+        self.renderer = Renderer(base_template)
+        self.renderer.connect(self.app, config_from_app=True)
+
+        # Create URL constants
+        self._ARCHIVE_NAME = 'archive'
+        self._POSTS_NAME = 'post'
 
         # Create index page
         @self.app.route('/')
         def index():
-            # Find active posts
-            posts = [str(pathlib.Path(self.app.config['POSTS_URL']) / path.stem)
-                     for path in self.app.config['POSTS_DIR'].glob('*.html')]
+            """ Creates the index page with latest blog posts
 
-            # Render all posts to template
-            return flask.render_template('_base.html', posts=posts)
-
+                :param: None
+                :return: Page content
+                """
+            return self.renderer.render_latest(self._POSTS_NAME)
+        
         # Create about page
         @self.app.route('/about')
         def about():
             return 'Not Implemented'
 
         # Create archive page
-        self._ARCHIVE_NAME = 'archive'
         @self.app.route(f'/{self._ARCHIVE_NAME}')
         @self.app.route(f'/{self._ARCHIVE_NAME}/<int:page>')
         def archive(page=1):
             return 'Not Implemented'
 
         # Create individual post pages
-        @self.app.route('/post/<name>')
+        @self.app.route(f'/{self._POSTS_NAME}/<name>')
         def blog_post(name=None):
             return 'Not Implemented'
 

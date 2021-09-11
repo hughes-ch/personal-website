@@ -1,13 +1,13 @@
 <h3><a href='{{ post }}' class='link'>Introduction to Asynchronous Programming with Python's Yield Keyword</a></h3>
 <p class='post-caption'>Jun 5, 2021</p>
 <p>
-  In this final installment of exploring Python's generators and coroutines, I'll introduce asynchronous programming using the <span class='mono'>yield</span> and <span class='mono'>yield from</span> keywords.
+  In this final installment of exploring Python's generators and coroutines, I'll introduce asynchronous programming using the {{ codeify("yield") }} and {{ codeify("yield from") }} keywords.
 </p>
 <p>
-  I'd like to note that my resource for these features was Luciano Ramalho's excellent book called <em>Fluent Python</em>. At the time of this post, he is revising his First Edition to cover more modern features of Python, like the <span class='mono'>await</span> and <span class='mono'>async</span> keywords. These are what truly provides Python with its exciting asynchronous programming feature. However, his First Edition (what I have) was written before <span class='mono'>async</span> and <span class='mono'>await</span>, so asynchronous programming was introduced to me in its infancy. It shows his incredible foresight that he had an aside at the end of the chapter which introduces <span class='mono'>yield</span> and <span class='mono'>yield from</span> explaining how additional keywords would make asynchronous programming much more explicit (and therefore easier to adapt).
+  I'd like to note that my resource for these features was Luciano Ramalho's excellent book called <em>Fluent Python</em>. At the time of this post, he is revising his First Edition to cover more modern features of Python, like the {{ codeify("await") }} and {{ codeify("async") }} keywords. These are what truly provides Python with its exciting asynchronous programming feature. However, his First Edition (what I have) was written before {{ codeify("async") }} and {{ codeify("await") }}, so asynchronous programming was introduced to me in its infancy. It shows his incredible foresight that he had an aside at the end of the chapter which introduces {{ codeify("yield") }} and {{ codeify("yield from") }} explaining how additional keywords would make asynchronous programming much more explicit (and therefore easier to adapt).
 </p>
 <p>
-  Since I am not yet fluent in <span class='mono'>async</span> and <span class='mono'>await</span>, I'll leave a link at the bottom to another resource which provides an excellent description of the keywords. However, I'd like to use <span class='mono'>yield</span> and <span class='mono'>yield from</span> to introduce asynchronous programming with syntax that is familiar.
+  Since I am not yet fluent in {{ codeify("async") }} and {{ codeify("await") }}, I'll leave a link at the bottom to another resource which provides an excellent description of the keywords. However, I'd like to use {{ codeify("yield") }} and {{ codeify("yield from") }} to introduce asynchronous programming with syntax that is familiar.
 </p>
 <p>First, let me introduce asynchronous programming.</p>
 <p>
@@ -61,27 +61,27 @@
   So which one do you choose if you need to solve a problem? It really depends on the architecture. For massive processing-heavy calculations where there are few constraints on the hardware resources (lots of memory and CPU power), parallel processing is the way to go. For simple calculations where latency is not an issue, the serial approach is probably the best bet. If latency is an issue but requests must be handled using shared or limited resources, multi-threading would usually be my choice, even knowing the risks of having to lock shared resources and tune thread priorities. Python gives a great alternative, though.
 </p>
 <p>
-  Instead of multiple threads running simultaneously with the OS as the arbitrator of which one gets CPU time, the <span class='mono'>yield</span> and <span class='mono'>yield from</span> keywords allow the application to decide when a thread of execution will change contexts. This is asynchronous programming.
+  Instead of multiple threads running simultaneously with the OS as the arbitrator of which one gets CPU time, the {{ codeify("yield") }} and {{ codeify("yield from") }} keywords allow the application to decide when a thread of execution will change contexts. This is asynchronous programming.
 </p>
 <p>This is big.</p>
 <p>
-  Now, instead of needing to tune the performance of threads by changing priorities, implementing locks, changing scheduling algorithms, etc, the application can make a section of code essentially atomic (cannot be interrupted by the OS). After the atomic operation, then the <span class='mono'>yield</span> keyword changes context so that other parts of the application can execute. Plus, because only one context is executing at a time, there is no need to lock a shared resource. Just make sure that the context does not yield until after the shared resource has been closed.
+  Now, instead of needing to tune the performance of threads by changing priorities, implementing locks, changing scheduling algorithms, etc, the application can make a section of code essentially atomic (cannot be interrupted by the OS). After the atomic operation, then the {{ codeify("yield") }} keyword changes context so that other parts of the application can execute. Plus, because only one context is executing at a time, there is no need to lock a shared resource. Just make sure that the context does not yield until after the shared resource has been closed.
 </p>
 <p>
   While this may be slower than multi-threading in processing-heavy situations, it is an excellent choice for any cases where there are long waits, such as HTTP requests or large file IO. Instead of having a high-priority thread waiting for something to complete and starving all other threads, it can yield the CPU to another context until the long-running request completes. Here's an example examining the time of execution of the infamous bogosort algorithm:
 </p>
-<pre>
-  <code>import random
+{{ codeify("
+import random
 import time
 
 def counter():
-    """ Prints the number of elapsed seconds.
+    ''' Prints the number of elapsed seconds.
         Print statements are output and rounded to the nearest second
 
         Yield None to caller if nothing to print.
 
         :return: None
-        """
+        '''
     # Initialize counter - this is executed only once
     start_time = time.time()
     last_output = 0
@@ -103,7 +103,7 @@ def counter():
             yield
 
 def bogosort(unsorted_list):
-    """ The extremely efficient bogosort algorithm.
+    ''' The extremely efficient bogosort algorithm.
         Sorts a list by randomly placing items at new indexes.
 
         Attempts a single sort. If it fails and the list must be
@@ -113,7 +113,7 @@ def bogosort(unsorted_list):
 
         :param unsorted_list:  of integers to sort
         :return:  Sorted list
-        """
+        '''
     # Start endless loop. It will continue to iterate until the 
     # list is sorted. 
     while True:
@@ -130,17 +130,17 @@ def bogosort(unsorted_list):
             yield
 
 def is_sorted(test_list):
-    """ Checks whether a list is sorted
+    ''' Checks whether a list is sorted
 
         :param test_list:  of integers
         :return:  Indicating if the list is sorted
-        """
+        '''
     return all(
         [test_list[ii] <= test_list[ii+1]
          for ii in range(len(test_list)-1)])
 
 def run_async(funcs):
-    """ Runs the asynchronous program.
+    ''' Runs the asynchronous program.
 
         Takes a list of generator functions as input. It schedules them
         via a round-robin schedule. When one yields the execution back
@@ -153,7 +153,7 @@ def run_async(funcs):
 
         :param funcs:  Containing generators
         :return: Return value of first generator to raise StopIteration
-        """
+        '''
     # Start execution loop
     while True:
         # Schedule functions in round-robin 
@@ -169,19 +169,19 @@ def run_async(funcs):
 # Execute main function
 if __name__ == '__main__':
     answer = run_async((counter(), bogosort(random.choices(range(100), k=10))))
-    print(f'Sorted list is: {answer}')</code>
-</pre>
+    print(f'Sorted list is: {answer}')
+") }}
 <p>
   This is a big example, so let's break it down piece by piece.
 </p>
 <p>
-  First, the bogosort algorithm is a theoretical sorting algorithm where a list is sorted by randomly re-ordering it and then checking if it has been sorted. I've implemented this with the <span class='mono'>bogosort()</span> function and the random module. This example is trying to sort a list of ten elements between 0 and 99.
+  First, the bogosort algorithm is a theoretical sorting algorithm where a list is sorted by randomly re-ordering it and then checking if it has been sorted. I've implemented this with the {{ codeify("bogosort()") }} function and the random module. This example is trying to sort a list of ten elements between 0 and 99.
 </p>
 <p>
   A counter function maintains the amount of time which has elapsed between the start of the bogosort and the end. Since this is a random function, it can deviate wildly. Here was the output of my attempt:
 </p>
-<pre>
-  <code>Elapsed Time: 0
+{{ codeify("
+Elapsed Time: 0
 Elapsed Time: 1
 Elapsed Time: 2
 Elapsed Time: 3
@@ -190,24 +190,24 @@ Elapsed Time: 5
 ...
 Elapsed Time: 52
 Elapsed Time: 53
-Sorted list is: [6, 10, 35, 38, 51, 56, 61, 64, 91, 93]</code>
-</pre>
+Sorted list is: [6, 10, 35, 38, 51, 56, 61, 64, 91, 93]
+")}}
 <p>It almost took a minute!</p>
 <p>
-  Now the cool thing about this example is the bogosort algorithm and the counter were executing at the same time without the use of threads. That was possible because they were both generators being driven by the <span class='mono'>run_async()</span> function. Let's first examine <span class='mono'>run_async()</span>.
+  Now the cool thing about this example is the bogosort algorithm and the counter were executing at the same time without the use of threads. That was possible because they were both generators being driven by the {{ codeify("run_async()") }} function. Let's first examine {{ codeify("run_async()") }}.
 </p>
 <p>
-  It's actually pretty simple. It just takes a list of generators and iterates through them, calling <span class='mono'>next()</span> on each. When one yields, <span class='mono'>run_async()</span> goes to the next in a simple round-robin scheduling algorithm. After each generator has had its turn, <span class='mono'>run_async()</span> continues until one of the generators raises StopIteration. At this point, it returns the value corresponding to the StopIteration exception.
+  It's actually pretty simple. It just takes a list of generators and iterates through them, calling {{ codeify("next()") }} on each. When one yields, {{ codeify("run_async()") }} goes to the next in a simple round-robin scheduling algorithm. After each generator has had its turn, {{ codeify("run_async()") }} continues until one of the generators raises StopIteration. At this point, it returns the value corresponding to the StopIteration exception.
 </p>
 <p>
-  The key to <span class='mono'>run_async()</span> is that all of the generators passed into it yield execution when they get to a point where they can safely interrupt execution. In <span class='mono'>counter()</span>, that's when it determines that it doesn't have anything to print (since it's been less than a second). In <span class='mono'>bogosort()</span>, that's when it determines that it will have to try sorting again.
+  The key to {{ codeify("run_async()") }} is that all of the generators passed into it yield execution when they get to a point where they can safely interrupt execution. In {{ codeify("counter()") }}, that's when it determines that it doesn't have anything to print (since it's been less than a second). In {{ codeify("bogosort()") }}, that's when it determines that it will have to try sorting again.
 </p>
 <p>
-  Between the <span class='mono'>yield</span>s, both methods can assume the code is atomic. If either were writing to a shared resource (like a database), it wouldn't have to worry about the OS automatically changing context to another thread which may completely change the resource. Furthermore, if written correctly, there are no deadlocks, no starved threads, and you can customize your scheduling algorithm.
+  Between the {{ codeify("yield") }}s, both methods can assume the code is atomic. If either were writing to a shared resource (like a database), it wouldn't have to worry about the OS automatically changing context to another thread which may completely change the resource. Furthermore, if written correctly, there are no deadlocks, no starved threads, and you can customize your scheduling algorithm.
 </p>
 <p>I think that's pretty neat.</p>
 <p>
-  Now, like I said at the top, this is just an introduction into a fairly new feature of Python that has since been expanded upon. The <span class='mono'>yield</span> and <span class='mono'>yield from</span> keywords are able to introduce asynchronous programming using a fairly straightforward syntax, but <span class='mono'>async</span> and <span class='mono'>await</span> are specifically designed for it. I still have reading to do on those two keywords, but <a href='https://snarky.ca/how-the-heck-does-async-await-work-in-python-3-5/' target='_blank' class='underlined link'>this</a> is an excellent resource (and he has the same enthusiasm that I do about asynchronous programming).
+  Now, like I said at the top, this is just an introduction into a fairly new feature of Python that has since been expanded upon. The {{ codeify("yield") }} and {{ codeify("yield from") }} keywords are able to introduce asynchronous programming using a fairly straightforward syntax, but {{ codeify("async") }} and {{ codeify("await") }} are specifically designed for it. I still have reading to do on those two keywords, but <a href='https://snarky.ca/how-the-heck-does-async-await-work-in-python-3-5/' target='_blank' class='underlined link'>this</a> is an excellent resource (and he has the same enthusiasm that I do about asynchronous programming).
 </p>
 <p>
   I can't wait to start playing around with this feature. I've spent way too much time trying to debug multi-threading issues, and it's good to know the language designers at Python provided an alternative. Just another reason to migrate to a language that's not quite as old as I am, I guess.

@@ -1,15 +1,15 @@
 <h3><a href='{{ post }}' class='link'>The Alternate Egos of Python's 'Else'</a></h3>
 <p class='post-caption'>Jun 12, 2021</p>
 <p>
-  Python's <span class='mono'>else</span> keyword has some neat functionalities that I haven't run into in other programming languages. As someone new to the language, you'll obviously know the <span class='mono'>if</span>/<span class='mono'>else</span> block, exemplified in this simplified selection of a preposition (<a href='https://www.grammar.com/a-vs-an-when-to-use/' target='_blank' class='underlined link'>if you go to this article</a>, you can find plenty of examples where this function is inadequate):
+  Python's {{ codeify("else") }} keyword has some neat functionalities that I haven't run into in other programming languages. As someone new to the language, you'll obviously know the {{ codeify("if") }}/{{ codeify("else") }} block, exemplified in this simplified selection of a preposition (<a href='https://www.grammar.com/a-vs-an-when-to-use/' target='_blank' class='underlined link'>if you go to this article</a>, you can find plenty of examples where this function is inadequate):
 </p>
-<pre>
-  <code>def select_preposition(word):
-    """ Selects a preposition for the given word
+{{ codeify("
+def select_preposition(word):
+    ''' Selects a preposition for the given word
 
         :param word:  String which preposition will be inserted before
         :return:  Selected preposition (a or an)
-        """
+        '''
     if word.lower()[0] in 'aeiou':
         return 'an'
     else:
@@ -26,27 +26,27 @@ if __name__ == '__main__':
 
     for word in words:
         preposition = select_preposition(word)
-        print(f'{preposition} {word.lower()}')</code>
-</pre>
+        print(f'{preposition} {word.lower()}')
+") }}
 <p>Of course, that gives you:</p>
-<pre>
-  <code>a man
+{{ codeify("
+a man
 an animal
 a house
-a wombat</code>
-</pre>
+a wombat
+") }}
 <p>But did you also know that the else keyword can be used with for loops?</p>
 <p>
   Here's an example of a script which adds friends' contact information to a spreadsheet if an entry has not been found:
 </p>
-<pre>
-  <code>def get_contact_info(name):
-    """ Gets the contact information or adds it to the spreadsheet
+{{ codeify("
+def get_contact_info(name):
+    ''' Gets the contact information or adds it to the spreadsheet
         if not available
 
         :param name:  Name of contact to add
         :return:  Contact information
-        """
+        '''
     # Initialize empty record for new contacts
     record = {
         'name': name,
@@ -67,7 +67,7 @@ a wombat</code>
         # No contact found. Add new entry to spreadsheet
         else:
             contact_info.write(
-                f'{record["name"]},{record["phone"]},{record["email"]}\n')
+                f'{record[\'name\']},{record[\'phone\']},{record[\'email\']}\n')
 
         return record
 
@@ -75,21 +75,21 @@ a wombat</code>
 if __name__ == '__main__':
     for name in ['Janet', 'Chris', 'Bob']:
         contact_info = get_contact_info(name)
-        print(f'Name:{contact_info["name"]}\n'
-              f'Phone:{contact_info["phone"]}\n'
-              f'Email:{contact_info["email"]}')</code>
-</pre>
+        print(f'Name:{contact_info[\'name\']}\n'
+              f'Phone:{contact_info[\'phone\']}\n'
+              f'Email:{contact_info[\'email\']}')
+") }}
 <p>
-  Within the <span class='mono'>with</span> block, each line of the file is searched for the friend's name. If the name is found, a new record with the contact information is populated and the loop is exited with the <span class='mono'>break</span> keyword. This avoids the functionality in the <span class='mono'>else</span> block of the loop.
+  Within the {{ codeify("with") }} block, each line of the file is searched for the friend's name. If the name is found, a new record with the contact information is populated and the loop is exited with the {{ codeify("break") }} keyword. This avoids the functionality in the {{ codeify("else") }} block of the loop.
 </p>
 <p>
-  If the loop is able to complete without breaking, the <span class='mono'>else</span> block is executed. In this case, that means that a record was not found for the friend that was requested. A new record is written to the CSV.
+  If the loop is able to complete without breaking, the {{ codeify("else") }} block is executed. In this case, that means that a record was not found for the friend that was requested. A new record is written to the CSV.
 </p>
 <p>
   Here's the output of the program when Janet's and Chris' contact information is in the CSV and Bob must be added:
 </p>
-<pre>
-  <code>Name:Janet
+{{ codeify("
+Name:Janet
 Phone:555-1234
 Email:janet@gmail.com
 
@@ -99,33 +99,33 @@ Email:chris@christhesoftwareguy.com
 
 Name:Bob
 Phone:
-Email:</code>
-</pre>
+Email:
+") }}
 <p>The contents of the file after execution looks like this:</p>
-<pre>
-  <code>Janet,555-1234,janet@gmail.com
+{{ codeify("
+Janet,555-1234,janet@gmail.com
 Chris,555-5555,chris@christhesoftwareguy.com
-Bob,,</code>
-</pre>
+Bob,,
+") }}
 <p>
   No new records were created for Janet and Chris, since they were found in the file and the function broke early from the loop. A new record was created for Bob since the loop was allowed to complete.
 </p>
 <p>
-  The same functionality can be used for the <span class='mono'>while</span> statement.
+  The same functionality can be used for the {{ codeify("while") }} statement.
 </p>
 <p>
-  The <span class='mono'>else</span> keyword's third hat is related to the <span class='mono'>try</span>/<span class='mono'>except</span> block. It can be placed after except to execute any code which should only run if an exception is not encountered. Note that this is different than a <span class='mono'>finally</span> block which runs after the <span class='mono'>try</span>/<span class='mono'>except</span> whether or not there was an exception encountered.
+  The {{ codeify("else") }} keyword's third hat is related to the {{ codeify("try") }}/{{ codeify("except") }} block. It can be placed after except to execute any code which should only run if an exception is not encountered. Note that this is different than a {{ codeify("finally") }} block which runs after the {{ codeify("try") }}/{{ codeify("except") }} whether or not there was an exception encountered.
 </p>
 <p>
-  The next example of a file reader demonstrates the difference between the 'finally' and 'else' keywords in the context of a <span class='mono'>try</span>/<span class='mono'>except</span> block.
+  The next example of a file reader demonstrates the difference between the 'finally' and 'else' keywords in the context of a {{ codeify("try") }}/{{ codeify("except") }} block.
 </p>
-<pre>
-  <code>def read_file_contents(path):
-    """ Prints the file contents and number of characters read
+{{ codeify("
+def read_file_contents(path):
+    ''' Prints the file contents and number of characters read
 
         :param path:  Path to file
         :return: None
-        """
+        '''
     # Attempt to open the file. If the file is not found, a
     # FileNotFoundError will be raised. 
     try:
@@ -158,11 +158,11 @@ Bob,,</code>
 # example), or a file which cannot be found. 
 if __name__ == '__main__':
     read_file_contents('contact_info.csv')
-    read_file_contents('not_a_file.txt')</code>
-</pre>
+    read_file_contents('not_a_file.txt')
+") }}
 <p>This script results in the following:</p>
-<pre>
-  <code>----------contact_info.csv----------
+{{ codeify("
+----------contact_info.csv----------
 Characters read: 82
 
 Janet,555-1234,janet@gmail.com
@@ -172,12 +172,12 @@ Bob,,
 ----------not_a_file.txt----------
 Characters read: 0
 
-File not_a_file.txt not found</code>
-</pre>
+File not_a_file.txt not found
+") }}
 <p>
-  You can see that the <span class='mono'>except</span> and the <span class='mono'>else</span> block are exclusive, while the <span class='mono'>finally</span> block will always be executed, even if an exception is raised. Note that if there are multiple <span class='mono'>except</span> blocks (for multiple exception types), there is still only one <span class='mono'>else</span> block. No need for an <span class='mono'>else</span> after each exception type.
+  You can see that the {{ codeify("except") }} and the {{ codeify("else") }} block are exclusive, while the {{ codeify("finally") }} block will always be executed, even if an exception is raised. Note that if there are multiple {{ codeify("except") }} blocks (for multiple exception types), there is still only one {{ codeify("else") }} block. No need for an {{ codeify("else") }} after each exception type.
 </p>
 <p>
-  I find that this is really helpful in writing explicit code. Instead of having to guess where exceptions come from in a giant <span class='mono'>try</span> block, the <span class='mono'>else</span> keyword guides the readers of your code to what is expected to raise an exception, and what is just a dependency of the suspect code (and is not expected to raise an exception itself).
+  I find that this is really helpful in writing explicit code. Instead of having to guess where exceptions come from in a giant {{ codeify("try") }} block, the {{ codeify("else") }} keyword guides the readers of your code to what is expected to raise an exception, and what is just a dependency of the suspect code (and is not expected to raise an exception itself).
 </p>
 <p>And isn't explicit code the beauty of Python?</p>
