@@ -4,10 +4,11 @@
     :copyright: Copyright (c) 2021 Chris Hughes
     :license: MIT License. See LICENSE.md for details
 """
+import bs4
 import flask
-import pathlib
 import unittest
 
+from datetime import datetime
 from src.blog import Blog
 from src.render import Renderer
 from src.render import RendererNotConfiguredException
@@ -25,7 +26,7 @@ class TestRenderer(unittest.TestCase):
         pass
     
     def test_connect(self):
-        """ Tests the connect method
+        """ Test the connect method
 
             :param: None
             :return: None
@@ -55,7 +56,7 @@ class TestRenderer(unittest.TestCase):
         self.assertEquals(auto_config_render.template_folder, app.template_folder)
 
     def test_renderer_config_check(self):
-        """ Tests a renderer must be configured to render something
+        """ Test a renderer must be configured to render something
 
             :param: None
             :return: None
@@ -65,7 +66,7 @@ class TestRenderer(unittest.TestCase):
             bad_renderer.render_latest('url')
 
     def test_codeify(self):
-        """ Tests a block of code rendered with _codeify
+        """ Test a block of code rendered with _codeify
 
             :param: None
             :return: None
@@ -95,7 +96,7 @@ class TestRenderer(unittest.TestCase):
         self.assertNotIn(b'\'', response)
 
     def test_inline_codeify(self):
-        """ Tests an inline span of code rendered with _codeify
+        """ Test an inline span of code rendered with _codeify
 
             :param: None
             :return: None
@@ -118,3 +119,19 @@ class TestRenderer(unittest.TestCase):
         response = template.get()
         self.assertNotIn(b' print', response)
         self.assertNotIn(b'\'', response)
+
+    def test_index_ordering(self):
+        """ Test the ordering of the index page
+
+            :param: None
+            :return: None
+            """
+        with Blog().app.test_client() as client:
+            response = client.get('/').data
+            
+            soup = bs4.BeautifulSoup(response, 'html.parser')
+            dates = soup.find_all(id='date')
+            datetimes = [datetime.strptime(date.string, '%b %d, %Y')
+                         for date in dates]
+            
+            self.assertEquals(datetimes, sorted(datetimes, reverse=True))

@@ -4,8 +4,11 @@
     :copyright: Copyright (c) 2021 Chris Hughes
     :license: MIT License. See LICENSE.md for details
 """
+import bs4
 import flask
 import pathlib
+
+from datetime import datetime
 
 class RendererNotConfiguredException(Exception):
     """ Raised when Renderer is not configured """
@@ -62,14 +65,13 @@ class Renderer:
         if not self._is_configured():
             raise RendererNotConfiguredException
             
-        # Find active posts
+        # Get list of latest posts
         posts_path = (
             pathlib.Path(self.root_path) /
             self.template_folder /
             post_url)
 
-        posts = [str(pathlib.Path(post_url) / path.stem)
-                 for path in posts_path.glob('*.html')]
+        posts = self._find_latest_posts(posts_path)
 
         # Render all posts to template
         return flask.render_template(self.template_name, posts=posts)
@@ -106,3 +108,45 @@ class Renderer:
         # Return clean string as Markup
         return flask.Markup(
             f'{pre_open}<code {class_statement}>%s</code>{pre_close}') % formatted_code
+
+    def _find_latest_posts(self, post_path):
+        """ Returns the latest posts in sorted order
+
+            :param path: <PosixPath> Path to posts on filesystem
+            :return: <list> Of sorted post titles
+            """
+        # Find date of each post
+        post_list = []
+        for path in post_path.glob('*.html'):
+            with path.open() as f_handle:
+                html = f_handle.read()
+                soup = bs4.BeautifulSoup(html, 'html.parser')
+
+                try:
+                    date_str = soup.find(id="date").string
+                    post_date = datetime.strptime(
+                        date_str,
+                        '%b %d, %Y')
+                    
+                except (AttributeError, ValueError):
+                    post_date = datetime.now()
+                    
+            post_list.append(
+                {
+                    'path': pathlib.Path(post_path.stem) / path.stem,
+                    'date': post_date
+                }
+            )
+
+        # Return posts in sorted order
+        posts = [
+            str(post['path']) for post in sorted(
+                post_list,
+                key=lambda entry: entry['date'],
+                reverse=True
+            )
+        ]
+
+        return posts
+
+
