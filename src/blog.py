@@ -34,6 +34,7 @@ class Blog:
         # Create renderer object
         self.renderer = Renderer(base_template)
         self.renderer.connect(self.app, config_from_app=True)
+        self._RENDERED_POST_COUNT = 2
 
         # Create URL constants
         self._ARCHIVE_NAME = 'archive'
@@ -47,7 +48,9 @@ class Blog:
                 :param: None
                 :return: Page content
                 """
-            return self.renderer.render_latest(self._POSTS_NAME)
+            return self.renderer.render_latest(
+                self._RENDERED_POST_COUNT,
+                self._POSTS_NAME)
         
         # Create about page
         @self.app.route('/about')

@@ -48,8 +48,13 @@ class TestBlog(unittest.TestCase):
 
         posts = [path.stem for path in posts_full_path.glob('*.html')]
 
+        found_a_recent_post = False
         for post in posts:
-            self.assertIn(post, str(response.data))
+            if post in str(response.data):
+                found_a_recent_post = True
+                break
+
+        self.assertTrue(found_a_recent_post)
 
     def test_links_are_valid(self):
         """ Verifies internal links return a valid response

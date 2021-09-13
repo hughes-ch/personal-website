@@ -28,6 +28,7 @@ class Renderer:
         self.root_path = None
         self.template_folder = None
         self.template_name = template_name
+        self._RENDERED_POST_COUNT = 2
 
     def connect(self, app, config_from_app=False):
         """ Sets the active flask app
@@ -54,10 +55,11 @@ class Renderer:
         def _connect_context_processors():
             return dict(codeify=self._codeify)
 
-    def render_latest(self, post_url, page=None):
+    def render_latest(self, count, post_url, page=None):
         """ Renders the latest blog posts
 
-            :post_url: <str> Base URL of blog posts
+            :param count: <int> Number of posts to render
+            :param post_url: <str> Base URL of blog posts
             :param page: <int> Specifies the page number to render 
             :return: Page contents
             """
@@ -72,6 +74,9 @@ class Renderer:
             post_url)
 
         posts = self._find_latest_posts(posts_path)
+
+        if len(posts) > count:
+            posts = posts[:count]
 
         # Render all posts to template
         return flask.render_template(self.template_name, posts=posts)
@@ -148,5 +153,3 @@ class Renderer:
         ]
 
         return posts
-
-

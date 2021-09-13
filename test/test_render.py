@@ -63,7 +63,7 @@ class TestRenderer(unittest.TestCase):
             """
         bad_renderer = Renderer('_base.html')
         with self.assertRaises(RendererNotConfiguredException):
-            bad_renderer.render_latest('url')
+            bad_renderer.render_latest(2, 'url')
 
     def test_codeify(self):
         """ Test a block of code rendered with _codeify
@@ -126,7 +126,8 @@ class TestRenderer(unittest.TestCase):
             :param: None
             :return: None
             """
-        with Blog().app.test_client() as client:
+        blog = Blog()
+        with blog.app.test_client() as client:
             response = client.get('/').data
             
             soup = bs4.BeautifulSoup(response, 'html.parser')
@@ -135,3 +136,4 @@ class TestRenderer(unittest.TestCase):
                          for date in dates]
             
             self.assertEquals(datetimes, sorted(datetimes, reverse=True))
+            self.assertEquals(len(datetimes), blog._RENDERED_POST_COUNT)
