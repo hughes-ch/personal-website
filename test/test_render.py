@@ -43,7 +43,7 @@ class TestRenderer(unittest.TestCase):
         self.assertEquals(man_config_render.config, {})
         self.assertEquals(man_config_render.root_path, None)
         self.assertEquals(man_config_render.template_folder, None)
-        self.assertEquals(man_config_render.template_name, template_name)
+        self.assertEquals(man_config_render.base_template, template_name)
 
         # Test that an automatically configured renderer is config'd right
         auto_config_render = Renderer('_base.html')
@@ -126,7 +126,7 @@ class TestRenderer(unittest.TestCase):
             :param: None
             :return: None
             """
-        blog = Blog()
+        blog = Blog({'TESTING': True})
         with blog.app.test_client() as client:
             response = client.get('/').data
             

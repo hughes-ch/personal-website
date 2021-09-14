@@ -29,7 +29,8 @@ class Template:
             :return: <str> Rendered template HTML
             """
         # Create test client to get template
-        with Blog(base_template=self.template_name,
+        with Blog({'TESTING': True},
+                  base_template=self.template_name,
                   root_path=self.root_path,
                   template_path=self.root_path).app.test_client() as client:
 

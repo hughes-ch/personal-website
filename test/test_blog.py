@@ -21,7 +21,6 @@ class TestBlog(unittest.TestCase):
             :return: None
             """
         self.blog = Blog({'TESTING': True})
-        self.client = self.blog.app.test_client()
 
     def get_index_page(self):
         """ Returns the contents of the index page
@@ -29,9 +28,10 @@ class TestBlog(unittest.TestCase):
             :param: None
             :return: Contents of index (if valid response received)
             """
-        response = self.client.get('/')
-        self.assertEqual(response.status_code, 200)
-        return response
+        with self.blog.app.test_client() as client:
+            response = client.get('/')
+            self.assertEqual(response.status_code, 200)
+            return response
 
     def test_index_response(self):
         """ Verify index page returns latest blog posts
@@ -57,7 +57,7 @@ class TestBlog(unittest.TestCase):
         self.assertTrue(found_a_recent_post)
 
     def test_links_are_valid(self):
-        """ Verifies internal links return a valid response
+        """ Verify internal links return a valid response
 
             :param: None
             :return: None
@@ -76,10 +76,52 @@ class TestBlog(unittest.TestCase):
             elif 'mailto' in href:
                 pass
             else:
-                response = self.client.get(href)
+                with self.blog.app.test_client() as client:
+                    response = client.get(href)
 
             self.assertNotIn(
                 response.status_code,
                 bad_status_codes,
                 msg=f'{response.status_code} returned by "{href}"')
-                
+
+    def test_index_pagination(self):
+        """ Test the pagination feature of the main index page
+
+            :param: None
+            :return: None
+            """
+        # Request first page and verify it matches index page
+        with self.blog.app.test_client() as client:
+            index_data = client.get('/').data
+            page1_response = client.get('/page/1')
+            self.assertEqual(index_data, page1_response.data)
+            self.assertEqual(page1_response.status_code, 200)
+
+            # Request following pages and verify they differ from last
+            max_page_count = 5000
+            last_page_content = page1_response.data
+            
+            for page_num in range(max_page_count):
+                next_page_response = client.get(f'/page/{page_num}')
+                self.assertIn(next_page_response.status_code, [200, 404])
+                self.assertNotEqual(last_page_content, next_page_response.data)
+
+                if next_page_response.status_code == 404:
+                    break
+
+            self.assertNotEqual(page_num, max_page_count)
+
+    def test_index_pagination_incorrect_page(self):
+        """ Verify an incorrect page number is handled correctly
+
+            :param: None
+            :return: None
+            """
+        # Request first page and verify it matches index page
+        with self.blog.app.test_client() as client:
+            status_code = client.get('/page/0').status_code
+            self.assertEqual(status_code, 404)
+
+            status_code = client.get('/page/5000').status_code
+            self.assertEqual(status_code, 404)
+            

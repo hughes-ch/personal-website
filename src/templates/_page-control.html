@@ -1,0 +1,17 @@
+<div class='page-control-section'>
+  <span class='page-control' id='prev-nav'>
+    {% if prev_page is none %}
+    <span class='page-control-button-dead'>Prev</span>
+    {% else %}
+    <a href='/page/{{ prev_page }}' class='page-control-button-alive'>Prev</a>
+    {% endif %}
+  </span>
+  
+  <span class='page-control' id='next-nav'>
+    {% if next_page is none %}
+    <span class='page-control-button-dead'>Next</span>
+    {% else %}
+    <a href='/page/{{ next_page }}' class='page-control-button-alive'>Next</a>
+    {% endif %}
+  </span>
+</div>

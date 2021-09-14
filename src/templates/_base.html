@@ -4,176 +4,25 @@
     <meta charset='utf-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
 
-    <title>Sprinting With Suitcases</title>
+    <title>{{ title }}</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
-    
-    <style>
-      :root {
-          --code-background: lightgrey;
-          --link-block-margin: 1em;
-          --max-width: 50em;
-          --variable-font-size: inherit;
-          --title-color: #ff7600;
-      }
-      article {
-          max-width: var(--max-width);
-      }
-      article img {
-          max-width: var(--max-width);
-          width: 100%;
-      }
-      body {
-          font-family: 'Roboto Mono', monospace;
-      }
-      code {
-          background-color: var(--code-background);
-      }
-      footer {
-          margin-block-start: 5em;
-          text-align: center;
-      }
-      hr {
-          margin-block-start: 5em;
-          margin-block-end: 5em;
-      }
-      nav {
-          display: flex;
-          flex-flow: row wrap;
-          justify-content: space-evenly;
-          width: 100%;
-          max-width: 60em;
-      }
-      nav h1, nav h3, nav p {
-          font-size: 1.5em;
-          margin-block-start: 0em;
-          margin-block-end: 0em;
-      }
-      table {
-          border-collapse: collapse;
-          font-size: var(--variable-font-size);
-          text-align: center;
-          width: 100%;
-      }
-      th {
-          padding: 4px 8px;
-      }
-      thead {
-          background-color: var(--title-color);
-          color: white;
-      }
-      tbody tr:nth-child(even) {
-          background-color: var(--code-background);
-      }
-      tbody tr:nth-child(odd) {
-          background-color: white;
-      }
-      .code-block {
-          display: block;
-          font-size: var(--variable-font-size);
-          padding: 1em;
-          white-space: pre-wrap;
-      }
-      .footer-title {
-          font-size: 1.17em;
-      }
-      .link {
-          color: black;
-          text-decoration: none;
-      }
-      .link-block {
-          display: flex;
-          flex-flow: row nowrap;
-          justify-content: center;
-          align-items: center;
-      }
-      .link-block h3, .link-block div {
-          display: inline-block;
-          text-align: center;
-          margin-left: var(--link-block-margin);
-      }
-      .mono {
-          font-family: monospace;
-          background-color: var(--code-background);
-      }
-      .page-content {
-          align-items: center;
-          display: flex;
-          flex-direction: column;
-      }
-      .page-control {
-          padding-left: 1em;
-          padding-right: 1em;
-      }
-      .page-control-section {
-          display: grid;
-          max-width: var(--max-width);
-          width: 100%;
-      }
-      .page-control-button {
-          color: var(--title-color);
-          font-size: 1.5em;
-          font-weight: bold;
-          padding-left: 0.1em;
-          padding-right: 0.1em;
-          text-decoration: none;
-      }
-      .page-control-button:hover {
-          background-color: var(--title-color);
-          color: white;
-      }
-      .page-title {
-          text-align: center;
-          font-size: 1.5em;
-          color: var(--title-color);
-      }
-      .title-block {
-          text-align: center;
-          white-space: nowrap;
-          margin-bottom: 1em;
-      }
-      .underlined {
-          text-decoration: underline;
-      }
-      #next-nav {
-          grid-column: 2 / span 1;
-          grid-row: 1 / span 1;
-          text-align: right;
-      }
-      #prev-nav {
-          grid-column: 1 / span 1;
-          grid-row: 1 / span 1;
-          text-align: left;
-      }
-      @media (max-width: 40em) {
-          :root {
-              --link-block-margin: 2em;
-              --variable-font-size: 2vw;
-          }
-          .nav-social-media-block div * {
-              display: none;
-          }
-      }
-    </style>
+    <link href='{{ url_for("static", filename="css/stylesheet.css") }}' rel='stylesheet' type='text/css' media='screen'>
   </head>
   <body>
     <div class='page-content'>
       <nav>
         <div class='title-block'>
-          <h1><a href='/' class='link'>Sprinting with Suitcases</a></h1>
+          <h1><a href='{{ url_for("index") }}' class='link'>{{ title }}</a></h1>
           <p class='title-caption'>A software blog</p>
         </div>
         <div class='link-block'>
-          <h3 class='nav-about'><a href='/about' class='link'>About Me</a></h3>
-          <h3 class='nav-archive'><a href='/archive' class='link nav-archive'>Archive</a></h3>
+          <h3 class='nav-about'><a href='{{ url_for("about") }}' class='link'>About Me</a></h3>
+          <h3 class='nav-archive'><a href='{{ url_for("archive") }}' class='link nav-archive'>Archive</a></h3>
           <div class='nav-social-media-block'>
-            <div>
-              <a href='https://www.linkedin.com/in/hughes-ch/' target='_blank'><img src='static/icon/linkedin.png' alt='LinkedIn Logo' height='32px'></a>
-              <a href='https://github.com/hughes-ch' target='_blank'><img src='static/icon/github.png' alt='GitHub Logo' height='32px'></a>
-              <a href='mailto:chris@sprintingwithsuitcases.com'><img src='static/icon/gmail.png' alt='Gmail Logo' height='32px'></a>
-            </div>
+            {% include '_socialmedia.html' %}
           </div>
         </div>
       </nav>
@@ -186,21 +35,14 @@
         <hr>
         {% endfor %}
       </main>
-      <div class='page-control-section'>
-        <span class='page-control' id='prev-nav'><span class='page-control-button'>Prev</span></span>
-        <span class='page-control' id='next-nav'><a href='/archive/2' class='page-control-button'>Next</a></span>
-      </div>
+      {% include '_pagination.html' %}
       <footer>
-        <p class='footer-title'><strong>Sprinting with Suitcases</strong></p>
+        <p class='footer-title'><strong>{{ title }}</strong></p>
         <p>Copyright © 2021 All Rights Reserved</p>
         <br>
         <p><strong>Want to get in touch?</strong></p>
         <div>
-          <div>
-            <a href='https://www.linkedin.com/in/hughes-ch/' target='_blank'><img src='static/icon/linkedin.png' alt='LinkedIn Logo' height='32px'></a>
-            <a href='https://github.com/hughes-ch' target='_blank'><img src='static/icon/github.png' alt='GitHub Logo' height='32px'></a>
-            <a href='mailto:chris@sprintingwithsuitcases.com'><img src='static/icon/gmail.png' alt='Gmail Logo' height='32px'></a>
-          </div>
+          {% include '_socialmedia.html' %}
         </div>
       </footer>
     </div>
