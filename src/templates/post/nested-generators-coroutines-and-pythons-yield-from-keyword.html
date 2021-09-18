@@ -93,7 +93,7 @@ Return value is 45
   The {{ codeify("yield from") }} keyword can be a difficult concept to grasp. The first thing to understand is that must take an iterator. Next, visualize that it works similarly to {{ codeify("yield") }} in that it pauses execution and transitions to another context. However, instead of passing the context up to the caller of the function, it passes the context down to the iterator parameter. It essentially creates a pipe between the calling code (in this case, the main script body) and the iterator parameter (the accumulate function). In this example, it allows the main script body to directly control the accumulate function through the delegator.
 </p>
 <p>It might be easier to understand with a picture:</p>
-<img src='static/img/nested-generators-coroutines-and-pythons-yield-from-keyword-1.webp' alt='Pipe representing yield'>
+<img src='{{ url_for("static", filename="img/nested-generators-coroutines-and-pythons-yield-from-keyword-1.webp") }}' alt='Pipe representing yield'>
 <p>
   Like the picture shows, the {{ codeify("yield from") }} keyword sets up a direct connection from the main function to {{ codeify("accumulate()") }} and does not continue operation until {{ codeify("accumulate()") }} completes its iteration and returns a value. At that time, {{ codeify("yield from generator()") }} evaluates to the return value of {{ codeify("accumulate()") }} (in this case, 45), which is saved to {{ codeify("ret_val") }}. Then, context is switched back to the {{ codeify("delegator()") }} function and it continues executing by printing the result of {{ codeify("accumulate()") }}.
 </p>

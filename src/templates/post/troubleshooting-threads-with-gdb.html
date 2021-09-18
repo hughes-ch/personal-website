@@ -162,13 +162,13 @@ __pthread_clockjoin_ex (threadid=139760597890816, thread_return=0x0, clockid=<op
 <p>
   At the bottom of the previous code block is the text (gdb). This is the GNU debugger prompt. To get information on the currently running threads, type {{ codeify("thread apply all where") }}. It will dump a ton of information, even in a small program like the example above. Below is the information for each thread, starting with Thread 5:
 </p>
-<img src='static/img/troubleshooting-threads-with-gdb-1.png' alt='Output of "thread apply all where"'>
+<img src='{{ url_for("static", filename="img/troubleshooting-threads-with-gdb-1.png") }}' alt='Output of "thread apply all where"'>
 <p>Thread 4:</p>
-<img src='static/img/troubleshooting-threads-with-gdb-2.png' alt='Output of "thread apply all where"'>
+<img src='{{ url_for("static", filename="img/troubleshooting-threads-with-gdb-2.png") }}' alt='Output of "thread apply all where"'>
 <p>Thread 3:</p>
-<img src='static/img/troubleshooting-threads-with-gdb-3.png' alt='Output of "thread apply all where"'>
+<img src='{{ url_for("static", filename="img/troubleshooting-threads-with-gdb-3.png") }}' alt='Output of "thread apply all where"'>
 <p>Threads 2 and 1:</p>
-<img src='static/img/troubleshooting-threads-with-gdb-4.png' alt='Output of "thread apply all where"'>
+<img src='{{ url_for("static", filename="img/troubleshooting-threads-with-gdb-4.png") }}' alt='Output of "thread apply all where"'>
 <p>
   While the example is running, five threads are active. Each thread shows a backtrace of the call stack that got them to the currently executing function. For example, thread 1 is currently executing line 0: {{ codeify("__pthread_clockjoin_ex") }}, an OS library call. That might not sound familiar. However, its caller on line 1, {{ codeify("std::thread::join()") }} is something that we actually coded in our main function. Now we know the main function is stuck on the join calls. 
 </p>

@@ -15,14 +15,14 @@
 <p>
   Here's a representation of this implementation with a queue:
 </p>
-<img src='static/img/introduction-to-asynchronous-programming-with-pythons-yield-keyword-1.webp' alt='Single worker thread representation'>
+<img src='{{ url_for("static", filename="img/introduction-to-asynchronous-programming-with-pythons-yield-keyword-1.webp") }}' alt='Single worker thread representation'>
 <p>
   You can see that only one request is processed at a time. Each time one is finished, it is thrown into my elegantly named "Done Bucket" and the next one is taken off the queue to be processed. This method is very simple, and no interactions between different workers must be coordinated. However, this can be slow, especially if each request can be processed somewhat independently of one another.
 </p>
 <p>
   The next architecture is running multiple threads concurrently from the same shared container. This has benefits and drawbacks. Let's cover the basic case and imagine the ideal scenario. Here's how that would look:
 </p>
-<img src='static/img/introduction-to-asynchronous-programming-with-pythons-yield-keyword-2.webp' alt='Multiple worker thread representation'>
+<img src='{{ url_for("static", filename="img/introduction-to-asynchronous-programming-with-pythons-yield-keyword-2.webp") }}' alt='Multiple worker thread representation'>
 <p>
   In this case, there are two workers processing requests from both sides of the container. This means that we can process double the requests in the same amount of time, right?
 </p>
@@ -30,7 +30,7 @@
 <p>
   In this case, the container is a shared resource between the two threads. What happens if both of them get to the last request at the same time?
 </p>
-<img src='static/img/introduction-to-asynchronous-programming-with-pythons-yield-keyword-3.webp' alt='Thread contention'>
+<img src='{{ url_for("static", filename="img/introduction-to-asynchronous-programming-with-pythons-yield-keyword-3.webp") }}' alt='Thread contention'>
 <p>Who wins?</p>
 <p>
   No one. In fact, both workers will take the request out of the container at the same time, not realizing that the other has done the same. That last request will be processed twice. In some cases, this might be almost harmless. In others, it can completely nullify the important work that was done by one of the threads. This can be especially nasty if the output of the thread is actually a shared resource.
@@ -50,7 +50,7 @@
 <p>
   Parallel processing gets all of the benefits of multi-threading without many of the drawbacks. In this architecture, multiple independent processes execute a backlog of work in nearly isolated silos. Ideally, they can work freely without having to interact or wait for any shared resources or other processes. Here's the example from above designed using parallel processing:
 </p>
-<img src='static/img/introduction-to-asynchronous-programming-with-pythons-yield-keyword-4.webp' alt='Parallel processing'>
+<img src='{{ url_for("static", filename="img/introduction-to-asynchronous-programming-with-pythons-yield-keyword-4.webp") }}' alt='Parallel processing'>
 <p>
   In this example, each worker has its own request pile, so they can churn through the requests twice as quick as the serial example. However, when one worker reaches the end of its pile, it simply stops working. It does not need to notify the other worker or have to worry about locking the container, like in the multi-threading example.
 </p>

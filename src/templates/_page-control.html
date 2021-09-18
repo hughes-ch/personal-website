@@ -3,7 +3,7 @@
     {% if prev_page is none %}
     <span class='page-control-button-dead'>Prev</span>
     {% else %}
-    <a href='/page/{{ prev_page }}' class='page-control-button-alive'>Prev</a>
+    <a href='{{ url_for("index", value=prev_page) }}' class='page-control-button-alive'>Prev</a>
     {% endif %}
   </span>
   
@@ -11,7 +11,7 @@
     {% if next_page is none %}
     <span class='page-control-button-dead'>Next</span>
     {% else %}
-    <a href='/page/{{ next_page }}' class='page-control-button-alive'>Next</a>
+    <a href='{{ url_for("index", value=next_page) }}' class='page-control-button-alive'>Next</a>
     {% endif %}
   </span>
 </div>
