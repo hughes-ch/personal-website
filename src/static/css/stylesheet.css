@@ -70,6 +70,9 @@ tbody tr:nth-child(odd) {
 .footer-title {
     font-size: 1.17em;
 }
+.icon {
+    height: 32px;
+}
 .link {
     color: black;
     text-decoration: none;

@@ -5,6 +5,7 @@
     :license: MIT License. See LICENSE.md for details
 """
 from .render import Renderer
+from .setting import BlogSetting
 
 import flask
 import pathlib
@@ -14,13 +15,20 @@ class Blog:
 
     def __init__(self,
                  config=None,
-                 base_template='_base.html', err404_template='_404.html',
+                 base_template='_index.html',
+                 err404_template='_404.html',
+                 post_template='_post.html',
                  root_path=None, template_path='templates'):
         """ Constructor
         
             Routes each URL to a class method
 
-            :param: None
+            :param config: <dict> Flask config
+            :param base_template: <str> Name of template for index page
+            :param err404_template: <str> Name of template for 404 page
+            :param post_temlate: <str> Name of template for indiv post page
+            :param root_path: <str> Path to flask root
+            :param template_path: <str> Path to flask templates
             :return: New instance
             """
         # Create and configure flask instance
@@ -34,11 +42,22 @@ class Blog:
 
         # Create renderer object
         self._RENDERED_POST_COUNT = 2
-        self._TITLE = 'Running with Suitcases'
+
+        self._params = {}
+        self._params[BlogSetting.TITLE] = (
+            'Running with Suitcases')
+        self._params[BlogSetting.LINKEDIN] = (
+            'https://www.linkedin.com/in/hughes-ch/')
+        self._params[BlogSetting.GITHUB] = (
+            'https://github.com/hughes-ch')
+        self._params[BlogSetting.EMAIL] = (
+            'mailto:chris@sprintingwithsuitcases.com')
 
         self.renderer = Renderer(
-            base_template, err404_template,
-            self._TITLE)
+            self._params,
+            base_template,
+            err404_template,
+            post_template)
         
         self.renderer.connect(self.app, config_from_app=True)
 
@@ -53,7 +72,7 @@ class Blog:
         def index(page=1):
             """ Creates the index page with latest blog posts
 
-                :param: None
+                :param page: <int> Page number
                 :return: Page content
                 """
             return self.renderer.render_latest(
@@ -75,5 +94,12 @@ class Blog:
         # Create individual post pages
         @self.app.route(f'/{self._POSTS_NAME}/<name>')
         def blog_post(name=None):
-            return 'Not Implemented'
+            """ Creates an individual post page
+
+                :param name: <str> Page number
+                :return: Page content
+                """
+            return self.renderer.render_post(
+                name,
+                self._POSTS_NAME)
 

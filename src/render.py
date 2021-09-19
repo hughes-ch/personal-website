@@ -6,10 +6,12 @@
 """
 import bs4
 import flask
+import jinja2
 import math
 import pathlib
 
 from datetime import datetime
+from .setting import BlogSetting
 
 class RendererNotConfiguredException(Exception):
     """ Raised when Renderer is not configured """
@@ -23,12 +25,16 @@ class Renderer:
     """ Creates content for HTML pages """
 
     def __init__(self,
+                 params,
                  base_template='_base.html',
                  err404_template='_404.html',
-                 title=''):
+                 post_template='_post.html'):
         """ Constructor
 
-            :param base_template: <str> Name of template
+            :param params: <dict> Specifying constants of website
+            :param base_template: <str> Name of base template
+            :param err404_template: <str> Name of 404 template
+            :param post_template: <str> Name of post template
             :return: New object
             """
         self._RENDERED_POST_COUNT = 2
@@ -36,10 +42,15 @@ class Renderer:
         self.base_template = base_template
         self.config = {}
         self.err404_template = err404_template
+        self.post_template = post_template
         self.root_path = None
         self.template_folder = None
-        self.title = title
 
+        self.context = {
+            'params': params,
+            'BlogSetting': BlogSetting,
+        }
+        
     def connect(self, app, config_from_app=False):
         """ Sets the active flask app
 
@@ -88,36 +99,28 @@ class Renderer:
         # Determine posts on requested page
         posts_per_page = self._find_posts_per_page(posts, count)
 
+        self.context['prev_page'] = None
+        self.context['next_page'] = None
+        
         if len(posts_per_page) > 0:
             if page < 1 or page >= len(posts_per_page):
                 return self.render_404()
-
-            if page == 1:
-                prev_page = None
             else:
-                prev_page = page-1
+                self.context['posts'] = posts_per_page[page-1]
 
-            if page == len(posts_per_page)-1:
-                next_page = None
-            else:
-                next_page = page+1
-
-            posts = posts_per_page[page-1]
+            if page > 1:
+                self.context['prev_page'] = page-1
+            if page < len(posts_per_page)-1:
+                self.context['next_page'] = page+1
             
         else:
+            self.context['posts'] = []
+
             if page != 1:
                 return self.render_404()
             
-            posts = []
-            prev_page = None
-            next_page = None
-
         # Render all posts to template
-        return flask.render_template(
-            self.base_template,
-            title=self.title,
-            posts=posts,
-            prev_page=prev_page, next_page=next_page)
+        return flask.render_template(self.base_template, **self.context)
 
     def render_404(self):
         """ Renders the 404 page
@@ -125,7 +128,28 @@ class Renderer:
             :param: None
             :return: 404 status and template
             """
+        if not self._is_configured():
+            raise RendererNotConfiguredException
+        
         return flask.render_template(self.err404_template), 404
+
+    def render_post(self, post_name, post_dir_name):
+        """ Renders single post
+
+            :param post_name: <str> Name of post
+            :param post_dir_name: <str> Name of post dir
+            :return: Page contents
+            """
+        if not self._is_configured():
+            raise RendererNotConfiguredException
+
+        self.context['post'] = str(
+            pathlib.Path('/') / post_dir_name / post_name)
+
+        try:
+            return flask.render_template(self.post_template, **self.context)
+        except jinja2.exceptions.TemplateNotFound:
+            return self.render_404()
 
     def _is_configured(self):
         """ Checks that an instance is configured enough to render a template
@@ -184,7 +208,7 @@ class Renderer:
                     
             post_list.append(
                 {
-                    'path': pathlib.Path(post_path.stem) / path.stem,
+                    'path': pathlib.Path('/') / post_path.stem / path.stem,
                     'date': post_date
                 }
             )

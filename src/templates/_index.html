@@ -1,0 +1,12 @@
+{% extends '_base.html' %}
+{% block content %}
+<h2 class='page-title'>Latest Blog Posts</h2>
+{% for post in posts %}
+{% include '_article.html' %}
+{% endfor %}
+{% endblock %}
+
+{% block pagination %}
+{% include '_pagination.html' %}
+{% endblock %}
+

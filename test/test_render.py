@@ -137,3 +137,46 @@ class TestRenderer(unittest.TestCase):
             
             self.assertEquals(datetimes, sorted(datetimes, reverse=True))
             self.assertEquals(len(datetimes), blog._RENDERED_POST_COUNT)
+
+    def test_render_post(self):
+        """ Test how individual posts are rendered
+
+            :param: None
+            :return: None
+            """
+        blog = Blog({'TESTING': True})
+        with blog.app.test_client() as client:
+            # Find the first link to a blog post in index page
+            index_page = client.get('/').data
+
+            index_soup = bs4.BeautifulSoup(index_page, 'html.parser')
+            for link in index_soup.find_all('a'):
+                if f'/{blog._POSTS_NAME}/' in link['href']:
+                    # Verify post is returned successfully 
+                    response = client.get(link['href'])
+                    self.assertEquals(response.status_code, 200)
+
+                    # Verify post looks correct by checking for 'date' id
+                    post_soup = bs4.BeautifulSoup(response.data, 'html.parser')
+                    self.assertNotEqual(len(post_soup.find_all(id='date')), 0)
+
+    def test_render_post_not_configured(self):
+        """ Test how a post is rendered if renderer not configured
+
+            :param: None
+            :return: None
+            """
+        renderer = Renderer(None)
+        with self.assertRaises(RendererNotConfiguredException):
+            renderer.render_post('hello', 'post')
+
+    def test_render_post_404(self):
+        """ Test how a post is rendered if it is not found
+
+            :param: None
+            :return: None
+            """
+        blog = Blog({'TESTING': True})
+        with blog.app.test_client() as client:
+            response = client.get(f'/{blog._POSTS_NAME}/not-a-post')
+            self.assertEquals(response.status_code, 404)
