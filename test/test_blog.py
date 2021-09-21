@@ -124,4 +124,14 @@ class TestBlog(unittest.TestCase):
 
             status_code = client.get('/page/5000').status_code
             self.assertEqual(status_code, 404)
+
+    def test_about_page(self):
+        """ Tests the about page is rendered
+
+            :param: None
+            :return: None
+            """
+        with self.blog.app.test_client() as client:
+            status_code = client.get('/about').status_code
+            self.assertEqual(status_code, 200)
             

@@ -18,6 +18,7 @@ class Blog:
                  base_template='_index.html',
                  err404_template='_404.html',
                  post_template='_post.html',
+                 about_template='_about.html',
                  root_path=None, template_path='templates'):
         """ Constructor
         
@@ -27,6 +28,7 @@ class Blog:
             :param base_template: <str> Name of template for index page
             :param err404_template: <str> Name of template for 404 page
             :param post_temlate: <str> Name of template for indiv post page
+            :param about_template: <str> Name of template for about page
             :param root_path: <str> Path to flask root
             :param template_path: <str> Path to flask templates
             :return: New instance
@@ -57,7 +59,8 @@ class Blog:
             self._params,
             base_template,
             err404_template,
-            post_template)
+            post_template,
+            about_template)
         
         self.renderer.connect(self.app, config_from_app=True)
 
@@ -83,7 +86,7 @@ class Blog:
         # Create about page
         @self.app.route('/about')
         def about():
-            return 'Not Implemented'
+            return self.renderer.render_about()
 
         # Create archive page
         @self.app.route(f'/{self._ARCHIVE_NAME}')

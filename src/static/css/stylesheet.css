@@ -30,6 +30,10 @@ hr {
     margin-block-start: 5em;
     margin-block-end: 5em;
 }
+iframe {
+    width: 8.5in;
+    height: 11in;
+}
 nav {
     display: flex;
     flex-flow: row wrap;
@@ -144,5 +148,11 @@ tbody tr:nth-child(odd) {
     }
     .nav-social-media-block div * {
         display: none;
+    }
+}
+@media (max-width: 8.5in) {
+    iframe {
+        width: 100%;
+        height: 129vw;
     }
 }

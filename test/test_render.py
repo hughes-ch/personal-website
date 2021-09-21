@@ -180,3 +180,13 @@ class TestRenderer(unittest.TestCase):
         with blog.app.test_client() as client:
             response = client.get(f'/{blog._POSTS_NAME}/not-a-post')
             self.assertEquals(response.status_code, 404)
+
+    def test_render_about_not_configured(self):
+        """ Test that the about page cannot be rendered if not configured
+
+            :param: None
+            :return: None
+            """
+        renderer = Renderer(None)
+        with self.assertRaises(RendererNotConfiguredException):
+            renderer.render_about()

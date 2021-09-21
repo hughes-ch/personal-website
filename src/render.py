@@ -28,16 +28,19 @@ class Renderer:
                  params,
                  base_template='_base.html',
                  err404_template='_404.html',
-                 post_template='_post.html'):
+                 post_template='_post.html',
+                 about_template='_about.html'):
         """ Constructor
 
             :param params: <dict> Specifying constants of website
             :param base_template: <str> Name of base template
             :param err404_template: <str> Name of 404 template
             :param post_template: <str> Name of post template
+            :param about_template: <str> Name of about page template
             :return: New object
             """
         self._RENDERED_POST_COUNT = 2
+        self.about_template = about_template
         self.app = None
         self.base_template = base_template
         self.config = {}
@@ -150,6 +153,17 @@ class Renderer:
             return flask.render_template(self.post_template, **self.context)
         except jinja2.exceptions.TemplateNotFound:
             return self.render_404()
+
+    def render_about(self):
+        """ Renders the "about" page
+
+            :param: None
+            :return: Page contents
+            """
+        if not self._is_configured():
+            raise RendererNotConfiguredException
+        
+        return flask.render_template(self.about_template, **self.context)
 
     def _is_configured(self):
         """ Checks that an instance is configured enough to render a template
