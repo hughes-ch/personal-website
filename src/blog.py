@@ -5,7 +5,6 @@
     :license: MIT License. See LICENSE.md for details
 """
 from .render import Renderer
-from .setting import BlogSetting
 
 import flask
 import pathlib
@@ -13,96 +12,55 @@ import pathlib
 class Blog:
     """ Creates and maintains the Flask app """
 
-    def __init__(self,
-                 config=None,
-                 base_template='_index.html',
-                 err404_template='_404.html',
-                 post_template='_post.html',
-                 about_template='_about.html',
-                 root_path=None, template_path='templates'):
+    def __init__(self, settings):
         """ Constructor
         
             Routes each URL to a class method
 
-            :param config: <dict> Flask config
-            :param base_template: <str> Name of template for index page
-            :param err404_template: <str> Name of template for 404 page
-            :param post_temlate: <str> Name of template for indiv post page
-            :param about_template: <str> Name of template for about page
-            :param root_path: <str> Path to flask root
-            :param template_path: <str> Path to flask templates
+            :param settings_file: <str> Name of INI file
             :return: New instance
             """
         # Create and configure flask instance
         self.app = flask.Flask(
             __name__,
-            root_path=root_path,
-            template_folder=template_path)
-        
-        if config is not None:
-            self.app.config.from_mapping(config)
+            root_path=settings['Routes'].get('FlaskRoot', None),
+            template_folder=settings['Routes']['FlaskTemplate'])
+
+        self.app.config.from_mapping(settings['Flask'])
 
         # Create renderer object
-        self._RENDERED_POST_COUNT = 2
-
-        self._params = {}
-        self._params[BlogSetting.TITLE] = (
-            'Running with Suitcases')
-        self._params[BlogSetting.LINKEDIN] = (
-            'https://www.linkedin.com/in/hughes-ch/')
-        self._params[BlogSetting.GITHUB] = (
-            'https://github.com/hughes-ch')
-        self._params[BlogSetting.EMAIL] = (
-            'mailto:chris@sprintingwithsuitcases.com')
-
-        self.renderer = Renderer(
-            self._params,
-            base_template,
-            err404_template,
-            post_template,
-            about_template)
-        
-        self.renderer.connect(self.app, config_from_app=True)
-
-        # Create URL constants
-        self._ARCHIVE_NAME = 'archive'
-        self._PAGE_NAME = 'page'
-        self._POSTS_NAME = 'post'
+        self.renderer = Renderer(settings)
+        self.renderer.connect(self.app)
 
         # Create index page
         @self.app.route('/')
-        @self.app.route(f'/{self._PAGE_NAME}/<int:page>')
+        @self.app.route(f'/{settings["Routes"]["PageUrl"]}/<int:page>')
         def index(page=1):
             """ Creates the index page with latest blog posts
 
                 :param page: <int> Page number
                 :return: Page content
                 """
-            return self.renderer.render_latest(
-                self._RENDERED_POST_COUNT,
-                self._POSTS_NAME,
-                page=page)
+            return self.renderer.render_latest(page=page)
         
         # Create about page
-        @self.app.route('/about')
+        @self.app.route(f'/{settings["Routes"]["AboutUrl"]}')
         def about():
             return self.renderer.render_about()
 
         # Create archive page
-        @self.app.route(f'/{self._ARCHIVE_NAME}')
-        @self.app.route(f'/{self._ARCHIVE_NAME}/<int:page>')
+        @self.app.route(f'/{settings["Routes"]["ArchiveUrl"]}')
+        @self.app.route(f'/{settings["Routes"]["ArchiveUrl"]}/<int:page>')
         def archive(page=1):
             return 'Not Implemented'
 
         # Create individual post pages
-        @self.app.route(f'/{self._POSTS_NAME}/<name>')
+        @self.app.route(f'/{settings["Routes"]["PostsUrl"]}/<name>')
         def blog_post(name=None):
             """ Creates an individual post page
 
                 :param name: <str> Page number
                 :return: Page content
                 """
-            return self.renderer.render_post(
-                name,
-                self._POSTS_NAME)
+            return self.renderer.render_post(name)
 

@@ -4,7 +4,7 @@
     <meta charset='utf-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
 
-    <title>{{ params[BlogSetting.TITLE] }}</title>
+    <title>{{ settings['Render']['BlogTitle'] }}</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,7 +15,7 @@
     <div class='page-content'>
       <nav>
         <div class='title-block'>
-          <h1><a href='{{ url_for("index") }}' class='link'>{{ params[BlogSetting.TITLE] }}</a></h1>
+          <h1><a href='{{ url_for("index") }}' class='link'>{{ settings['Render']['BlogTitle'] }}</a></h1>
           <p class='title-caption'>A software blog</p>
         </div>
         <div class='link-block'>
@@ -35,7 +35,7 @@
       <footer>
         <p class='footer-title'>
           <strong>
-            <a href='{{ url_for("index") }}' class='link'>{{ params[BlogSetting.TITLE] }}</a>
+            <a href='{{ url_for("index") }}' class='link'>{{ settings['Render']['BlogTitle'] }}</a>
           </strong>
         </p>
         <p>Copyright © 2021 All Rights Reserved</p>

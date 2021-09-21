@@ -6,6 +6,7 @@
 """
 import bs4
 import flask
+import test.util
 import unittest
 
 from datetime import datetime
@@ -23,47 +24,18 @@ class TestRenderer(unittest.TestCase):
             :param: None
             :return: None
             """
-        pass
+        self.config = test.util.load_test_config()
+        self.blog = Blog(self.config)
     
-    def test_connect(self):
-        """ Test the connect method
-
-            :param: None
-            :return: None
-            """
-        # Test that a manually configured renderer is config'd right
-        app = flask.Flask(__name__)
-        app.config['MY_CONFIG'] = 'config'
-
-        template_name = '_base.html'
-        man_config_render = Renderer(template_name)
-        man_config_render.connect(app, config_from_app=False)
-
-        self.assertEquals(man_config_render.app, app)
-        self.assertEquals(man_config_render.config, {})
-        self.assertEquals(man_config_render.root_path, None)
-        self.assertEquals(man_config_render.template_folder, None)
-        self.assertEquals(man_config_render.base_template, template_name)
-
-        # Test that an automatically configured renderer is config'd right
-        auto_config_render = Renderer('_base.html')
-
-        auto_config_render.connect(app, config_from_app=True)
-
-        self.assertEquals(auto_config_render.app, app)
-        self.assertEquals(auto_config_render.config, app.config)
-        self.assertEquals(auto_config_render.root_path, app.root_path)
-        self.assertEquals(auto_config_render.template_folder, app.template_folder)
-
     def test_renderer_config_check(self):
         """ Test a renderer must be configured to render something
 
             :param: None
             :return: None
             """
-        bad_renderer = Renderer('_base.html')
+        bad_renderer = Renderer(self.config)
         with self.assertRaises(RendererNotConfiguredException):
-            bad_renderer.render_latest(2, 'url')
+            bad_renderer.render_latest()
 
     def test_codeify(self):
         """ Test a block of code rendered with _codeify
@@ -88,7 +60,7 @@ class TestRenderer(unittest.TestCase):
 
         # Verify it was rendered correctly
         template = Template(template_name, template_html)
-        response = template.get()
+        response = template.get(self.blog)
         self.assertIn(b'code-block', response)
         self.assertIn(b'<pre>', response)
         self.assertIn(b'</pre>', response)
@@ -116,7 +88,7 @@ class TestRenderer(unittest.TestCase):
         
         # Verify it was rendered correctly
         template = Template(template_name, template_html)
-        response = template.get()
+        response = template.get(self.blog)
         self.assertNotIn(b' print', response)
         self.assertNotIn(b'\'', response)
 
@@ -126,8 +98,7 @@ class TestRenderer(unittest.TestCase):
             :param: None
             :return: None
             """
-        blog = Blog({'TESTING': True})
-        with blog.app.test_client() as client:
+        with self.blog.app.test_client() as client:
             response = client.get('/').data
             
             soup = bs4.BeautifulSoup(response, 'html.parser')
@@ -136,7 +107,9 @@ class TestRenderer(unittest.TestCase):
                          for date in dates]
             
             self.assertEquals(datetimes, sorted(datetimes, reverse=True))
-            self.assertEquals(len(datetimes), blog._RENDERED_POST_COUNT)
+            self.assertEquals(
+                len(datetimes),
+                int(self.config['Render']['RenderedPostCount']))
 
     def test_render_post(self):
         """ Test how individual posts are rendered
@@ -144,14 +117,13 @@ class TestRenderer(unittest.TestCase):
             :param: None
             :return: None
             """
-        blog = Blog({'TESTING': True})
-        with blog.app.test_client() as client:
+        with self.blog.app.test_client() as client:
             # Find the first link to a blog post in index page
             index_page = client.get('/').data
 
             index_soup = bs4.BeautifulSoup(index_page, 'html.parser')
             for link in index_soup.find_all('a'):
-                if f'/{blog._POSTS_NAME}/' in link['href']:
+                if f'/{self.config["Routes"]["PostsUrl"]}/' in link['href']:
                     # Verify post is returned successfully 
                     response = client.get(link['href'])
                     self.assertEquals(response.status_code, 200)
@@ -168,7 +140,7 @@ class TestRenderer(unittest.TestCase):
             """
         renderer = Renderer(None)
         with self.assertRaises(RendererNotConfiguredException):
-            renderer.render_post('hello', 'post')
+            renderer.render_post('hello')
 
     def test_render_post_404(self):
         """ Test how a post is rendered if it is not found
@@ -176,9 +148,10 @@ class TestRenderer(unittest.TestCase):
             :param: None
             :return: None
             """
-        blog = Blog({'TESTING': True})
-        with blog.app.test_client() as client:
-            response = client.get(f'/{blog._POSTS_NAME}/not-a-post')
+        with self.blog.app.test_client() as client:
+            response = client.get(
+                f'/{self.config["Routes"]["PostsUrl"]}/not-a-post')
+            
             self.assertEquals(response.status_code, 404)
 
     def test_render_about_not_configured(self):

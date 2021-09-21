@@ -6,6 +6,7 @@
 """
 import pathlib
 import requests
+import test.util
 import unittest
 
 from bs4 import BeautifulSoup
@@ -20,7 +21,8 @@ class TestBlog(unittest.TestCase):
             :param: None
             :return: None
             """
-        self.blog = Blog({'TESTING': True})
+        self.config = test.util.load_test_config()
+        self.blog = Blog(self.config)
 
     def get_index_page(self):
         """ Returns the contents of the index page
@@ -40,7 +42,7 @@ class TestBlog(unittest.TestCase):
             :return: None
             """
         response = self.get_index_page()
-        posts_dir_name = self.blog._POSTS_NAME
+        posts_dir_name = self.config['Routes']['PostsUrl']
         posts_full_path = (
             pathlib.Path(self.blog.app.root_path) /
             self.blog.app.template_folder /
@@ -91,9 +93,11 @@ class TestBlog(unittest.TestCase):
             :return: None
             """
         # Request first page and verify it matches index page
+        page_url = self.config['Routes']['PageUrl']
+
         with self.blog.app.test_client() as client:
             index_data = client.get('/').data
-            page1_response = client.get('/page/1')
+            page1_response = client.get(f'/{page_url}/1')
             self.assertEqual(index_data, page1_response.data)
             self.assertEqual(page1_response.status_code, 200)
 
@@ -102,7 +106,7 @@ class TestBlog(unittest.TestCase):
             last_page_content = page1_response.data
             
             for page_num in range(max_page_count):
-                next_page_response = client.get(f'/page/{page_num}')
+                next_page_response = client.get(f'/{page_url}/{page_num}')
                 self.assertIn(next_page_response.status_code, [200, 404])
                 self.assertNotEqual(last_page_content, next_page_response.data)
 
@@ -118,11 +122,13 @@ class TestBlog(unittest.TestCase):
             :return: None
             """
         # Request first page and verify it matches index page
+        page_url = self.config['Routes']['PageUrl']
+
         with self.blog.app.test_client() as client:
-            status_code = client.get('/page/0').status_code
+            status_code = client.get(f'/{page_url}/0').status_code
             self.assertEqual(status_code, 404)
 
-            status_code = client.get('/page/5000').status_code
+            status_code = client.get(f'/{page_url}/5000').status_code
             self.assertEqual(status_code, 404)
 
     def test_about_page(self):
@@ -131,7 +137,9 @@ class TestBlog(unittest.TestCase):
             :param: None
             :return: None
             """
+        about_url = self.config['Routes']['AboutUrl']
+        
         with self.blog.app.test_client() as client:
-            status_code = client.get('/about').status_code
+            status_code = client.get(f'/{about_url}').status_code
             self.assertEqual(status_code, 200)
             

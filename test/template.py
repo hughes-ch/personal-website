@@ -5,6 +5,7 @@
     :license: MIT License. See LICENSE.md for details
 """
 import pathlib
+import test.util
 
 from src.blog import Blog
 
@@ -22,18 +23,20 @@ class Template:
         self.template_html = template_html
         self.root_path = pathlib.Path(__file__).parent.absolute()
 
-    def get(self):
+    def get(self, blog):
         """ Gets the template
 
-            :param: None
+            :param blog: Blog obj under test
             :return: <str> Rendered template HTML
             """
         # Create test client to get template
-        with Blog({'TESTING': True},
-                  base_template=self.template_name,
-                  root_path=self.root_path,
-                  template_path=self.root_path).app.test_client() as client:
+        config = test.util.load_test_config()
+        config['Routes']['FlaskRoot'] = str(self.root_path)
+        config['Routes']['FlaskTemplate'] = str(self.root_path)
+        config['Templates']['Index'] = self.template_name
+        blog = Blog(config)
 
+        with blog.app.test_client() as client:
             # Create local HTML file
             template_path = pathlib.Path(self.root_path) / self.template_name
             with template_path.open(mode='w') as f_handle:

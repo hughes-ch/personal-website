@@ -1,20 +1,21 @@
 """
-    Initializes the Blog app
+    Defines testing utilities
 
     :copyright: Copyright (c) 2021 Chris Hughes
     :license: MIT License. See LICENSE.md for details
 """
-
 import configparser
 import pathlib
 
-from .blog import Blog
+def load_test_config():
+    """ Loads a generic test configuration
 
-def create_app(test_config=None):
-    """ Create and configure blog app """
+        :param: None
+        :return: Config from INI modified to be in a test config
+        """
     ini_file_path = pathlib.Path(__file__).parent / 'blog.ini'
     config = configparser.ConfigParser()
     config.read(str(ini_file_path))
-    
-    blog = Blog(config)
-    return blog.app
+    config['Flask']['Testing'] = 'True'
+
+    return config
