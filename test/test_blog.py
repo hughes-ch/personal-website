@@ -122,4 +122,16 @@ class TestBlog(unittest.TestCase):
         with self.blog.app.test_client() as client:
             status_code = client.get(f'/{about_url}').status_code
             self.assertEqual(status_code, 200)
+
+    def test_404(self):
+        """ Tests the 404 page
+
+            :param: None
+            :return: None
+            """
+        with self.blog.app.test_client() as client:
+            response = client.get('/not-a-page')
+            self.assertEquals(response.status_code, 404)
+
+        test.util.validate_links(self, response.data)
             

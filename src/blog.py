@@ -64,3 +64,13 @@ class Blog:
                 """
             return self.renderer.render_post(name)
 
+        # Handle 404
+        @self.app.errorhandler(404)
+        def page_not_found(err):
+            """ Renders the 404 page
+
+                :param err: The encountered error
+                :return: Page content
+                """
+            return self.renderer.render_404()
+

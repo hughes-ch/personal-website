@@ -5,16 +5,10 @@
  #   :license: MIT License. See LICENSE.md for details
  #}
 
-<!doctype html>
-<html lang='en'>
-  <head>
-    <meta charset='utf-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
-
-    <title>Oops! Not found</title>
-    
-  </head>
-  <body>
-    <p>404 - Page not found</p>
-  </body>
-</html>
+{% extends '_base.html' %}
+{% block content %}
+<h2 class='page-title'>Hmm, seems like this page is missing...</h2>
+<p>
+  <a href='{{ url_for("index") }}' class='underlined link'>Click here</a> to get back to the home page.
+</p>
+{% endblock %}

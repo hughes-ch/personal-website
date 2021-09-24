@@ -106,7 +106,9 @@ class Renderer:
         if not self._is_configured():
             raise RendererNotConfiguredException
         
-        return flask.render_template(self._settings['Templates']['Err404']), 404
+        return flask.render_template(
+            self._settings['Templates']['Err404'],
+            **self._context), 404
 
     def render_post(self, post_name):
         """ Renders single post
