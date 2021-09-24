@@ -9,7 +9,6 @@ import requests
 import test.util
 import unittest
 
-from bs4 import BeautifulSoup
 from src.blog import Blog
 
 class TestBlog(unittest.TestCase):
@@ -64,27 +63,8 @@ class TestBlog(unittest.TestCase):
             :param: None
             :return: None
             """
-        bad_status_codes = [400, 404, 408, 410, 421, 501, 502, 503, 504]
-
-        # Find all links on page
-        response = self.get_index_page()
-        soup = BeautifulSoup(response.data, 'html.parser')
-        for a in soup.find_all('a'):
-            href = a.get('href')
-            if 'http' in href:
-                # Do not send external requests during development...
-                #response = requests.head(href)
-                pass
-            elif 'mailto' in href:
-                pass
-            else:
-                with self.blog.app.test_client() as client:
-                    response = client.get(href)
-
-            self.assertNotIn(
-                response.status_code,
-                bad_status_codes,
-                msg=f'{response.status_code} returned by "{href}"')
+        response = self.get_index_page().data
+        test.util.validate_links(self, response)
 
     def test_index_pagination(self):
         """ Test the pagination feature of the main index page

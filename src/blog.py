@@ -52,7 +52,7 @@ class Blog:
         @self.app.route(f'/{settings["Routes"]["ArchiveUrl"]}')
         @self.app.route(f'/{settings["Routes"]["ArchiveUrl"]}/<int:page>')
         def archive(page=1):
-            return 'Not Implemented'
+            return self.renderer.render_archive()
 
         # Create individual post pages
         @self.app.route(f'/{settings["Routes"]["PostsUrl"]}/<name>')

@@ -163,3 +163,48 @@ class TestRenderer(unittest.TestCase):
         renderer = Renderer(None)
         with self.assertRaises(RendererNotConfiguredException):
             renderer.render_about()
+
+    def test_render_archive_not_configured(self):
+        """ Test that the archive page cannot be rendered if not configured
+
+            :param: None
+            :return: None
+            """
+        renderer = Renderer(None)
+        with self.assertRaises(RendererNotConfiguredException):
+            renderer.render_archive()
+
+    def test_archive_time_order(self):
+        """ Test that the archive is rendered in time order
+
+            :param: None
+            :return: None
+            """
+        # Verify archive returns good response
+        with self.blog.app.test_client() as client:
+            response = client.get(f'/{self.config["Routes"]["ArchiveUrl"]}')
+            self.assertEquals(response.status_code, 200)
+
+            # Get all archive dates
+            soup = bs4.BeautifulSoup(response.data, 'html.parser')
+            archive_dates = []
+            for descendant in soup.find(class_='archive').descendants:
+                try:
+                    archive_dates.append(
+                        datetime.strptime(str(descendant), '%b %d, %Y'))
+                except ValueError:
+                    pass
+
+            # Verify the list of archive dates is not empty and that its sorted
+            self.assertNotEqual(len(archive_dates), 0)
+            self.assertEqual(archive_dates, sorted(archive_dates, reverse=True))
+
+    def test_archive_links(self):
+        """ Test all the links on the archive page
+
+            :param: None
+            :return: None
+            """
+        with self.blog.app.test_client() as client:
+            response = client.get(f'/{self.config["Routes"]["ArchiveUrl"]}')
+            test.util.validate_links(self, response.data)

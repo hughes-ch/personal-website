@@ -1,3 +1,9 @@
+/*
+ *   Global stylesheet
+ *
+ *   :copyright: Copyright (c) 2021 Chris Hughes
+ *   :license: MIT License. See LICENSE.md for details
+ */
 :root {
     --code-background: lightgrey;
     --link-block-margin: 1em;
@@ -65,6 +71,15 @@ tbody tr:nth-child(even) {
 tbody tr:nth-child(odd) {
     background-color: white;
 }
+.archive div {
+    padding: 4px 8px;
+}
+.archive div:nth-child(even) {
+    background-color: var(--code-background);
+}
+.archive div:nth-child(odd) {
+    background-color: white;
+}
 .code-block {
     display: block;
     font-size: var(--variable-font-size);
@@ -73,6 +88,9 @@ tbody tr:nth-child(odd) {
 }
 .footer-title {
     font-size: 1.17em;
+}
+.highlight-on-hover:hover {
+    color: var(--title-color);
 }
 .icon {
     height: 32px;

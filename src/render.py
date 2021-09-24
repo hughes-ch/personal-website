@@ -4,13 +4,12 @@
     :copyright: Copyright (c) 2021 Chris Hughes
     :license: MIT License. See LICENSE.md for details
 """
-import bs4
 import flask
 import jinja2
 import math
 import pathlib
 
-from datetime import datetime
+from .postlist import PostList
 
 class RendererNotConfiguredException(Exception):
     """ Raised when Renderer is not configured """
@@ -30,6 +29,7 @@ class Renderer:
             :return: New object
             """
         self._app = None
+        self._postlist = None
         self._settings = settings
 
         self._context = {
@@ -48,8 +48,10 @@ class Renderer:
                                            be inherited from app
             :return: None
             """
-        # Set configuration parameters
         self._app = app
+        self._postlist = PostList(
+            self._settings,
+            root_path=app.root_path)
 
         # Connect context processors
         @self._app.context_processor
@@ -66,17 +68,8 @@ class Renderer:
         if not self._is_configured():
             raise RendererNotConfiguredException
             
-        # Get list of latest posts
-        posts_path = (
-            pathlib.Path(self._app.root_path) /
-            self._settings['Routes']['FlaskTemplate'] /
-            self._settings['Routes']['PostsUrl'])
-
-        posts = self._find_latest_posts(posts_path)
-
         # Determine posts on requested page
         posts_per_page = self._find_posts_per_page(
-            posts,
             int(self._settings['Render']['RenderedPostCount']))
 
         self._context['prev_page'] = None
@@ -142,9 +135,24 @@ class Renderer:
             """
         if not self._is_configured():
             raise RendererNotConfiguredException
-        
+
         return flask.render_template(
             self._settings['Templates']['About'],
+            **self._context)
+
+    def render_archive(self):
+        """ Renders the "archive" page
+
+            :param: None
+            :return: Page contents
+            """
+        if not self._is_configured():
+            raise RendererNotConfiguredException
+
+        self._context['posts'] = list(self._postlist)
+
+        return flask.render_template(
+            self._settings['Templates']['Archive'],
             **self._context)
 
     def _is_configured(self):
@@ -178,47 +186,7 @@ class Renderer:
         return flask.Markup(
             f'{pre_open}<code {class_statement}>%s</code>{pre_close}') % formatted_code
 
-    def _find_latest_posts(self, post_path):
-        """ Returns the latest posts in sorted order
-
-            :param path: <PosixPath> Path to posts on filesystem
-            :return: <list> Of sorted post titles
-            """
-        # Find date of each post
-        post_list = []
-        for path in post_path.glob('*.html'):
-            with path.open() as f_handle:
-                html = f_handle.read()
-                soup = bs4.BeautifulSoup(html, 'html.parser')
-
-                try:
-                    date_str = soup.find(id="date").string
-                    post_date = datetime.strptime(
-                        date_str,
-                        '%b %d, %Y')
-                    
-                except (AttributeError, ValueError):
-                    post_date = datetime.now()
-                    
-            post_list.append(
-                {
-                    'path': pathlib.Path('/') / post_path.stem / path.stem,
-                    'date': post_date
-                }
-            )
-
-        # Return posts in sorted order
-        posts = [
-            str(post['path']) for post in sorted(
-                post_list,
-                key=lambda entry: entry['date'],
-                reverse=True
-            )
-        ]
-
-        return posts
-
-    def _find_posts_per_page(self, posts, count):
+    def _find_posts_per_page(self, count):
         """ Finds which posts to render for each page
 
             :param posts: <list> Of posts
@@ -227,11 +195,11 @@ class Renderer:
             """
         posts_per_page = []
 
-        for idx, post in enumerate(posts):
+        for idx, post in enumerate(self._postlist):
             mod = idx % count
             if mod == 0:
                 posts_per_page.append([])
 
-            posts_per_page[-1].append(post)
+            posts_per_page[-1].append(str(post.path))
 
         return posts_per_page
