@@ -88,7 +88,7 @@ int main()
     t3.join();
     t4.join();
 }
-") }}
+", lang='cpp') }}
 <p>
   What this gets you is a program that prints five lines and then loops forever:
 </p>
@@ -120,7 +120,7 @@ Thread 1: Thread 3 wuz here!
   First, find the running process ID with the ps command:
 </p>
 {{ codeify("
-ps -ef | grep <prog_name></prog_name>
+ps -ef | grep <prog_name>
 ") }}
 <p>
   My program was named 'test', so my output was:
@@ -162,7 +162,7 @@ Using host libthread_db library \"/lib/x86_64-linux-gnu/libthread_db.so.1\".
 __pthread_clockjoin_ex (threadid=139760597890816, thread_return=0x0, clockid=<optimized out>, abstime=<optimized out>, block=<optimized out>) at pthread_join_common.c:145
 145	pthread_join_common.c: No such file or directory.
 (gdb)
-") }}
+", lang='bash') }}
 <p>
   Make sure to use 'sudo' or you will not be able to attach to a running program.
 </p>

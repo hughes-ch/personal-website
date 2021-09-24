@@ -26,7 +26,7 @@
 with open('city_names.txt') as file_handle:
     for line in file_handle:
         print(line, end='')
-") }}
+", lang='py') }}
 <p>This outputs the content of the file 'city_names.txt', shown below:</p>
 {{ codeify("
 Boston
@@ -51,7 +51,7 @@ with open('city_names.txt') as file_handle:
     for line in file_handle:
         print(line, end='')
     raise Exception
-") }}
+", lang='py') }}
 <p>
   This is the major benefit of using {{ codeify("with") }} - the application developer can always be sure that code will be executed (in this case, the {{ codeify("close") }} function) when a context is exited, even if the exit is not performed cleanly.
 </p>
@@ -66,7 +66,7 @@ except:
     if not file_handle.closed:
         file_handle.close()
     raise
-") }}
+", lang='py') }}
 <p>
   Using the {{ codeify("with") }} statements with your own objects is fairly straightforward and requires defining two dunder methods within a class:
 </p>
@@ -83,7 +83,7 @@ except:
 {{ codeify("
 def __exit__(self, exc_type, exc_value, traceback):
     return True
-") }}
+", lang='py') }}
 <ul>
   <li>The {{ codeify("exc_type") }} argument contains the exception type. If a {{ codeify("ValueError") }} was raised during processing of the context, {{ codeify("exc_type") }} would equal {{ codeify("ValueError") }}.</li>
   <li>The {{ codeify("exc_value") }} argument contains the exception instance. This may contain important information about the exception for handling, such as the error message.</li>
@@ -149,7 +149,7 @@ if __name__ == '__main__':
 
     # After context exits, OpenWrapper.__exit__() is called
     print('end program')
-") }}
+", lang='py') }}
 <p>Execution of this script results in:</p>
 {{ codeify("
 begin program
@@ -191,7 +191,7 @@ if __name__ == '__main__':
         for line in fh:
             print(line, end='')
         raise EOFError('EOF encountered')
-") }}
+", lang='py') }}
 <p>This would result in:</p>
 {{ codeify("
 __enter__(self)

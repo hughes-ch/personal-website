@@ -26,13 +26,13 @@ names = [
 for ii in range(len(names)):
     print(f'The name at position {ii} is {names[ii]}')
 
-") }}
+", lang='py') }}
   In C++, this is just the way things are done. However, Python's enumerate method makes this loop a little more simple and more Pythonic:
 {{ codeify("
 for pos,name in enumerate(names):
     print(f'The name at position {pos} is {name}')
 
-") }}
+", lang='py') }}
   You might even be able to do that last for loop as a one-liner, but I'm not clever enough to figure that one out.
 </p>
 <p>
@@ -41,7 +41,7 @@ for pos,name in enumerate(names):
 >>> print(list(enumerate(names)))
 [(0, 'Abigail'), (1, 'Betty'), (2, 'Carlos'), (3, 'Dan')]
 
-") }}
+", lang='pycon') }}
   Instead of having to maintain your own counter, the enumerate method maintains it for you. So you'll no longer have to use the ugly 'i', 'ii', 'idx', 'count' variable which is so prevalent in C++. Instead, you can use descriptive variable names, and you'll never again fall victim to the easy mistake of forgetting to increment your counter and ending up with an infinite loop.
 </p>
 <p>

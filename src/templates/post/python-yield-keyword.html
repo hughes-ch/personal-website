@@ -34,12 +34,12 @@ if __name__ == '__main__':
 
 # Output    
 Count is ['0', '1', '2']
-") }}
+", lang='py') }}
 <p>
   Let's visualize line by line through what is happening here. Our visualization might not be the exact steps Python takes to execute this program, but it will help to illustrate a point. First, the program executes the right side of this line:
 </p>
 {{ codeify("
-count = [ii for ii in counter(3)]
+count = [str(ii) for ii in counter(3)]
 ") }}
 <p>
   It executes the first loop of the for loop in the {{ codeify("counter") }} function by setting {{ codeify("ii") }} to 0 and continuing onto {{ codeify("yield") }} keyword. Once it reaches it, it sends the expression after {{ codeify("yield") }} to the caller (the main function). The value of {{ codeify("ii") }} is then converted into a string and appended to the {{ codeify("count") }} list in the main function. Execution in {{ codeify("counter") }} is paused, but the internal state remains.
@@ -68,7 +68,7 @@ count = [ii for ii in counter(3)]
 >>> count = [ii for ii in Counter(3)]
 >>> print(f'Count is {count}')
 Count is [0, 1, 2]
-") }}
+", lang='pycon') }}
 <p>
   As you can see, {{ codeify("Counter") }} can be used as a generator, just like the previous {{ codeify("counter") }} generator function.
 </p>
@@ -99,7 +99,7 @@ Count is [0, 1, 2]
 Line 1: An old silent pond
 Line 2: A frog jumps into the pond--
 Line 3: Splash! Silence again.
-") }}
+", lang='pycon') }}
 <p>
   For those wondering, this poem is called <em>The Old Pond</em>, by Matsuo Bashō. I'm certainly not clever enough to come up with that.
 </p>
@@ -146,7 +146,7 @@ contents = next(iter(reader))
 Line 1: An old silent pond
 Line 2: A frog jumps into the pond--
 Line 3: Splash! Silence again.
-") }}
+", lang='pycon') }}
 <p>
   This exception will play an interesting role in the upcoming discussion on coroutines.
 </p>

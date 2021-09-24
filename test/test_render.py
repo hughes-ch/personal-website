@@ -53,19 +53,22 @@ class TestRenderer(unittest.TestCase):
                 <body>
                   {{ codeify("
                      print('hello world!')
-                  ") }}
+                  ", lang='py') }}
                 </body>
               </html>
         """ 
 
-        # Verify it was rendered correctly
         template = Template(template_name, template_html)
         response = template.get(self.blog)
-        self.assertIn(b'code-block', response)
+
+        # Verify tags and whitespace are correct
+        self.assertIn(b'<code>', response)
         self.assertIn(b'<pre>', response)
-        self.assertIn(b'</pre>', response)
         self.assertNotIn(b' print', response)
         self.assertNotIn(b'\'', response)
+
+        # Verify syntax highlighting
+        self.assertIn(b'>print<', response)
 
     def test_inline_codeify(self):
         """ Test an inline span of code rendered with _codeify
@@ -81,7 +84,7 @@ class TestRenderer(unittest.TestCase):
                 <head>
                 </head>
                 <body>
-                  {{ codeify("print('hello world!')") }}
+                  {{ codeify(" print('hello world!')") }}
                 </body>
               </html>
         """
@@ -91,6 +94,7 @@ class TestRenderer(unittest.TestCase):
         response = template.get(self.blog)
         self.assertNotIn(b' print', response)
         self.assertNotIn(b'\'', response)
+        self.assertIn(b'<code>', response)
 
     def test_index_ordering(self):
         """ Test the ordering of the index page

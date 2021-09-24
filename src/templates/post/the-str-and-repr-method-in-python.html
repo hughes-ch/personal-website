@@ -38,12 +38,12 @@ class IncrementingVector:
 if __name__ == '__main__':
     vector = IncrementingVector(10)
     print(vector)
-") }}
+", lang='py') }}
 <p>This program results in:</p>
 {{ codeify("
 chris@desktop: ~# python print_incrementing_vector.py
 [0 1 2 3 4 5 6 7 8 9]
-") }}
+", lang='bash') }}
 <p>
   However, if I did the same thing, substituting {{ codeify("__repr__") }} for {{ codeify("__str__") }}, I get the same thing. What gives? Is {{ codeify("__repr__") }} just an alias for {{ codeify("__str__") }}? No!
 </p>
@@ -54,11 +54,11 @@ chris@desktop: ~# python print_incrementing_vector.py
   What this is really going to come down to is that the {{ codeify("__str__") }} method is going to meaningfully show the internals of the class as a string (similar to the print_incrementing_vector.py example) and the {{ codeify("__repr__") }} method is going to be useful for debugging. Most of the time, {{ codeify("__repr__") }} is going to be the call to {{ codeify("__init__") }} which would create the class if the string was passed to {{ codeify("eval()") }}. The {{ codeify("__str__") }} method will be what you typically would associate with printing a complex class. See the following for a more concrete example:
 </p>
 {{ codeify("
->> print(str(IncrementingVector(10)))
+>>> print(str(IncrementingVector(10)))
 [0 1 2 3 4 5 6 7 8 9]
->> print(repr(IncrementingVector(10)))
+>>> print(repr(IncrementingVector(10)))
 IncrementingVector(10)
-") }}
+", lang='pycon') }}
 <p>
   Just think: the end user is never going to care that the class representing their data is an {{ codeify("IncrementingVector") }} with length 10. However, they may care that their vector is a list from 0 through 9. A developer may need both pieces of information: how to create the object and what it actually represents under the hood. 
 </p>
@@ -73,7 +73,7 @@ IncrementingVector(10)
 >>> print(new_object)
 ... 
 <__main__.NewObject object at 0x7f2ecd825310>
-") }}
+", lang='pycon') }}
 <p>... well that's not very helpful.</p>
 <p>
   Interestingly, if a {{ codeify("__repr__") }} method is defined for {{ codeify("NewObject") }}, the Python interpreter will represent the class as the string returned by {{ codeify("__repr__") }}. This makes sense since the Python interpreter isn't really printing the end-user representation of the object, but the object itself. Here's an example:
@@ -86,7 +86,7 @@ IncrementingVector(10)
 >>> new_object = NewObject()
 >>> new_object
 Hello world
-") }}
+", lang='pycon') }}
 <p>
   So in summary, the {{ codeify("__str__") }} method should define the string representation of the object as if it is being shown to the end user. The {{ codeify("__repr__") }} method should define the interface to construct the object as if the string was being passed to {{ codeify("eval()") }}.
 </p>

@@ -23,7 +23,7 @@ int.__add__(5, 4)
   To overload an operator in Python, a user-defined class needs to override the dunder method which is associated with the operator. The table is shown below. Don't worry if you don't know all of them, or understand what 'Reverse Operator' or 'In-Place Operator' is for now. Only the ones which are applicable to your class needs to be overridden (that's the benefit of Python). Reverse and In-Place operators will be covered below, as well as unary methods, which get their own table further below.
 </p>
 <h4>Mathematical Operators:</h4>
-<table>
+<table class='not-code'>
   <thead>
     <tr>
       <th>Operator</th>
@@ -93,7 +93,7 @@ int.__add__(5, 4)
   </tbody>
 </table>
 <h4>Bitwise Logical Operators:</h4>
-<table>
+<table class='not-code'>
   <thead>
     <tr>
       <th>Operator</th>
@@ -142,7 +142,7 @@ int.__add__(5, 4)
   </tbody>
 </table>
 <h4>Boolean Operators:</h4>
-<table>
+<table class='not-code'>
   <thead>
     <tr>
       <th>Operator</th>
@@ -222,7 +222,7 @@ int.__add__(5, 4)
 >>> angle3 = angle1 + angle2
 >>> angle3
 Angle(90)
-") }}
+", lang='pycon') }}
 <p>
   The Angle class' addition method is really simple, but it adds a step to standard addition. Instead of just adding two numbers, it also checks that the answer is between 0 and 360 degrees. If not, it wraps the answer by adding or subtracting 360 degrees.
 </p>
@@ -249,7 +249,7 @@ Angle(90)
 >>> angle = Angle(10)
 >>> angle + 10
 Angle(20)
-") }}
+", lang='pycon') }}
 <p>
   It certainly does when the {{ codeify("Angle") }} is on the left side of the operand. However, placing the {{ codeify("Angle") }} on the right side of the operand creates a {{ codeify("TypeError") }}:
 </p>
@@ -258,7 +258,7 @@ Angle(20)
 Traceback (most recent call last):
   File '', line 1, in 
 TypeError: unsupported operand type(s) for +: 'int' and 'Angle'
-") }}
+", lang='pycon') }}
 <p>
   If your application needs objects which require commutative operators (the {{ codeify("Angle") }} type sure does), you will need to implement the 'Reverse Operator', shown above in the operator table. For addition, this would be the rad {{ codeify("__radd__") }} method. The implementation can be super easy in a lot of cases:
 </p>
@@ -267,7 +267,7 @@ TypeError: unsupported operand type(s) for +: 'int' and 'Angle'
 ...     ''' Other implementation details removed for brevity'''
 ...     def __radd__(self, int_to_add):
 ...         return self + int_to_add
-") }}
+", lang='pycon') }}
 <p>
   The 'Reverse Operator' is invoked by Python when a user-defined class is on the right side of an operator. The arguments are a little confusing here (they certainly confused me when making this example). The left side of the operator is actually the second argument. The right side of the operator (the user defined class) is {{ codeify("self") }} or the first argument. The arguments are reversed from the standard operator, but make sense if thinking of it from a purely method-signature standpoint. 
 </p>
@@ -301,7 +301,7 @@ TypeError: unsupported operand type(s) for +: 'int' and 'Angle'
 >>> angle += Angle(40)
 >>> angle
 Angle(50)
-") }}
+", lang='pycon') }}
 <p>
   The equality operators are defined exactly the same as the math-y operators like addition, subtraction, etc. However, instead of returning an instance of the class, they return a {{ codeify("True") }} or {{ codeify("False") }} value. Like the forward and reverse operators, it is not expected that the class itself or either input parameter is changed by a equality operator.
 </p>
@@ -334,7 +334,7 @@ Angle(50)
 >>> angle = Angle(10)
 >>> -angle
 Angle(-10)
-") }}
+", lang='pycon') }}
 <p>
   The other two unary operators can be defined similarly for your user-defined class, as applicable.
 </p>

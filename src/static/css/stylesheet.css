@@ -5,11 +5,13 @@
  *   :license: MIT License. See LICENSE.md for details
  */
 :root {
-    --code-background: lightgrey;
+    --code-background: #f3f3f3;
+    --code-padding: 1em;
+    --line-no-text-color: grey;
     --link-block-margin: 1em;
     --max-width: 50em;
-    --variable-font-size: inherit;
     --title-color: #ff7600;
+    --variable-font-size: inherit;
 }
 a.page-control-button:hover {
     background-color: var(--title-color);
@@ -52,24 +54,24 @@ nav h1, nav h3, nav p {
     margin-block-start: 0em;
     margin-block-end: 0em;
 }
-table {
+table.not-code {
     border-collapse: collapse;
     font-size: var(--variable-font-size);
     text-align: center;
     width: 100%;
 }
-th {
-    padding: 4px 8px;
-}
-thead {
-    background-color: var(--title-color);
-    color: white;
-}
-tbody tr:nth-child(even) {
+table.not-code tbody tr:nth-child(even) {
     background-color: var(--code-background);
 }
-tbody tr:nth-child(odd) {
+table.not-code tbody tr:nth-child(odd) {
     background-color: white;
+}
+table.not-code th {
+    padding: 4px 8px;
+}
+table.not-code thead {
+    background-color: var(--title-color);
+    color: white;
 }
 .archive div {
     padding: 4px 8px;
@@ -80,17 +82,44 @@ tbody tr:nth-child(odd) {
 .archive div:nth-child(odd) {
     background-color: white;
 }
-.code-block {
-    display: block;
-    font-size: var(--variable-font-size);
-    padding: 1em;
-    white-space: pre-wrap;
-}
 .footer-title {
     font-size: 1.17em;
 }
 .highlight-on-hover:hover {
     color: var(--title-color);
+}
+table.highlighttable {
+    background-color: var(--code-background);
+    padding: var(--code-padding);
+    width: 100%;
+}
+table.highlighttable .highlight {
+    padding: 0px;
+}
+table.highlighttable pre {
+    margin: 0px;
+}
+table.highlighttable tr {
+    vertical-align: top;
+}
+table.highlighttable .code {
+    padding-left: 5px;
+    width: 100%;
+}
+table.highlighttable .linenos {
+    border-width: 0px 8px 0px 0px;
+    border-style: solid;
+    border-color: lightgrey;
+    color: var(--line-no-text-color);
+    padding-right: 5px;
+    text-align: right;
+}
+.highlight {
+    background-color: var(--code-background);
+    padding: var(--code-padding);
+}
+.highlight pre {
+    margin: 0px;
 }
 .icon {
     height: 32px;

@@ -43,7 +43,7 @@ next(accumulator)
 # Print the cumulative sum of 1 through 10
 for ii in range(10):
     print(accumulator.send(ii), end=' ')
-") }}
+", lang='py') }}
 <p>
   This coroutine will then print:
 </p>
@@ -65,7 +65,7 @@ def accumulate():
     while True:
         total += yield
         print(total)
-") }}
+", lang='py') }}
 <p>
   This is completely valid, though the syntax looks a little strange.
 </p>
@@ -87,7 +87,7 @@ def accumulate():
 Traceback (most recent call last):
   File '', line 1, in 
 TypeError: can't send non-None value to a just-started generator
-") }}
+", lang='pycon') }}
 <p>
   Make sure  to prime those coroutines! A really cool design pattern that is covered by Luciano Ramalho's <em>Fluent Python</em> is to define a priming decorator. That pattern is out of scope for this blog post, but it shouldn't be hard to find online (or just buy his book - he's coming out with a new version soon!).
 </p>
@@ -113,7 +113,7 @@ GO!
 Traceback (most recent call last):
   File '', line 2, in 
 StopIteration
-") }}
+", lang='pycon') }}
 <p>
   The above state machine waits for the calling code to pass a timeout value. Before transitioning to the next state, it waits for the timeout and then prints out the next statement to the user. It also shows an interesting point about the flow control of the {{ codeify("yield") }} keyword. The first call to {{ codeify("next()") }} actually returns the first state in the list, instead of waiting until the calling code delegates back to the coroutine. This makes sense, since Python executes the entire right side of a statement before assigning to the left side of the assignment operator (in this case 'timeout').
 </p>
@@ -146,7 +146,7 @@ try:
         
 except StopIteration as exception:
     print(f'Sum is {exception.value}')
-") }}
+", lang='py') }}
 <p>This code prints the following:</p>
 {{ codeify("
 Sum is 45

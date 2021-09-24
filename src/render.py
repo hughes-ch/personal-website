@@ -8,6 +8,10 @@ import flask
 import jinja2
 import math
 import pathlib
+import pygments
+import pygments.formatters
+import pygments.lexers
+import pygments.util
 
 from .postlist import PostList
 
@@ -34,6 +38,37 @@ class Renderer:
 
         self._context = {
             'settings': self._settings,
+        }
+
+        # Setup parser objects
+        self._lang_config = {
+            'bash': {
+                'lexer': pygments.lexers.BashSessionLexer(),
+                'formatter': pygments.formatters.HtmlFormatter(
+                    wrapcode=True)
+            },
+            'cpp': {
+                'lexer': pygments.lexers.CppLexer(),
+                'formatter': pygments.formatters.HtmlFormatter(
+                    linenos=True,
+                    wrapcode=True)
+            },
+            'default': {
+                'lexer': pygments.lexers.TextLexer(),
+                'formatter': pygments.formatters.HtmlFormatter(
+                    wrapcode=True)
+            },
+            'py': {
+                'lexer': pygments.lexers.PythonLexer(),
+                'formatter': pygments.formatters.HtmlFormatter(
+                    linenos=True,
+                    wrapcode=True)
+            },
+            'pycon': {
+                'lexer': pygments.lexers.PythonConsoleLexer(),
+                'formatter': pygments.formatters.HtmlFormatter(
+                    wrapcode=True)
+            },
         }
         
     def connect(self, app):
@@ -165,28 +200,26 @@ class Renderer:
             """
         return self._app is not None
 
-    def _codeify(self, code):
+    def _codeify(self, code, lang=None):
         """ Escapes, colors, and formats code so the blogger doesn't have to
 
             :param code: <str> Code to format
+            :param lang: <str> Language specifier
             :return: <str> Formatted code
             """
-        # Determine if this is a block or inline piece of code
-        class_statement = ''
-        pre_open = ''
-        pre_close = ''
-        
-        if '\n' in code:
-            class_statement = 'class="code-block"'
-            pre_open = '<pre>'
-            pre_close = '</pre>'
-
         # Remove leading/trailing whitespace
+        is_multiline = '\n' in code
         formatted_code = code.strip()
+
+        # Determine if this is a block or inline piece of code
+        if is_multiline:
+            formatted_code = self._highlight_syntax(formatted_code, lang)
+        else:
+            formatted_code = flask.escape(formatted_code)
 
         # Return clean string as Markup
         return flask.Markup(
-            f'{pre_open}<code {class_statement}>%s</code>{pre_close}') % formatted_code
+            f'<code>{formatted_code}</code>')
 
     def _find_posts_per_page(self, count):
         """ Finds which posts to render for each page
@@ -205,3 +238,17 @@ class Renderer:
             posts_per_page[-1].append(str(post.path))
 
         return posts_per_page
+
+    def _highlight_syntax(self, code, lang):
+        """ Modifies code to perform syntax highlighting
+
+            :param code: <str> Code to highlight
+            :param lang: <str> Language specifier
+            :return: None
+            """
+        fallback_config = self._lang_config['default']
+        return pygments.highlight(
+            code,
+            self._lang_config.get(lang, fallback_config)['lexer'],
+            self._lang_config.get(lang, fallback_config)['formatter'])
+

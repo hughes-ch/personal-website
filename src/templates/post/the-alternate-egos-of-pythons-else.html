@@ -34,7 +34,7 @@ if __name__ == '__main__':
     for word in words:
         preposition = select_preposition(word)
         print(f'{preposition} {word.lower()}')
-") }}
+", lang='py') }}
 <p>Of course, that gives you:</p>
 {{ codeify("
 a man
@@ -85,7 +85,7 @@ if __name__ == '__main__':
         print(f'Name:{contact_info[\'name\']}\n'
               f'Phone:{contact_info[\'phone\']}\n'
               f'Email:{contact_info[\'email\']}')
-") }}
+", lang='py') }}
 <p>
   Within the {{ codeify("with") }} block, each line of the file is searched for the friend's name. If the name is found, a new record with the contact information is populated and the loop is exited with the {{ codeify("break") }} keyword. This avoids the functionality in the {{ codeify("else") }} block of the loop.
 </p>
@@ -166,7 +166,7 @@ def read_file_contents(path):
 if __name__ == '__main__':
     read_file_contents('contact_info.csv')
     read_file_contents('not_a_file.txt')
-") }}
+", lang='py') }}
 <p>This script results in the following:</p>
 {{ codeify("
 ----------contact_info.csv----------

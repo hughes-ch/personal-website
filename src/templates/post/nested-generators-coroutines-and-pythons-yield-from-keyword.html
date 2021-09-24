@@ -39,7 +39,7 @@ try:
         
 except StopIteration as exception:
     print(f'Sum is {exception.value}')
-") }}
+", lang='py') }}
 <p>To this:</p>
 {{ codeify("
 def accumulate():
@@ -82,7 +82,7 @@ accum_inputs.append(None)
 
 for ii in accum_inputs:
     accumulator.send(ii)
-") }}
+", lang='py') }}
 <p>This second example prints:</p>
 {{ codeify("
 Return value is 45
@@ -127,7 +127,7 @@ if __name__ == '__main__':
     generator = yield_from_counter()
     for num in range(5):
         print(f'Yield from counter: {next(generator)}')
-") }}
+", lang='py') }}
 <p>
   In this example, there are two generators: {{ codeify("yielding_counter") }} and {{ codeify("yield_from_counter") }}. They both do the same thing.  Here's the output:
 </p>
@@ -167,7 +167,7 @@ if __name__ == '__main__':
     generator = yield_from_counter()
     for num in range(5):
         print(f'Yield from counter: {next(generator)}')
-") }}
+", lang='py') }}
 <p>
   Instead of driving the {{ codeify("yield_range_100") }} generator itself, the main script body (which is calling {{ codeify("next()") }} on {{ codeify("yield_from_counter") }}) is driving it. Plus, it's doing so without needing a ton of infrastructure to handle {{ codeify("StopIteration") }} exceptions and pass {{ codeify("next()") }} calls down the chain. Theoretically, you could define hundreds of nested generators, and all will be driven by the top level calls to {{ codeify("next()") }} and {{ codeify("send()") }}. The only limitation is that the innermost generator has to use the {{ codeify("yield") }} keyword or has to {{ codeify("yield from") }} an iterable.
 </p>
@@ -251,7 +251,7 @@ if __name__ == '__main__':
     else:
         # We found our search string! Print out the result
         print(f'Found in {file_name} Line {line_number}: \'{line_contents}\'')
-") }}
+", lang='py') }}
 <p>
   I've added comments to walk you through the code, but here's the gist in three sentences:
 </p>
