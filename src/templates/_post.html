@@ -6,6 +6,11 @@
  #}
 
 {% extends '_base.html' %}
+
+{% block meta %}
+<meta name='description' content='{{ post_description }}'>
+{% endblock %}
+
 {% block content %}
 <article>
   {% include (post + '.html') %}

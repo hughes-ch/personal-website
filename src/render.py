@@ -91,7 +91,9 @@ class Renderer:
         # Connect context processors
         @self._app.context_processor
         def _connect_context_processors():
-            return dict(codeify=self._codeify)
+            return dict(
+                codeify=self._codeify,
+                set_description=self._set_description)
 
     def render_latest(self, page=1):
         """ Renders the latest blog posts
@@ -266,4 +268,13 @@ class Renderer:
             code,
             self._lang_config.get(lang, fallback_config)['lexer'],
             self._lang_config.get(lang, fallback_config)['formatter'])
+
+    def _set_description(self, description):
+        """ Overrides the description for a page
+
+            :param description: <str> to go in the meta description tag
+            :return: Empty string
+            """
+        self._context['post_description'] = description
+        return ""
 

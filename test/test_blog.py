@@ -190,3 +190,26 @@ class TestBlog(unittest.TestCase):
             """
         with self.blog.app.test_client() as client:
             self.assertEquals(200, client.get('/robots.txt').status_code)
+
+    def test_meta_description(self):
+        """ Test the meta description exists
+
+            :param: None
+            :return: None
+            """
+        with self.blog.app.test_client() as client:
+            response = client.get('/').data
+            soup = bs4.BeautifulSoup(response, 'html.parser')
+            meta_tag = soup.find('meta', attrs={'name': 'description'})
+            self.assertGreater(len(meta_tag['content']), 0)
+
+            links = soup.find_all('a')
+            for link in links:
+                if self.config['Routes']['PostsUrl'] in link['href']:
+                    latest_post_url = link['href']
+                    break
+                
+            response = client.get(latest_post_url).data
+            soup = bs4.BeautifulSoup(response, 'html.parser')
+            meta_tag = soup.find('meta', attrs={'name':'description'})
+            self.assertGreater(len(meta_tag['content']), 0)
