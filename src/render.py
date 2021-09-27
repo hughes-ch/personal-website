@@ -111,7 +111,7 @@ class Renderer:
         self._context['next_page'] = None
         
         if len(posts_per_page) > 0:
-            if page < 1 or page >= len(posts_per_page):
+            if page < 1 or page > len(posts_per_page):
                 return self.render_404()
             else:
                 self._context['posts'] = posts_per_page[page-1]

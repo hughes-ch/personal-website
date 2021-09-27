@@ -4,6 +4,7 @@
     :copyright: Copyright (c) 2021 Chris Hughes
     :license: MIT License. See LICENSE.md for details
 """
+import bs4
 import pathlib
 import requests
 import test.util
@@ -134,4 +135,25 @@ class TestBlog(unittest.TestCase):
             self.assertEquals(response.status_code, 404)
 
         test.util.validate_links(self, response.data)
+
+    def test_render_all_posts(self):
+        """ Test when RenderedPostCount > amount of posts
+
+            :param: None
+            :return: None
+            """
+        self.config = test.util.load_test_config()
+        old_post_count = self.config['Render']['RenderedPostCount']
+        self.config['Render']['RenderedPostCount'] = '2000'
+        self.blog = Blog(self.config)
+
+        with self.blog.app.test_client() as client:
+            response = client.get('/')
+            self.assertEquals(response.status_code, 200)
+
+            soup = bs4.BeautifulSoup(response.data, 'html.parser')
+            all_post_dates = soup.find_all(id='date')
+            self.assertGreater(len(all_post_dates), int(old_post_count))
+        
+        
             
