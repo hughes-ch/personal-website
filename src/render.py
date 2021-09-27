@@ -128,6 +128,8 @@ class Renderer:
                 return self.render_404()
             
         # Render all posts to template
+        self._context['title'] = self._settings['Render']['IndexTitle']
+        
         return flask.render_template(
             self._settings['Templates']['Index'],
             **self._context)
@@ -140,6 +142,8 @@ class Renderer:
             """
         if not self._is_configured():
             raise RendererNotConfiguredException
+
+        self._context['title'] = self._settings['Render']['ErrorTitle']
         
         return flask.render_template(
             self._settings['Templates']['Err404'],
@@ -157,6 +161,14 @@ class Renderer:
         self._context['post'] = str(
             pathlib.Path('/') / self._settings['Routes']['PostsUrl'] / post_name)
 
+        try: 
+            post_title = self._postlist.get(post_name).title
+            self._context['title'] = (
+                f'{post_title} - {self._settings["Render"]["BlogTitle"]}')
+            
+        except ValueError:
+            self._context['title'] = self._settings['Render']['BlogTitle']
+
         try:
             return flask.render_template(
                 self._settings['Templates']['Post'],
@@ -173,6 +185,8 @@ class Renderer:
         if not self._is_configured():
             raise RendererNotConfiguredException
 
+        self._context['title'] = self._settings['Render']['AboutTitle']
+
         return flask.render_template(
             self._settings['Templates']['About'],
             **self._context)
@@ -187,6 +201,7 @@ class Renderer:
             raise RendererNotConfiguredException
 
         self._context['posts'] = list(self._postlist)
+        self._context['title'] = self._settings['Render']['ArchiveTitle']
 
         return flask.render_template(
             self._settings['Templates']['Archive'],

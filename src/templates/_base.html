@@ -11,7 +11,7 @@
     <meta charset='utf-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
 
-    <title>{{ settings['Render']['BlogTitle'] }}</title>
+    <title>{{ title }}</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,7 +26,7 @@
       <nav>
         <div class='title-block'>
           <h1><a href='{{ url_for("index") }}' class='link'>{{ settings['Render']['BlogTitle'] }}</a></h1>
-          <p class='title-caption'>A software blog</p>
+          <p class='title-caption'>{{ settings['Render']['BlogCaption'] }}</p>
         </div>
         <div class='link-block'>
           <h3 class='nav-about'><a href='{{ url_for("about") }}' class='link'>About Me</a></h3>
