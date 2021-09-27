@@ -118,7 +118,7 @@ class Renderer:
 
             if page > 1:
                 self._context['prev_page'] = page-1
-            if page < len(posts_per_page)-1:
+            if page < len(posts_per_page):
                 self._context['next_page'] = page+1
             
         else:

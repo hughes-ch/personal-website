@@ -154,6 +154,30 @@ class TestBlog(unittest.TestCase):
             soup = bs4.BeautifulSoup(response.data, 'html.parser')
             all_post_dates = soup.find_all(id='date')
             self.assertGreater(len(all_post_dates), int(old_post_count))
-        
-        
-            
+
+    def test_last_page_pagination(self):
+        """ Test the pagination button works correctly for the last page
+
+            :param: None
+            :return: None
+            """
+        # The approach to this one is a little hacky. First, update the
+        # RenderedPostCount to be well over the amount of posts to get
+        # the overall number of posts. Then, update it again so that
+        # there are only two blog post pages. Make sure the "Next"
+        # button is actually a link.
+        self.config = test.util.load_test_config()
+        self.config['Render']['RenderedPostCount'] = '2000'
+        self.blog = Blog(self.config)
+        with self.blog.app.test_client() as client:
+            response = client.get('/').data
+            soup = bs4.BeautifulSoup(response, 'html.parser')
+            all_post_dates = soup.find_all(id='date')
+            self.config['Render']['RenderedPostCount'] = str(len(all_post_dates)-1)
+
+        self.blog = Blog(self.config)
+        with self.blog.app.test_client() as client:
+            response = client.get('/').data
+            soup = bs4.BeautifulSoup(response, 'html.parser')
+            next_button = soup.find(id='next-nav')
+            self.assertIsNotNone(next_button.a)
