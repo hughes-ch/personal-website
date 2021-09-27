@@ -18,7 +18,8 @@ a.page-control-button:hover {
     color: white;
 }
 article {
-    max-width: var(--max-width);
+    max-width: 95vw;
+    width: var(--max-width);
 }
 article img {
     max-width: var(--max-width);
@@ -91,6 +92,7 @@ table.not-code thead {
 table.highlighttable {
     background-color: var(--code-background);
     padding: var(--code-padding);
+    table-layout: fixed;
     width: 100%;
 }
 table.highlighttable .highlight {
@@ -113,6 +115,7 @@ table.highlighttable .linenos {
     color: var(--line-no-text-color);
     padding-right: 5px;
     text-align: right;
+    width: 2em;
 }
 .highlight {
     background-color: var(--code-background);
@@ -120,6 +123,7 @@ table.highlighttable .linenos {
 }
 .highlight pre {
     margin: 0px;
+    overflow: auto;
 }
 .icon {
     height: 32px;
