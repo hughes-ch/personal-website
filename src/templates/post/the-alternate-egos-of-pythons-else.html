@@ -82,9 +82,9 @@ def get_contact_info(name):
 if __name__ == '__main__':
     for name in ['Janet', 'Chris', 'Bob']:
         contact_info = get_contact_info(name)
-        print(f'Name:{contact_info[\'name\']}\\n'
-              f'Phone:{contact_info[\'phone\']}\\n'
-              f'Email:{contact_info[\'email\']}')
+        print(f'Name:{contact_info[\"name\"]}\\n'
+              f'Phone:{contact_info[\"phone\"]}\\n'
+              f'Email:{contact_info[\"email\"]}')
 ", lang='py') }}
 <p>
   Within the {{ codeify("with") }} block, each line of the file is searched for the friend's name. If the name is found, a new record with the contact information is populated and the loop is exited with the {{ codeify("break") }} keyword. This avoids the functionality in the {{ codeify("else") }} block of the loop.

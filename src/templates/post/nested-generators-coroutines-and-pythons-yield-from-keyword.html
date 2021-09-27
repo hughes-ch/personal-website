@@ -227,7 +227,7 @@ def file_search(search_string, files):
     # If we've made it this far without finding anything, raise an
     # error.
     raise EOFError(
-        f'End of files encountered before finding str \'{search_string}\'')
+        f'End of files encountered before finding str \"{search_string}\"')
 
 # Main function
 if __name__ == '__main__':
@@ -250,7 +250,7 @@ if __name__ == '__main__':
         print(err)
     else:
         # We found our search string! Print out the result
-        print(f'Found in {file_name} Line {line_number}: \'{line_contents}\'')
+        print(f'Found in {file_name} Line {line_number}: \"{line_contents}\"')
 ", lang='py') }}
 <p>
   I've added comments to walk you through the code, but here's the gist in three sentences:
