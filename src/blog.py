@@ -74,3 +74,16 @@ class Blog:
                 """
             return self.renderer.render_404()
 
+        # Serve robots.txt
+        robots = 'robots.txt'
+        @self.app.route(f'/{robots}')
+        def serve_robots():
+            """ Serves robots.txt
+
+                :param: None
+                :return: Page content
+                """
+            return flask.send_from_directory(
+                pathlib.Path(self.app.static_folder) /
+                settings['Routes']['RobotsLocation'],
+                robots)

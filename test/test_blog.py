@@ -181,3 +181,12 @@ class TestBlog(unittest.TestCase):
             soup = bs4.BeautifulSoup(response, 'html.parser')
             next_button = soup.find(id='next-nav')
             self.assertIsNotNone(next_button.a)
+
+    def test_static_files(self):
+        """ Test serving static files like robots.txt
+
+            :param: None
+            :return: None
+            """
+        with self.blog.app.test_client() as client:
+            self.assertEquals(200, client.get('/robots.txt').status_code)
