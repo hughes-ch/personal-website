@@ -11,6 +11,7 @@ import requests
 import test.util
 import unittest
 
+from datetime import date
 from parameterized import parameterized
 from src.blog import Blog
 
@@ -268,9 +269,16 @@ class TestBlog(unittest.TestCase):
             self.assertIn(f'"@type": "{schema_type}"', str(response))
             if route == 'IndexJson':
                 self.assertIn(b'mainEntity', response)
+
+                loaded_json = json.loads(response)
                 link_attempt_resp = client.get(
-                    json.loads(response)['mainEntity']['url'])
+                    loaded_json['mainEntity']['url'])
                 self.assertEquals(link_attempt_resp.status_code, 200)
+
+                # Verify dates can be converted to ISO (no raise)
+                date.fromisoformat(loaded_json['dateCreated'])
+                date.fromisoformat(loaded_json['dateModified'])
+                
             else:
                 self.assertNotIn(b'mainEntity', response)
 
@@ -293,10 +301,16 @@ class TestBlog(unittest.TestCase):
             response = client.get(
                 f'/{self.config["Routes"]["Json"]}'
                 f'/{latest_post_url.stem}.json').data
-                
+
+            loaded_json = json.loads(response)
             self.assertIn(f'"@type": "BlogPosting"', str(response))
-            link_attempt_resp = client.get(json.loads(response)['url'])
+            link_attempt_resp = client.get(loaded_json['url'])
             self.assertEquals(link_attempt_resp.status_code, 200)
+
+            # Verify dates can be converted to ISO (no raise)
+            date.fromisoformat(loaded_json['dateCreated'])
+            date.fromisoformat(loaded_json['dateModified'])
+            date.fromisoformat(loaded_json['datePublished'])
 
     def test_serve_json_404(self):
         """ Test that JSON is not served for invalid file
