@@ -1,0 +1,269 @@
+{#
+ #   Blog post contents
+ #
+ #   :copyright: Copyright (c) 2021 Chris Hughes
+ #   :license: MIT License. See LICENSE.md for details. All rights reserved for post contents
+ #}
+
+<!--This blog post introduces nested generators and Python's yield from keyword.-->
+<h3><a href='{{ post_url }}' class='link'>Nested Generators, Coroutines, and Python's 'Yield From' Keyword</a></h3>
+<p class='post-caption' id='date'>May 22, 2021</p>
+<p>
+  Continuing on with the introduction to coroutines and eventually asynchronous programming in Python, I'll introduce the motivation and use of Python's {{ codeify("yield from") }} keyword. <a href='/post/introduction-to-coroutines' class='underlined link'>In my last post</a>, I introduced generators-as-coroutines in Python. I ended with an example of a not-so-flattering syntax for retrieving the return value from generators which have raised the StopIteration exception.
+</p>
+<p>
+  I'm learning all the time, and as I was creating this week's examples, I realized that we are still (unfortunately) stuck with somewhat unflattering syntax. No matter how you do it, returning something from a vanilla generator (or a generator-as-coroutine) will raise a {{ codeify("StopIteration") }} exception. Bummer.
+</p>
+<p>
+  However, I can refactor last weeks example:
+</p>
+{{ codeify("
+def accumulate():
+    total = 0
+    while True:
+        new_num = yield
+        if new_num is None:
+            break
+        
+        total += new_num
+
+    return total
+
+accumulator = accumulate()
+accum_inputs = list(range(10))
+accum_inputs.insert(0, None)
+accum_inputs.append(None)
+
+try:
+    for ii in accum_inputs:
+        accumulator.send(ii)
+        
+except StopIteration as exception:
+    print(f'Sum is {exception.value}')
+", lang='py') }}
+<p>To this:</p>
+{{ codeify("
+def accumulate():
+    ''' Same accumulate function as last week
+
+        Totals all values sent from the caller. Returns None on each
+        iteration. Once complete, returns the total accumulated value.
+
+        To 'complete' an accumulator, send the value None
+
+        :return: Total sum of all accumulated objects
+        '''
+    total = 0
+    while True:
+        new_num = yield
+        if new_num is None:
+            break
+        
+        total += new_num
+    return total
+
+def delegator(generator):
+    ''' New 'delegator' function
+
+        'Yields from' a specified generator and prints the return
+
+    :param: Function (as object) that takes no arguments
+    :return: 
+    '''
+    while True:
+        ret_val = yield from generator()
+        print(f'Return value is {ret_val}')
+
+# Builds up a list of numbers to add
+# [None (primer), 0-9, None (to notify accumulator to complete]
+accumulator = delegator(accumulate)
+accum_inputs = list(range(10))
+accum_inputs.insert(0, None)
+accum_inputs.append(None)
+
+for ii in accum_inputs:
+    accumulator.send(ii)
+", lang='py') }}
+<p>This second example prints:</p>
+{{ codeify("
+Return value is 45
+") }}
+<p>
+  without needing to catch the {{ codeify("StopIteration") }} exception and examine the {{ codeify("value") }} attribute. More importantly, it demonstrates the {{ codeify("yield from") }} keyword and nested generators. Let's walk through this step-by-step.
+</p>
+<p>
+  The accumulate function is the same as last week, just with documentation explaining the inputs and outputs.
+</p>
+<p>
+  The {{ codeify("delegator") }} function is the new, important functionality to explore here. It is passed a generator function as an input. It then {{ codeify("yields from") }} that generator and captures it's return value to be printed in the next line.
+</p>
+<p>
+  The {{ codeify("yield from") }} keyword can be a difficult concept to grasp. The first thing to understand is that must take an iterator. Next, visualize that it works similarly to {{ codeify("yield") }} in that it pauses execution and transitions to another context. However, instead of passing the context up to the caller of the function, it passes the context down to the iterator parameter. It essentially creates a pipe between the calling code (in this case, the main script body) and the iterator parameter (the accumulate function). In this example, it allows the main script body to directly control the accumulate function through the delegator.
+</p>
+<p>It might be easier to understand with a picture:</p>
+<img src='{{ url_for("static", filename="img/nested-generators-coroutines-and-pythons-yield-from-keyword-1.webp") }}' alt='Pipe representing yield'>
+<p>
+  Like the picture shows, the {{ codeify("yield from") }} keyword sets up a direct connection from the main function to {{ codeify("accumulate()") }} and does not continue operation until {{ codeify("accumulate()") }} completes its iteration and returns a value. At that time, {{ codeify("yield from generator()") }} evaluates to the return value of {{ codeify("accumulate()") }} (in this case, 45), which is saved to {{ codeify("ret_val") }}. Then, context is switched back to the {{ codeify("delegator()") }} function and it continues executing by printing the result of {{ codeify("accumulate()") }}.
+</p>
+<p>If this is still as clear as mud, I'll back up a little bit to show an easier example:</p>
+{{ codeify("
+def yielding_counter():
+    ''' Yields the numbers 0 through 99 using the 'yield' keyword '''
+    for num in range(100):
+        yield(num)
+        
+def yield_from_counter():
+    ''' Yields the numbers 0 through 99 using 'yield from' '''
+    yield from range(100)
+
+# Main script body
+if __name__ == '__main__':
+    # Generate numbers 0 through 4 using yielding counter
+    generator = yielding_counter()
+    for num in range(5):
+        print(f'Yielding counter: {next(generator)}')
+
+    # Generate numbers 0 through 4 using 'yield from' counter
+    print()
+    generator = yield_from_counter()
+    for num in range(5):
+        print(f'Yield from counter: {next(generator)}')
+", lang='py') }}
+<p>
+  In this example, there are two generators: {{ codeify("yielding_counter") }} and {{ codeify("yield_from_counter") }}. They both do the same thing.  Here's the output:
+</p>
+{{ codeify("
+Yielding counter: 0
+Yielding counter: 1
+Yielding counter: 2
+Yielding counter: 3
+Yielding counter: 4
+
+Yield from counter: 0
+Yield from counter: 1
+Yield from counter: 2
+Yield from counter: 3
+Yield from counter: 4
+") }}
+<p>
+  When {{ codeify("yield from") }} is used with an iterable, it acts just like syntactic sugar for yielding from that iterable. So when defining nested generators using the {{ codeify("yield from") }} keyword, you can visualize that you are just trying to build the iterable for the {{ codeify("yield from") }} keyword to iterate through.
+</p>
+<p>Let's go one step further.</p>
+<p>
+  Here's the previous example written with only the {{ codeify("yield_from_counter") }} function. This time, it is delegating to another generator function:
+</p>
+{{ codeify("
+def yield_range_100():
+    ''' Yields the numbers 0 through 99 '''
+    yield from range(100)
+
+def yield_from_counter():
+    ''' Yields the numbers 0 through 99 using 'yield from' '''
+    yield from yield_range_100()
+
+# Main script body
+if __name__ == '__main__':
+    # Generate numbers 0 through 4 using 'yield from' counter
+    print()
+    generator = yield_from_counter()
+    for num in range(5):
+        print(f'Yield from counter: {next(generator)}')
+", lang='py') }}
+<p>
+  Instead of driving the {{ codeify("yield_range_100") }} generator itself, the main script body (which is calling {{ codeify("next()") }} on {{ codeify("yield_from_counter") }}) is driving it. Plus, it's doing so without needing a ton of infrastructure to handle {{ codeify("StopIteration") }} exceptions and pass {{ codeify("next()") }} calls down the chain. Theoretically, you could define hundreds of nested generators, and all will be driven by the top level calls to {{ codeify("next()") }} and {{ codeify("send()") }}. The only limitation is that the innermost generator has to use the {{ codeify("yield") }} keyword or has to {{ codeify("yield from") }} an iterable.
+</p>
+<p>
+  So what's a practical use case for nested generators? There are plenty! Here's an example which I could actually fit in a blog post where a string is searched for in a list of files. Kind of like a simple 'grep' command on Linux:
+</p>
+{{ codeify("
+def file_reader(file_name):
+    ''' Opens a given file name for reading and yields contents
+
+        :param file_name:  Path to file
+        :return: None
+        '''
+    with open(file_name, 'r') as file_handle:
+        for line_no, line_contents in enumerate(file_handle):
+            # For each call to next(), yield the file name,
+            # the line number, and the line contents in a tuple
+            yield file_name, line_no, line_contents
+
+def file_list_reader(files):
+    ''' Iterates through file list and yields their contents
+
+        :param files:  Containing paths to files to read
+        :return: None
+        '''
+    for file_name in files:
+        # Delegates to file_reader. Any caller will be yielded
+        # the file name, line number, and line contents of the
+        # current line/file since 'yield from' essentially opens
+        # a pipe from the delegate to the caller.
+        yield from file_reader(file_name)
+
+def file_search(search_string, files):
+    ''' Searches the contents of the file list for the search_string
+
+        Raises EOFError if end of file list is reached without success
+
+        :param search_string:  To search for
+        :param files:  Containing paths to files to search
+        :return:  Containing file name, line number, contents
+        '''
+    # Loop through the file_list_reader generator. Since it is a
+    # generator, looping can simply be done with the 'in' keyword
+    # without any knowledge of when the end of a file has been reached.
+    #
+    # Note that a tuple with the file name, line number, and line
+    # contents is returned for each iteration of the loop because
+    # of the tuple yielded by file_reader.
+    file_contents = file_list_reader(files)
+    for file_name, line_no, line_contents in file_contents:
+
+        # If the search string is within line_contents, return the
+        # tuple. 
+        if search_string in line_contents:
+            return file_name, line_no, line_contents
+
+    # If we've made it this far without finding anything, raise an
+    # error.
+    raise EOFError(
+        f'End of files encountered before finding str \"{search_string}\"')
+
+# Main function
+if __name__ == '__main__':
+
+    # Define list of files to search and search string
+    search_string = 'Plumber'
+    list_of_files = [
+        'city_names.txt',
+        'favorite_colors.csv',
+        'haiku.txt',
+        'contact_info.dat'
+    ]
+    
+    # Search for contents
+    try:
+        file_name, line_number, line_contents = file_search(
+            search_string,
+            list_of_files)
+    except EOFError as err:
+        print(err)
+    else:
+        # We found our search string! Print out the result
+        print(f'Found in {file_name} Line {line_number}: \"{line_contents}\"')
+", lang='py') }}
+<p>
+  I've added comments to walk you through the code, but here's the gist in three sentences:
+</p>
+<ol>
+  <li>The {{ codeify("file_search") }} function takes a search string and an iterable of file paths to search</li>
+  <li>It delegates to {{ codeify("file_reader") }} and {{ codeify("file_list_reader") }} to provide the file list contents line by line</li>
+  <li>If a line contains the search string, {{ codeify("file_search") }} returns the line number, contents, and file name</li>
+</ol>
+<p>
+  The file_search function can be so simple because of the nested {{ codeify("file_reader") }} and {{ codeify("file_list_reader") }} generators. Using the {{ codeify("yield") }} and {{ codeify("yield from") }} keywords, allows {{ codeify("file_search") }} to be dumb to the fact that one file ends and the next begins. It simply needs to request the next line of the file list. Essentially, the file list has been flattened into a single really long file from the view of {{ codeify("file_search") }}.
+</p>
+<p>
+  While this is really handy, this isn't even the reason why I'm so excited about the {{ codeify("yield") }} and {{ codeify("yield from") }} keywords. Next week, I'd like to cover how they can be used for asynchronous programming instead of being limited to confusing, bug riddled threading. Though Python provides dedicated keywords and libraries for asynchronous programming, {{ codeify("yield") }} and {{ codeify("yield from") }} can provide an understanding of the basics.
+</p>

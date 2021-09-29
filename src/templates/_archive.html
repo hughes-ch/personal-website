@@ -1,0 +1,22 @@
+{#
+ #   Template for the /archive pages
+ #
+ #   :copyright: Copyright (c) 2021 Chris Hughes
+ #   :license: MIT License. See LICENSE.md for details
+ #}
+
+{% extends '_base.html' %}
+{% block content %}
+<h2 class='page-title'>Archive</h2>
+<div class='archive'>
+  {% for post in posts %}
+  <div>
+    <a href='{{ post.full_url }}' class='link highlight-on-hover'>
+      <p><strong>{{ post.datestr }}</strong></p>
+      <p>{{ post.title }}</p>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+<hr>
+{% endblock %}

@@ -1,0 +1,16 @@
+{#
+ #   Template for each post
+ #
+ #   :copyright: Copyright (c) 2021 Chris Hughes
+ #   :license: MIT License. See LICENSE.md for details
+ #}
+
+{% extends '_base.html' %}
+
+{% block meta %}
+<meta name='description' content='{{ post_description }}'>
+{% endblock %}
+
+{% block content %}
+{% include '_article.html' %}
+{% endblock %}

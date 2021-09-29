@@ -1,0 +1,24 @@
+{#
+ #   Template for the navigation at the bottom of each page
+ #
+ #   :copyright: Copyright (c) 2021 Chris Hughes
+ #   :license: MIT License. See LICENSE.md for details
+ #}
+
+<div class='page-control-section'>
+  <span class='page-control' id='prev-nav'>
+    {% if prev_page is none %}
+    <span class='page-control-button'>Prev</span>
+    {% else %}
+    <a href='/page/{{ prev_page }}' class='page-control-button'>Prev</a>
+    {% endif %}
+  </span>
+  
+  <span class='page-control' id='next-nav'>
+    {% if next_page is none %}
+    <span class='page-control-button'>Next</span>
+    {% else %}
+    <a href='/page/{{ next_page }}' class='page-control-button'>Next</a>
+    {% endif %}
+  </span>
+</div>

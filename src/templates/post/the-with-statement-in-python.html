@@ -1,0 +1,230 @@
+{#
+ #   Blog post contents
+ #
+ #   :copyright: Copyright (c) 2021 Chris Hughes
+ #   :license: MIT License. See LICENSE.md for details. All rights reserved for post contents
+ #}
+
+<!--Python's 'with' keyword is an extremely useful feature, but it was originally hard for me to grasp. Here, I explain it in full.-->
+<h3><a href='{{ post_url }}' class='link'>The 'with' Statement in Python</a></h3>
+<p class='post-caption' id='date'>Jun 5, 2021</p>
+<p>
+  Coming from C++, one of the more intimidating features of base Python was the {{ codeify("with") }} keyword. There's really no equivalent in C++, besides possibly creating something within a local scope and defining a class destructor.
+</p>
+<p>
+  To make matters worse, most Python tutorials just explain that {{ codeify("with") }} is the accepted way of opening files, but don't describe the mechanisms behind this powerful feature. This led me to believe that there was an entire keyword dedicated to just opening (and closing) files, and there was some magic behind the {{ codeify("open") }} function that was hidden to developers.
+</p>
+<p>
+  Not until I did a little more digging did I realize that {{ codeify("with") }} could be used for a wide assortment of applications, and my own classes could implement their own code to execute when using the {{ codeify("with") }} statement.
+</p>
+<p>
+  First, what does the {{ codeify("with") }} statement actually do? It enters a context in which an object can be considered active. When entering the context, it performs some action on the object. In the context of the {{ codeify("open") }} function, it opens a file handle. Upon exiting the context (whether that be through standard code execution, an exception being raised, the program exiting, etc), the {{ codeify("with") }} statement performs an additional action on the object. I'd assume this is typically the reverse of what was done to enter the context, but in theory, it can actually be anything. In the case of the {{ codeify("open") }} function, the file handle is closed.
+</p>
+<p>
+  Let's explore the standard example of opening a file:
+</p>
+{{ codeify("
+with open('city_names.txt') as file_handle:
+    for line in file_handle:
+        print(line, end='')
+", lang='py') }}
+<p>This outputs the content of the file 'city_names.txt', shown below:</p>
+{{ codeify("
+Boston
+New York
+Newark
+Scranton
+Toronto
+...
+") }}
+<p>So what's happening here?</p>
+<p>
+  When {{ codeify("open") }} is called on city_names.txt, the {{ codeify("with") }} statement enters a context where city_names.txt is open for reading. It establishes a contract with the application that it will call {{ codeify("close") }} on the file handle when the context is exited, no matter how it is exited. It also returns the file handle, which the application can access with the {{ codeify("as") }} keyword. Theoretically, the application can skip the {{ codeify("as") }} clause and it can still be completely valid code. However, I'm not sure how useful it would be in this case.
+</p>
+<p>
+  Once the context is entered, the open file handle is looped through line-by-line, printing each. After the loop exits, the {{ codeify("with") }} block is exited, closing the file handle with it.
+</p>
+<p>
+  It's important to note that if the below code is executed, the file handle will still be closed, even though the program completes with an error:
+</p>
+{{ codeify("
+with open('city_names.txt') as file_handle:
+    for line in file_handle:
+        print(line, end='')
+    raise Exception
+", lang='py') }}
+<p>
+  This is the major benefit of using {{ codeify("with") }} - the application developer can always be sure that code will be executed (in this case, the {{ codeify("close") }} function) when a context is exited, even if the exit is not performed cleanly.
+</p>
+<p>To compare, the alternative would be overly verbose and error prone:</p>
+{{ codeify("
+try:
+    file_handle = open('city_names.txt')
+    for line in file_handle:
+        print(line, end='')
+    raise Exception
+except:
+    if not file_handle.closed:
+        file_handle.close()
+    raise
+", lang='py') }}
+<p>
+  Using the {{ codeify("with") }} statements with your own objects is fairly straightforward and requires defining two dunder methods within a class:
+</p>
+<ul>
+  <li>The {{ codeify("__enter__") }} method does whatever it needs to enter the context and returns an object to manipulate in the context (or {{ codeify("None") }} if appropriate).</li>
+  <li>The {{ codeify("__exit__") }} method presumably cleans up what {{ codeify("__enter__") }} has created and handles any exceptions which are raised during the processing of the context.</li>
+</ul>
+<p>
+  The function signature for {{ codeify("__enter__") }} is very simple and takes {{ codeify("self") }}. The return value can be bound to a variable using the {{ codeify("as") }} keyword in the {{ codeify("with") }} statement.
+</p>
+<p>
+  The function signature for {{ codeify("__exit__") }} is a little bit more complicated since it needs to gather information about any exceptions which are raised during the processing of the context. At its simplest, the {{ codeify("__exit__") }} method would look like this:
+</p>
+{{ codeify("
+def __exit__(self, exc_type, exc_value, traceback):
+    return True
+", lang='py') }}
+<ul>
+  <li>The {{ codeify("exc_type") }} argument contains the exception type. If a {{ codeify("ValueError") }} was raised during processing of the context, {{ codeify("exc_type") }} would equal {{ codeify("ValueError") }}.</li>
+  <li>The {{ codeify("exc_value") }} argument contains the exception instance. This may contain important information about the exception for handling, such as the error message.</li>
+  <li>The {{ codeify("traceback") }} contains the traceback object.</li>
+</ul>
+<p>
+  The return value of the {{ codeify("__exit__") }} method tells the interpreter whether an exception was handled successfully. If an exception was raised during the context and {{ codeify("__exit__") }} returns {{ codeify("None") }} or anything but {{ codeify("True") }}, the exception will be propagated forward after {{ codeify("__exit__") }} completes.
+</p>
+<p>
+  If a context completes without any exceptions, {{ codeify("exc_type") }}, {{ codeify("exc_value") }}, and {{ codeify("traceback") }} are all set to {{ codeify("None") }} by the interpreter.
+</p>
+<p>
+  Here's a very simple example which wraps the {{ codeify("open") }} function to show how {{ codeify("__enter__") }} and {{ codeify("__exit__") }} are called by the interpreter:
+</p>
+{{ codeify("
+class OpenWrapper:
+    ''' A class which wraps the open function '''
+    
+    def __init__(self, file_name):
+        ''' Class constructor
+
+            :param file_name:  Path to file
+            :return:  New object
+            '''
+        self._file_name = file_name
+        self._file_handle = None
+
+    def __enter__(self):
+        ''' Enters context by opening file and returning handle
+
+            :return: 
+            '''
+        print('__enter__(self)')
+        self._file_handle = open(self._file_name)
+        return self._file_handle
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        ''' Exits context by closing file handle
+
+            :return: None
+            '''
+        print(f'__exit__(self, {exc_type}, {exc_value}, {traceback})')
+        self._file_handle.close()
+        return None
+
+# Main function
+if __name__ == '__main__':
+    print('begin program')
+
+    # Construct OpenWrapper
+    wrapper = OpenWrapper('city_names.txt')
+    print('OpenWrapper constructed')
+
+    # Call __enter__ on wrapper, which binds the return value
+    # (OpenWrapper._file_handle) to fh using the 'as' keyword.
+    # 
+    # Note that wrapper could be constructed on this line as
+    # well. I've broken the construction and the 'with' keywords
+    # into two lines for verbosity.
+    with wrapper as fh:
+        for line in fh:
+            print(line, end='')
+
+    # After context exits, OpenWrapper.__exit__() is called
+    print('end program')
+", lang='py') }}
+<p>Execution of this script results in:</p>
+{{ codeify("
+begin program
+OpenWrapper constructed
+__enter__(self)
+Boston
+New York
+Newark
+Scranton
+Toronto
+...
+__exit__(self, None, None, None)
+end program
+") }}
+<p>
+  Since the context completed without any exceptions, the {{ codeify("__exit__") }} method was passed {{ codeify("self, None, None, None") }} and no exception was propagated forward. If this program raised an {{ codeify("EOFError") }} after the for loop continued, the {{ codeify("__exit__") }} method could be updated to quietly handle this error and still do its due diligence in closing the file:
+</p>
+{{ codeify("
+# Previous file contents omitted for brevity...
+    def __exit__(self, exc_type, exc_value, traceback):
+        ''' Exits context by closing file handle
+
+            :return: None
+            '''
+        print(f'__exit__(self, {exc_type}, {exc_value}, {traceback})')
+
+        # Close file regardless of error type
+        self._file_handle.close()
+
+        # If EOFError was encountered, notify interpreter that it has
+        # been successfully handled. Other errors will be propaged
+        # forward. 
+        if exc_type is EOFError:
+            return True
+
+# Main function
+if __name__ == '__main__':
+    with OpenWrapper('city_names.txt') as fh:
+        for line in fh:
+            print(line, end='')
+        raise EOFError('EOF encountered')
+", lang='py') }}
+<p>This would result in:</p>
+{{ codeify("
+__enter__(self)
+Boston
+New York
+Newark
+Scranton
+Toronto
+Manchester
+Augusta
+Denver
+Miami
+__exit__(self, <class 'EOFError'>, EOF encountered, <traceback object at 0x7f4cede049c0>)
+") }}
+<p>
+  Now that an actual error was encountered, the last three parameters of {{ codeify("__exit__") }} are populated. Since the {{ codeify("exc_type") }} is defined to be {{ codeify("EOFError") }}, {{ codeify("__exit__") }} does not propagate the exception forward and the program ends without a traceback. If the exception encountered was actually a {{ codeify("ValueError") }}, the output would have looked like this:
+</p>
+{{ codeify("
+__enter__(self)
+Boston
+New York
+Newark
+Scranton
+Toronto
+...
+__exit__(self, <class 'ValueError'>, ValueError encountered, <traceback object at 0x7fd284704a00>)
+Traceback (most recent call last):
+  File 'test.py', line 43, in 
+    raise ValueError('ValueError encountered')
+ValueError: ValueError encountered
+") }}
+<p>
+  Although it doesn't have a parallel in other languages I've worked with, I've quickly come to love using the {{ codeify("with") }} keyword, and I find it's an incredibly important tool to make robust code that's easy to interpret and maintain. Though initially confusing, once I had a visual on the internal workings, I find it was an easy concept to grasp and I find myself wishing it was available in my C++ and MATLAB work.
+</p>
+<p>Time to implement a workaround, I guess...</p>

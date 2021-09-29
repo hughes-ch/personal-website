@@ -1,0 +1,153 @@
+{#
+ #   Blog post contents
+ #
+ #   :copyright: Copyright (c) 2021 Chris Hughes
+ #   :license: MIT License. See LICENSE.md for details. All rights reserved for post contents
+ #}
+
+<!--Coming from the C++98 world, Python's yield keyword was foreign to me. Now I can't wait to use it.-->
+<h3><a href='{{ post_url }}' class='link'>Python Yield Keyword</a></h3>
+<p class='post-caption' id='date'>May 3, 2021</p>
+<p>Holy moly coroutines.</p>
+<p>
+  In my journey through Luciano Ramalho's Fluent Python, I ran into this incredible feature of Python which I've never experienced in any other programming language. To my (possibly naive) mind, I'm imagining them being Python's magic bullet to fix all the issues that plague concurrency and make it really, really hard to get right.
+</p>
+<p>
+  No mutexes? No needing to worry about an operating system starving a thread? Control over context switching? Sweet! I can't wait to try it!
+</p>
+<p>
+  The first step in the journey to understanding coroutines is the {{ codeify("yield") }} keyword. This is another concept that I haven't run into in any other programming language that I've used. It provides a function (in a general sense) the ability to pause execution and send a value to the caller, with the understanding that it can be resumed.
+</p>
+<p>
+  I'd imagine the most frequent usage of {{ codeify("yield") }} is in iterators and generators. Here's a really simple example:
+</p>
+{{ codeify("
+def counter(max_num):
+    ''' Yields numbers from 0 to max_num, iterating by 1 '''
+    for ii in range(max_num):
+        yield ii
+
+# Main function
+if __name__ == '__main__':
+    # Creates a list from the numbers yielded by counter
+    count = [str(ii) for ii in counter(3)]
+    print(f'Count is {count}')
+
+# Output    
+Count is ['0', '1', '2']
+", lang='py') }}
+<p>
+  Let's visualize line by line through what is happening here. Our visualization might not be the exact steps Python takes to execute this program, but it will help to illustrate a point. First, the program executes the right side of this line:
+</p>
+{{ codeify("
+count = [str(ii) for ii in counter(3)]
+") }}
+<p>
+  It executes the first loop of the for loop in the {{ codeify("counter") }} function by setting {{ codeify("ii") }} to 0 and continuing onto {{ codeify("yield") }} keyword. Once it reaches it, it sends the expression after {{ codeify("yield") }} to the caller (the main function). The value of {{ codeify("ii") }} is then converted into a string and appended to the {{ codeify("count") }} list in the main function. Execution in {{ codeify("counter") }} is paused, but the internal state remains.
+</p>
+<p>
+  Since the for loop in {{ codeify("counter(3)") }} has not been satisfied yet, the context is switched back to {{ codeify("counter") }}. The {{ codeify("ii") }} variable is now 1, which is then sent back to the main function to be appended to the {{ codeify("count") }} list. This same process is repeated for {{ codeify("ii = 2") }}.
+</p>
+<p>
+  After 2 is yielded to the main function, {{ codeify("counter") }} has finished its execution. Execution is permanently switched back to the main function context and the internal state of {{ codeify("counter") }} is reset. The main function continues on and runs to completion.
+</p>
+<p>
+  In reality, {{ codeify("counter") }} creates a generator object with the internal states of its iterations. This generator object can then be iterated through, converted to a list, etc. But this is just a Python implementation detail.
+</p>
+<p>
+  The same thing can be implemented with a user-defined class with the {{ codeify("__iter__") }} method. The {{ codeify("__iter__") }} method is really similar to the function defined above. Actually, the method contents can be exactly the same. Here's an example of a Counter class:
+</p>
+{{ codeify("
+>>> class Counter:
+...     def __init__(self, max_num):
+...         self._max_num = max_num
+...
+...     def __iter__(self):
+...         for ii in range(self._max_num):
+...             yield ii
+... 
+>>> count = [ii for ii in Counter(3)]
+>>> print(f'Count is {count}')
+Count is [0, 1, 2]
+", lang='pycon') }}
+<p>
+  As you can see, {{ codeify("Counter") }} can be used as a generator, just like the previous {{ codeify("counter") }} generator function.
+</p>
+<p>
+  Once a class or a function is made iterable with the {{ codeify("yield") }} keyword, the {{ codeify("next") }} keyword can be used by the calling class to temporarily switch context to the function/method using {{ codeify("yield") }}. Once {{ codeify("yield") }} is encountered in the iterable, the iterable passes a value back to the calling class and the context switches again.  Here's another really simple example reading a haiku from 'haiku.txt' on my local file system.
+</p>
+{{ codeify("
+>>> class Reader:
+...     def __init__(self, file_name):
+...         self._file_name = file_name
+...         self._file_handle = None
+...     def __enter__(self):
+...         self._file_handle = open(self._file_name, 'r')
+...         return self
+...     def __exit__(self, type, value, tb):
+...         self._file_handle.close()
+...     def __iter__(self):
+...         for line in self._file_handle:
+...             yield line
+... 
+>>> with Reader('haiku.txt') as reader:
+>>>     counter = 0
+>>>     while True:
+>>>         counter += 1
+>>>         contents = next(iter(reader))
+>>>         print(f'Line {counter}: {contents}', end='')
+>>> 
+Line 1: An old silent pond
+Line 2: A frog jumps into the pond--
+Line 3: Splash! Silence again.
+", lang='pycon') }}
+<p>
+  For those wondering, this poem is called <em>The Old Pond</em>, by Matsuo Bashō. I'm certainly not clever enough to come up with that.
+</p>
+<p>
+  For now, we can skip over the {{ codeify("__enter__") }} and {{ codeify("__exit__") }} methods in the Reader class. Those methods are used to implement the {{ codeify("with") }} keyword which automatically opens and closes the 'haiku.txt' file. I'd like to cover context managers like the {{ codeify("with") }} keyword in another post. The important parts are the {{ codeify("__iter__") }} method and the {{ codeify("next") }} keyword. 
+</p>
+<p>
+  As you can see, the Reader class implements the {{ codeify("__iter__") }} method, which loops through each line in {{ codeify("self._file_handle") }} (the haiku.txt file). Each time {{ codeify("yield") }} is encountered, context is switched back to the main function (those lines with {{ codeify(">>>") }} preceding them). The magic happens in this line:
+</p>
+{{ codeify("
+contents = next(iter(reader))
+") }}
+<p>
+  Here, an iterator is retrieved for the {{ codeify("Reader") }} class (by using the {{ codeify("__iter__") }} function). Each call to {{ codeify("next") }} retrieves the next value yielded from the iterator (as in, the next value yielded from {{ codeify("__iter__") }}). Once the value is retrieved and the context is given back to the main function, the retrieved line is printed out to the user. 
+</p>
+<p>
+  This context switching implemented by {{ codeify("next") }} is the basis for how coroutines and asynchronous programming works in Python!
+</p>
+<p>
+  There's no requirement that {{ codeify("next") }} has to be in quite as tight of a loop as it sits in this example. In fact, it can be one step in a very complex calculation. That's what makes this so powerful. One example which comes to the top of my head because I see it everywhere (including Fluent Python) is working with very large files. 
+</p>
+<p>
+  If 'haiku.txt' was not three lines, but millions of lines long, it would not be efficient (or even possible) to load the entire thing into memory and churn through as in the above example. It may be required to load the file into bite-sized pieces. A good approach would be to use a class which loaded the file piece-by-piece and could be iterated over by an algorithm which operated on each individual piece. In fact, the algorithm could look exactly the same as one which worked on a three-line haiku. Only the class which loads the file (and provides the iterator) would have to know that it worked with a giant file. 
+</p>
+<p>That's some good object oriented programming.</p>
+<p>
+  There are still some shortcomings and implementation details that I left out here. I will cover them in future blog posts. In the meantime, I'd like to cover one more piece that anyone who was trying out these examples may have uncovered. 
+</p>
+<p>
+  When an iterator reaches the end of its iterable range, it notifies the caller with a {{ codeify("StopIteration") }} exception. This is a valid, expected condition and should be handled by the calling code. In simple iterators, this can be as simple as catching the exception, {{ codeify("pass") }}-ing and continuing on. More complex examples will be handled in future posts. 
+</p>
+<p>Expanding the previous example to handle the {{ codeify("StopIteration") }} exception:</p>
+{{ codeify("
+>>> with Reader('/proj/skratch/test.txt') as reader:
+>>>     counter = 0
+>>>     while True:
+>>>         counter += 1
+>>>         try:
+>>>             contents = next(iter(reader))
+>>>         except StopIteration:
+>>>             break
+>>>         print(f'Line {counter}: {contents}', end='')
+ 
+Line 1: An old silent pond
+Line 2: A frog jumps into the pond--
+Line 3: Splash! Silence again.
+", lang='pycon') }}
+<p>
+  This exception will play an interesting role in the upcoming discussion on coroutines.
+</p>
