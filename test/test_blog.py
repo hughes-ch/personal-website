@@ -322,3 +322,44 @@ class TestBlog(unittest.TestCase):
             response = client.get(
                 f'/{self.config["Routes"]["Json"]}/invalid.json')
             self.assertEquals(response.status_code, 404)
+
+    def test_canonical_links(self):
+        """ Tests canonical links in each page type
+
+            :param: None
+            :return: None
+            """
+        input_output_pairs = []
+
+        latest_url = test.util.get_latest_url()
+        input_output_pairs.append(
+            ('/', f'{self.config["Routes"]["BaseUrl"]}{latest_url}')
+        )
+        input_output_pairs.append(
+            ('/about',
+             (f'{self.config["Routes"]["BaseUrl"]}/'
+              f'{self.config["Routes"]["AboutUrl"]}')
+            )
+        )
+        input_output_pairs.append(
+            ('/archive',
+            (f'{self.config["Routes"]["BaseUrl"]}/'
+             f'{self.config["Routes"]["ArchiveUrl"]}')
+            )
+        )
+        input_output_pairs.append(
+            (latest_url, f'{self.config["Routes"]["BaseUrl"]}{latest_url}')
+        )
+             
+        with self.blog.app.test_client() as client:
+            for route, canonical_url in input_output_pairs:
+                response = client.get(route).data
+                soup = bs4.BeautifulSoup(response, 'html.parser')
+                canonical_links = soup.find_all('link', rel='canonical')
+
+                self.assertEqual(len(canonical_links), 1)
+                self.assertEqual(canonical_links[0]['href'], canonical_url)
+                self.assertEqual(
+                    client.get(canonical_links[0]['href']).status_code,
+                    200)
+            

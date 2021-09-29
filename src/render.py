@@ -115,7 +115,9 @@ class Renderer:
             if page < 1 or page > len(posts_per_page):
                 return self.render_404()
             else:
-                self._context['posts'] = posts_per_page[page-1]
+                self._context['posts'] = [
+                    flask.Markup(post.contents)
+                    for post in posts_per_page[page-1]]
 
             if page > 1:
                 self._context['prev_page'] = page-1
@@ -128,8 +130,15 @@ class Renderer:
             if page != 1:
                 return self.render_404()
 
-        # Link SEO structured data
+        # Render SEO content
         self._context['json_script'] = self._settings['Routes']['IndexJson']
+        try: 
+            self._context['canonical_url'] = (
+                f'{self._settings["Routes"]["BaseUrl"]}'
+                f'{posts_per_page[page-1][0].full_url}')
+        except IndexError:
+            self._context['canonical_url'] = (
+                f'{self._settings["Routes"]["BaseUrl"]}')
 
         # Render all posts to template
         self._context['title'] = self._settings['Render']['IndexTitle']
@@ -177,6 +186,8 @@ class Renderer:
 
         # Render SEO
         self._context['json_script'] = f'{post.rel_url}.json'
+        self._context['canonical_url'] = (
+            f'{self._settings["Routes"]["BaseUrl"]}{post.full_url}')
 
         # Render post
         try:
@@ -197,6 +208,9 @@ class Renderer:
 
         self._context['title'] = self._settings['Render']['AboutTitle']
         self._context['json_script'] = self._settings['Routes']['AboutJson']
+        self._context['canonical_url'] = (
+            f'{self._settings["Routes"]["BaseUrl"]}/'
+            f'{self._settings["Routes"]["AboutUrl"]}')
 
         return flask.render_template(
             self._settings['Templates']['About'],
@@ -214,6 +228,9 @@ class Renderer:
         self._context['posts'] = list(self._postlist)
         self._context['title'] = self._settings['Render']['ArchiveTitle']
         self._context['json_script'] = self._settings['Routes']['ArchiveJson']
+        self._context['canonical_url'] = (
+            f'{self._settings["Routes"]["BaseUrl"]}/'
+            f'{self._settings["Routes"]["ArchiveUrl"]}')
 
         return flask.render_template(
             self._settings['Templates']['Archive'],
@@ -286,7 +303,7 @@ class Renderer:
             if mod == 0:
                 posts_per_page.append([])
 
-            posts_per_page[-1].append(flask.Markup(post.contents))
+            posts_per_page[-1].append(post)
 
         return posts_per_page
 
