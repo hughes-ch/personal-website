@@ -37,10 +37,6 @@ class Renderer:
         self._postlist = None
         self._settings = settings
 
-        self._context = {
-            'settings': self._settings,
-        }
-
         # Setup parser objects
         self._lang_config = {
             'bash': {
@@ -108,44 +104,47 @@ class Renderer:
         posts_per_page = self._find_posts_per_page(
             int(self._settings['Render']['RenderedPostCount']))
 
-        self._context['prev_page'] = None
-        self._context['next_page'] = None
+        context = {
+            'settings': self._settings,
+            'prev_page': None,
+            'next_page': None,
+        }
         
         if len(posts_per_page) > 0:
             if page < 1 or page > len(posts_per_page):
                 return self.render_404()
             else:
-                self._context['posts'] = [
+                context['posts'] = [
                     flask.Markup(post.contents)
                     for post in posts_per_page[page-1]]
 
             if page > 1:
-                self._context['prev_page'] = page-1
+                context['prev_page'] = page-1
             if page < len(posts_per_page):
-                self._context['next_page'] = page+1
+                context['next_page'] = page+1
             
         else:
-            self._context['posts'] = []
+            context['posts'] = []
 
             if page != 1:
                 return self.render_404()
 
         # Render SEO content
-        self._context['json_script'] = self._settings['Routes']['IndexJson']
+        context['json_script'] = self._settings['Routes']['IndexJson']
         try: 
-            self._context['canonical_url'] = (
+            context['canonical_url'] = (
                 f'{self._settings["Routes"]["BaseUrl"]}'
                 f'{posts_per_page[page-1][0].full_url}')
         except IndexError:
-            self._context['canonical_url'] = (
+            context['canonical_url'] = (
                 f'{self._settings["Routes"]["BaseUrl"]}')
 
         # Render all posts to template
-        self._context['title'] = self._settings['Render']['IndexTitle']
+        context['title'] = self._settings['Render']['IndexTitle']
 
         return flask.render_template(
             self._settings['Templates']['Index'],
-            **self._context)
+            **context)
 
     def render_404(self):
         """ Renders the 404 page
@@ -156,12 +155,15 @@ class Renderer:
         if not self._is_configured():
             raise RendererNotConfiguredException
 
-        self._context['title'] = self._settings['Render']['ErrorTitle']
-        self._context['json_script'] = self._settings['Routes']['ArchiveJson']
+        context = {
+            'settings': self._settings,
+            'title': self._settings['Render']['ErrorTitle'],
+            'json_script': self._settings['Routes']['ArchiveJson'],
+        }
 
         return flask.render_template(
             self._settings['Templates']['Err404'],
-            **self._context), 404
+            **context), 404
 
     def render_post(self, post_name):
         """ Renders single post
@@ -176,24 +178,26 @@ class Renderer:
         try:
             post = self._postlist.get(post_name)
 
-            self._context['title'] = (
-                f'{post.title} - {self._settings["Render"]["BlogTitle"]}')
-            self._context['post'] = flask.Markup(post.contents)
-            self._context['post_description'] = post.description
+            context = {
+                'settings': self._settings,
+                'title': f'{post.title} - {self._settings["Render"]["BlogTitle"]}',
+                'post': flask.Markup(post.contents),
+                'post_description': post.description,
+            }
             
         except ValueError:
             return self.render_404()
 
         # Render SEO
-        self._context['json_script'] = f'{post.rel_url}.json'
-        self._context['canonical_url'] = (
+        context['json_script'] = f'{post.rel_url}.json'
+        context['canonical_url'] = (
             f'{self._settings["Routes"]["BaseUrl"]}{post.full_url}')
 
         # Render post
         try:
             return flask.render_template(
                 self._settings['Templates']['Post'],
-                **self._context)
+                **context)
         except jinja2.exceptions.TemplateNotFound:
             return self.render_404()
 
@@ -206,15 +210,18 @@ class Renderer:
         if not self._is_configured():
             raise RendererNotConfiguredException
 
-        self._context['title'] = self._settings['Render']['AboutTitle']
-        self._context['json_script'] = self._settings['Routes']['AboutJson']
-        self._context['canonical_url'] = (
-            f'{self._settings["Routes"]["BaseUrl"]}/'
-            f'{self._settings["Routes"]["AboutUrl"]}')
+        context = {
+            'settings': self._settings,
+            'title': self._settings['Render']['AboutTitle'],
+            'json_script': self._settings['Routes']['AboutJson'],
+            'canonical_url': (
+                f'{self._settings["Routes"]["BaseUrl"]}/'
+                f'{self._settings["Routes"]["AboutUrl"]}')
+        }
 
         return flask.render_template(
             self._settings['Templates']['About'],
-            **self._context)
+            **context)
 
     def render_archive(self):
         """ Renders the "archive" page
@@ -225,16 +232,19 @@ class Renderer:
         if not self._is_configured():
             raise RendererNotConfiguredException
 
-        self._context['posts'] = list(self._postlist)
-        self._context['title'] = self._settings['Render']['ArchiveTitle']
-        self._context['json_script'] = self._settings['Routes']['ArchiveJson']
-        self._context['canonical_url'] = (
-            f'{self._settings["Routes"]["BaseUrl"]}/'
-            f'{self._settings["Routes"]["ArchiveUrl"]}')
+        context = {
+            'settings': self._settings,
+            'posts': list(self._postlist),
+            'title': self._settings['Render']['ArchiveTitle'],
+            'json_script': self._settings['Routes']['ArchiveJson'],
+            'canonical_url': (
+                f'{self._settings["Routes"]["BaseUrl"]}/'
+                f'{self._settings["Routes"]["ArchiveUrl"]}')
+        }
 
         return flask.render_template(
             self._settings['Templates']['Archive'],
-            **self._context)
+            **context)
 
     def serve_json(self, json_script_name):
         """ Serve up json file. Dynamically created.

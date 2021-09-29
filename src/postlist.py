@@ -8,6 +8,7 @@ import bs4
 import collections
 import flask
 import pathlib
+import threading
 
 from datetime import datetime
 
@@ -70,6 +71,11 @@ class PostList:
         self._root_path = root_path
         self._settings = settings
 
+        # Lock might not be necessary, but the bug that would result if it
+        # wasn't here would be really hard to track down. Only needed if
+        # multiple threads are started by Flask application. 
+        self._lock = threading.Lock()
+
     def __iter__(self):
         """ Returns an iterator. Loads posts if not done already
 
@@ -91,28 +97,36 @@ class PostList:
         except KeyError:
             raise ValueError
 
+    def _check_configure(self):
+        """ Determines if post information needs to be loaded
+
+            :return: None
+            """
+        with self._lock:
+            if self._posts is None:
+                self._load_posts()
+
     def _load_posts(self):
-        """ Loads the post information if not done already
+        """ Loads the post information 
 
             :param: None
             :return: None
             """
-        if self._posts is None:
-            post_list = []
+        post_list = []
 
-            post_path = (pathlib.Path(self._root_path) /
-                self._settings['Routes']['FlaskTemplate'] /
-                self._settings['Routes']['PostsUrl'])
+        post_path = (pathlib.Path(self._root_path) /
+                     self._settings['Routes']['FlaskTemplate'] /
+                     self._settings['Routes']['PostsUrl'])
 
-            for path in post_path.glob('*.html'):
-                post_list.append(Post(path))
+        for path in post_path.glob('*.html'):
+            post_list.append(Post(path))
 
-            sorted_post_list = sorted(
-                post_list,
-                key=lambda entry: entry.date,
-                reverse=True)
+        sorted_post_list = sorted(
+            post_list,
+            key=lambda entry: entry.date,
+            reverse=True)
 
-            self._posts = collections.OrderedDict(
-                [(post.rel_url, post) for post in sorted_post_list])
+        self._posts = collections.OrderedDict(
+            [(post.rel_url, post) for post in sorted_post_list])
 
             
