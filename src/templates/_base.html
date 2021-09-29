@@ -24,8 +24,9 @@
     <link href='{{ url_for("static", filename="icon/favicon-192x192.png") }}' rel='apple-touch-icon' type='image/png' sizes='192x192'>
 
     {% block meta %}
-    <meta name='description' content='Blog and portfolio for Chris Hughes, a freelance software developer based out of the state of New Hampshire in the United States.'>
+    <meta name='description' content='{{ settings["Render"]["BlogDescription"] }}'>
     {% endblock %}
+    <script src='{{ url_for("serve_json", name=json_script) }}' type="application/ld+json"></script>
   </head>
   <body>
     <div class='page-content'>

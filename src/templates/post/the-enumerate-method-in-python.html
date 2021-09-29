@@ -5,8 +5,8 @@
  #   :license: MIT License. See LICENSE.md for details. All rights reserved for post contents
  #}
 
-{{ set_description("Python's 'enumerate' keyword provides the index AND the object when iterating. I find it really useful. Here, I'll explain how to use it.") }}
-<h3><a href='{{ post }}' class='link'>The Enumerate Method in Python</a></h3>
+<!--Python's 'enumerate' keyword provides the index AND the object when iterating. I find it really useful. Here, I'll explain how to use it.-->
+<h3><a href='{{ post_url }}' class='link'>The Enumerate Method in Python</a></h3>
 <p class='post-caption' id='date'>May 6, 2021</p>
 <p>
   I'm just starting my journey into Python 3.8 from C++98. It's a long way to go, and as I learn more, I realize just how far behind the times I am. Nevertheless, it's incredibly rewarding. I find so many examples of how a programming language created in the last decade solves problems that I run into on a daily basis at work.
@@ -16,6 +16,7 @@
 </p>
 <p>
   In reality, I might be able to use the enumerate method every single day (though maybe that just comes because of my heavy C++ accent as I slowly get used to Python). Here's an example:
+</p>
 {{ codeify("
 names = [
     'Abigail', 
@@ -28,7 +29,9 @@ for ii in range(len(names)):
     print(f'The name at position {ii} is {names[ii]}')
 
 ", lang='py') }}
+<p>
   In C++, this is just the way things are done. However, Python's enumerate method makes this loop a little more simple and more Pythonic:
+</p>
 {{ codeify("
 for pos,name in enumerate(names):
     print(f'The name at position {pos} is {name}')
@@ -38,6 +41,7 @@ for pos,name in enumerate(names):
 </p>
 <p>
   What the enumerate method does is return each index of the iterable as an index, value pair represented by a tuple. For instance, if I were to enumerate the names list, I would get:
+</p>
 {{ codeify("
 >>> print(list(enumerate(names)))
 [(0, 'Abigail'), (1, 'Betty'), (2, 'Carlos'), (3, 'Dan')]

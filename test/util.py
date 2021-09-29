@@ -17,7 +17,8 @@ def load_test_config():
         :return: Config from INI modified to be in a test config
         """
     ini_file_path = pathlib.Path(__file__).parent / 'blog.ini'
-    config = configparser.ConfigParser()
+    config = configparser.ConfigParser(
+        interpolation=configparser.ExtendedInterpolation())
     config.read(str(ini_file_path))
     config['Flask']['Testing'] = 'True'
 
@@ -59,3 +60,20 @@ def validate_links(context, html):
             response.status_code,
             bad_status_codes,
             msg=f'{response.status_code} returned by "{href}"')
+
+def get_latest_url():
+    """ Finds the latest blog post URL
+
+        :param: None
+        :return: <str> Representing latest blog post URL
+        """
+    config = load_test_config()
+
+    with Blog(config).app.test_client() as client:
+        response = client.get('/').data
+        soup = bs4.BeautifulSoup(response, 'html.parser')
+        links = soup.find_all('a')
+        
+        for link in links:
+            if config['Routes']['PostsUrl'] in link['href']:
+                return link['href']

@@ -14,6 +14,7 @@ import pygments.lexers
 import pygments.util
 
 from .postlist import PostList
+from .struct_data import StructuredDataFactory
 
 class RendererNotConfiguredException(Exception):
     """ Raised when Renderer is not configured """
@@ -91,9 +92,7 @@ class Renderer:
         # Connect context processors
         @self._app.context_processor
         def _connect_context_processors():
-            return dict(
-                codeify=self._codeify,
-                set_description=self._set_description)
+            return dict(codeify=self._codeify)
 
     def render_latest(self, page=1):
         """ Renders the latest blog posts
@@ -128,10 +127,13 @@ class Renderer:
 
             if page != 1:
                 return self.render_404()
-            
+
+        # Link SEO structured data
+        self._context['json_script'] = self._settings['Routes']['IndexJson']
+
         # Render all posts to template
         self._context['title'] = self._settings['Render']['IndexTitle']
-        
+
         return flask.render_template(
             self._settings['Templates']['Index'],
             **self._context)
@@ -146,7 +148,8 @@ class Renderer:
             raise RendererNotConfiguredException
 
         self._context['title'] = self._settings['Render']['ErrorTitle']
-        
+        self._context['json_script'] = self._settings['Routes']['ArchiveJson']
+
         return flask.render_template(
             self._settings['Templates']['Err404'],
             **self._context), 404
@@ -160,17 +163,22 @@ class Renderer:
         if not self._is_configured():
             raise RendererNotConfiguredException
 
-        self._context['post'] = str(
-            pathlib.Path('/') / self._settings['Routes']['PostsUrl'] / post_name)
+        # Determine post contents
+        try:
+            post = self._postlist.get(post_name)
 
-        try: 
-            post_title = self._postlist.get(post_name).title
             self._context['title'] = (
-                f'{post_title} - {self._settings["Render"]["BlogTitle"]}')
+                f'{post.title} - {self._settings["Render"]["BlogTitle"]}')
+            self._context['post'] = flask.Markup(post.contents)
+            self._context['post_description'] = post.description
             
         except ValueError:
-            self._context['title'] = self._settings['Render']['BlogTitle']
+            return self.render_404()
 
+        # Render SEO
+        self._context['json_script'] = f'{post.rel_url}.json'
+
+        # Render post
         try:
             return flask.render_template(
                 self._settings['Templates']['Post'],
@@ -188,6 +196,7 @@ class Renderer:
             raise RendererNotConfiguredException
 
         self._context['title'] = self._settings['Render']['AboutTitle']
+        self._context['json_script'] = self._settings['Routes']['AboutJson']
 
         return flask.render_template(
             self._settings['Templates']['About'],
@@ -204,11 +213,36 @@ class Renderer:
 
         self._context['posts'] = list(self._postlist)
         self._context['title'] = self._settings['Render']['ArchiveTitle']
+        self._context['json_script'] = self._settings['Routes']['ArchiveJson']
 
         return flask.render_template(
             self._settings['Templates']['Archive'],
             **self._context)
 
+    def serve_json(self, json_script_name):
+        """ Serve up json file. Dynamically created.
+
+            :param name: <str> Name of json script to serve
+            :return: JSON contents or 404
+            """
+        if not self._is_configured():
+            raise RendererNotConfiguredException
+
+        struct_data_factory = StructuredDataFactory(self._settings)
+
+        if self._settings['Routes']['IndexJson'] == json_script_name:
+            return str(struct_data_factory.create_blog(self._postlist))
+        elif self._settings['Routes']['ArchiveJson'] == json_script_name:
+            return str(struct_data_factory.create_archive(self._postlist))
+        elif self._settings['Routes']['AboutJson'] == json_script_name:
+            return str(struct_data_factory.create_about())
+        else:
+            for post in self._postlist:
+                if json_script_name == f'{post.rel_url}.json':
+                    return str(struct_data_factory.create_post(post))
+
+            return self.render_404()
+            
     def _is_configured(self):
         """ Checks that an instance is configured enough to render a template
 
@@ -252,7 +286,7 @@ class Renderer:
             if mod == 0:
                 posts_per_page.append([])
 
-            posts_per_page[-1].append(str(post.path))
+            posts_per_page[-1].append(flask.Markup(post.contents))
 
         return posts_per_page
 
@@ -268,13 +302,3 @@ class Renderer:
             code,
             self._lang_config.get(lang, fallback_config)['lexer'],
             self._lang_config.get(lang, fallback_config)['formatter'])
-
-    def _set_description(self, description):
-        """ Overrides the description for a page
-
-            :param description: <str> to go in the meta description tag
-            :return: Empty string
-            """
-        self._context['post_description'] = description
-        return ""
-

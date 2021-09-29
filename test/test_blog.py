@@ -5,11 +5,13 @@
     :license: MIT License. See LICENSE.md for details
 """
 import bs4
+import json
 import pathlib
 import requests
 import test.util
 import unittest
 
+from parameterized import parameterized
 from src.blog import Blog
 
 class TestBlog(unittest.TestCase):
@@ -197,19 +199,112 @@ class TestBlog(unittest.TestCase):
             :param: None
             :return: None
             """
+        latest_post_url = test.util.get_latest_url()
+        
         with self.blog.app.test_client() as client:
             response = client.get('/').data
             soup = bs4.BeautifulSoup(response, 'html.parser')
             meta_tag = soup.find('meta', attrs={'name': 'description'})
             self.assertGreater(len(meta_tag['content']), 0)
 
-            links = soup.find_all('a')
-            for link in links:
-                if self.config['Routes']['PostsUrl'] in link['href']:
-                    latest_post_url = link['href']
-                    break
-                
             response = client.get(latest_post_url).data
             soup = bs4.BeautifulSoup(response, 'html.parser')
             meta_tag = soup.find('meta', attrs={'name':'description'})
             self.assertGreater(len(meta_tag['content']), 0)
+
+    def test_struct_data(self):
+        """ Test that each page serves structured data
+
+            :param: None
+            :return: None
+            """
+        latest_post_url = pathlib.Path(test.util.get_latest_url())
+        
+        with self.blog.app.test_client() as client:
+            response_expected_pairs = []
+            response_expected_pairs.append(
+                (client.get('/').data,
+                 self.config['Routes']['IndexJson']))
+            response_expected_pairs.append(
+                (client.get(f'{latest_post_url}').data,
+                 f'{latest_post_url.stem}.json'))
+            response_expected_pairs.append(
+                (client.get(f'/{self.config["Routes"]["AboutUrl"]}').data,
+                 self.config["Routes"]["AboutJson"]))
+            response_expected_pairs.append(
+                (client.get(f'/{self.config["Routes"]["ArchiveUrl"]}').data,
+                 self.config["Routes"]["ArchiveJson"]))
+
+            for response, expected in response_expected_pairs:
+                soup = bs4.BeautifulSoup(response, 'html.parser')
+                struct_data_blocks = soup.find_all(
+                    'script',
+                    type='application/ld+json')
+
+                self.assertEqual(len(struct_data_blocks), 1)
+                self.assertIn(expected, struct_data_blocks[0]['src'])
+                self.assertIn('.json', struct_data_blocks[0]['src'])
+                self.assertEqual(
+                    client.get(struct_data_blocks[0]['src']).status_code,
+                    200)
+
+    @parameterized.expand([
+        ('IndexJson', 'Blog'),
+        ('AboutJson', 'Person'),
+        ('ArchiveJson', 'Blog')
+    ])
+    def test_serve_json(self, route, schema_type):
+        """ Test that JSON is served correctly
+
+            :param route: <str> Route to JSON file
+            :param schema_type: <str> Schema type in JSON
+            :return: None
+            """
+        with self.blog.app.test_client() as client:
+            response = client.get(
+                f'/{self.config["Routes"]["Json"]}'
+                f'/{self.config["Routes"][route]}').data
+                
+            self.assertIn(f'"@type": "{schema_type}"', str(response))
+            if route == 'IndexJson':
+                self.assertIn(b'mainEntity', response)
+                link_attempt_resp = client.get(
+                    json.loads(response)['mainEntity']['url'])
+                self.assertEquals(link_attempt_resp.status_code, 200)
+            else:
+                self.assertNotIn(b'mainEntity', response)
+
+            if route == 'AboutJson':
+                link_attempt_resp = client.get(
+                    json.loads(response)['image'])
+                self.assertEquals(link_attempt_resp.status_code, 200)
+                
+            link_attempt_resp = client.get(json.loads(response)['url'])
+            self.assertEquals(link_attempt_resp.status_code, 200)
+            
+    def test_serve_json_for_post(self):
+        """ Test JSON is served correctly for posts
+
+            :return: None
+            """
+        latest_post_url = pathlib.Path(test.util.get_latest_url())
+        
+        with self.blog.app.test_client() as client:
+            response = client.get(
+                f'/{self.config["Routes"]["Json"]}'
+                f'/{latest_post_url.stem}.json').data
+                
+            self.assertIn(f'"@type": "BlogPosting"', str(response))
+            link_attempt_resp = client.get(json.loads(response)['url'])
+            self.assertEquals(link_attempt_resp.status_code, 200)
+
+    def test_serve_json_404(self):
+        """ Test that JSON is not served for invalid file
+
+            :param: None
+            :return: None
+            """
+        with self.blog.app.test_client() as client:
+            response = client.get(
+                f'/{self.config["Routes"]["Json"]}/invalid.json')
+            self.assertEquals(response.status_code, 404)

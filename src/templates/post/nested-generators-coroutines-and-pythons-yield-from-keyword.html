@@ -5,8 +5,8 @@
  #   :license: MIT License. See LICENSE.md for details. All rights reserved for post contents
  #}
 
-{{ set_description("This blog post introduces nested generators and Python's yield from keyword.") }}
-<h3><a href='{{ post }}' class='link'>Nested Generators, Coroutines, and Python's 'Yield From' Keyword</a></h3>
+<!--This blog post introduces nested generators and Python's yield from keyword.-->
+<h3><a href='{{ post_url }}' class='link'>Nested Generators, Coroutines, and Python's 'Yield From' Keyword</a></h3>
 <p class='post-caption' id='date'>May 22, 2021</p>
 <p>
   Continuing on with the introduction to coroutines and eventually asynchronous programming in Python, I'll introduce the motivation and use of Python's {{ codeify("yield from") }} keyword. <a href='/post/introduction-to-coroutines' class='underlined link'>In my last post</a>, I introduced generators-as-coroutines in Python. I ended with an example of a not-so-flattering syntax for retrieving the return value from generators which have raised the StopIteration exception.
