@@ -347,7 +347,7 @@ class TestBlog(unittest.TestCase):
              f'{self.config["Routes"]["ArchiveUrl"]}')
             )
         )
-        input_output_pairs.append(
+        input_output_pairs.append( 
             (latest_url, f'{self.config["Routes"]["BaseUrl"]}{latest_url}')
         )
              
