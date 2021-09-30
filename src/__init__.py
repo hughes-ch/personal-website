@@ -4,20 +4,20 @@
     :copyright: Copyright (c) 2021 Chris Hughes
     :license: MIT License. See LICENSE.md for details
 """
-
-import configparser
-import pathlib
+import flask_frozen
 
 from .blog import Blog
+from .freezer import Freezer
 
-def create_app(test_config=None):
+def create_app(test_config=None, frozen=False):
     """ Create and configure blog app """
-    ini_file_path = pathlib.Path(__file__).parent / 'blog.ini'
-    
-    config = configparser.ConfigParser(
-        interpolation=configparser.ExtendedInterpolation())
-    
-    config.read(str(ini_file_path))
-    
+    config = Blog.get_config()
     blog = Blog(config)
-    return blog.app
+
+    if frozen:
+        freezer = Freezer(blog.app, config)
+        freezer.freeze()
+        print('--- Static App Ready ---')
+        return flask_frozen.Freezer(blog.app).make_static_app()
+    else:
+        return blog.app

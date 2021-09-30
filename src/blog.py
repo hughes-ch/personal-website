@@ -4,13 +4,30 @@
     :copyright: Copyright (c) 2021 Chris Hughes
     :license: MIT License. See LICENSE.md for details
 """
-from .render import Renderer
-
+import configparser
 import flask
+import flask_frozen
 import pathlib
+
+from .render import Renderer
+from .freezer import Freezer 
 
 class Blog:
     """ Creates and maintains the Flask app """
+
+    def get_config():
+        """ class method used to get the Blog config
+
+            :param: None
+            :return: <configparser.ConfigParser>
+            """
+        ini_file_path = pathlib.Path(__file__).parent / 'blog.ini'
+    
+        config = configparser.ConfigParser(
+            interpolation=configparser.ExtendedInterpolation())
+    
+        config.read(str(ini_file_path))
+        return config
 
     def __init__(self, settings):
         """ Constructor
@@ -27,14 +44,15 @@ class Blog:
             template_folder=settings['Routes']['FlaskTemplate'])
 
         self.app.config.from_mapping(settings['Flask'])
-
+        self.app.url_map.strict_slashes = False
+        
         # Create renderer object
         self.renderer = Renderer(settings)
         self.renderer.connect(self.app)
 
         # Create index page
         @self.app.route('/')
-        @self.app.route(f'/{settings["Routes"]["PageUrl"]}/<int:page>')
+        @self.app.route(f'/{settings["Routes"]["PageUrl"]}/<int:page>/')
         def index(page=1):
             """ Creates the index page with latest blog posts
 
@@ -44,18 +62,17 @@ class Blog:
             return self.renderer.render_latest(page=page)
         
         # Create about page
-        @self.app.route(f'/{settings["Routes"]["AboutUrl"]}')
+        @self.app.route(f'/{settings["Routes"]["AboutUrl"]}/')
         def about():
             return self.renderer.render_about()
 
         # Create archive page
-        @self.app.route(f'/{settings["Routes"]["ArchiveUrl"]}')
-        @self.app.route(f'/{settings["Routes"]["ArchiveUrl"]}/<int:page>')
-        def archive(page=1):
+        @self.app.route(f'/{settings["Routes"]["ArchiveUrl"]}/')
+        def archive():
             return self.renderer.render_archive()
 
         # Create individual post pages
-        @self.app.route(f'/{settings["Routes"]["PostsUrl"]}/<name>')
+        @self.app.route(f'/{settings["Routes"]["PostsUrl"]}/<name>/')
         def blog_post(name=None):
             """ Creates an individual post page
 
@@ -98,3 +115,12 @@ class Blog:
                 """
             return self.renderer.serve_json(name)
 
+        # Build for deployment
+        @self.app.cli.command('build')
+        def freeze():
+            """ Builds static HTML files from the flask app
+
+                :return: None
+                """
+            freezer = Freezer(self.app, settings)
+            freezer.freeze()

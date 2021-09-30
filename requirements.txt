@@ -5,6 +5,7 @@ click==8.0.1
 configparser==5.0.2
 coverage==5.5
 Flask==2.0.1
+Frozen-Flask==0.18
 idna==3.2
 itsdangerous==2.0.1
 Jinja2==3.0.1

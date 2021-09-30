@@ -68,7 +68,7 @@ class TestBlog(unittest.TestCase):
             :return: None
             """
         response = self.get_index_page().data
-        test.util.validate_links(self, response)
+        test.util.validate_links(self, self.blog.app.test_client(), response)
 
     def test_index_pagination(self):
         """ Test the pagination feature of the main index page
@@ -137,7 +137,7 @@ class TestBlog(unittest.TestCase):
             response = client.get('/not-a-page')
             self.assertEquals(response.status_code, 404)
 
-        test.util.validate_links(self, response.data)
+        test.util.validate_links(self, self.blog.app.test_client(), response.data)
 
     def test_render_all_posts(self):
         """ Test when RenderedPostCount > amount of posts
@@ -338,13 +338,13 @@ class TestBlog(unittest.TestCase):
         input_output_pairs.append(
             ('/about',
              (f'{self.config["Routes"]["BaseUrl"]}/'
-              f'{self.config["Routes"]["AboutUrl"]}')
+              f'{self.config["Routes"]["AboutUrl"]}/')
             )
         )
         input_output_pairs.append(
             ('/archive',
             (f'{self.config["Routes"]["BaseUrl"]}/'
-             f'{self.config["Routes"]["ArchiveUrl"]}')
+             f'{self.config["Routes"]["ArchiveUrl"]}/')
             )
         )
         input_output_pairs.append( 

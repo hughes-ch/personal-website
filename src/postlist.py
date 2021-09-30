@@ -31,7 +31,7 @@ class Post:
         
         self.contents = flask.render_template(
             str(self.rel_path),
-            post_url=self.full_url)
+            post_url=f'{self.full_url}/')
         
         soup = bs4.BeautifulSoup(self.contents, 'html.parser')
 

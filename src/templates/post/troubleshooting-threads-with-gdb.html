@@ -9,7 +9,7 @@
 <h3><a href='{{ post_url }}' class='link'>Troubleshooting Threads with GDB</a></h3>
 <p class='post-caption' id='date'>Jun 19, 2021</p>
 <p>
-  <a class='underlined link' href='/post/introduction-to-asynchronous-programming-with-pythons-yield-keyword'>A few posts ago</a>, I raved about the benefits of using asynchronous programming over threads due to the difficulty in designing and troubleshooting a multi-threaded system. But what if you find yourself using threads? How can you understand problems like deadlock, thread priorities, and thread interactions in your application?
+  <a class='underlined link' href='/post/introduction-to-asynchronous-programming-with-pythons-yield-keyword/'>A few posts ago</a>, I raved about the benefits of using asynchronous programming over threads due to the difficulty in designing and troubleshooting a multi-threaded system. But what if you find yourself using threads? How can you understand problems like deadlock, thread priorities, and thread interactions in your application?
 </p>
 <p>
   One really simple (yet still powerful) way is through gdb, the GNU debugger. By attaching to a running program or by analyzing a core file, it is able to tell you tons of information about a thread. I'll just go into one application of it in this blog post, one that I used recently in my work to get myself out of a sticky situation.
