@@ -4,13 +4,15 @@
     :copyright: Copyright (c) 2021 Chris Hughes
     :license: MIT License. See LICENSE.md for details
 """
+import click
 import configparser
 import flask
+import flask.cli
 import flask_frozen
 import pathlib
 
 from .render import Renderer
-from .freezer import Freezer 
+from .builder import Builder
 
 class Blog:
     """ Creates and maintains the Flask app """
@@ -29,6 +31,16 @@ class Blog:
         config.read(str(ini_file_path))
         return config
 
+    @click.command('build')
+    @flask.cli.with_appcontext
+    def build():
+        """ Builds static HTML files from the flask app
+
+            :return: None
+            """
+        builder = Builder(flask.current_app, Blog.get_config())
+        builder.build()
+
     def __init__(self, settings):
         """ Constructor
         
@@ -45,6 +57,9 @@ class Blog:
 
         self.app.config.from_mapping(settings['Flask'])
         self.app.url_map.strict_slashes = False
+
+        # Add CLI commands
+        self.app.cli.add_command(Blog.build)
         
         # Create renderer object
         self.renderer = Renderer(settings)
@@ -114,13 +129,3 @@ class Blog:
                 :return: JSON file
                 """
             return self.renderer.serve_json(name)
-
-        # Build for deployment
-        @self.app.cli.command('build')
-        def freeze():
-            """ Builds static HTML files from the flask app
-
-                :return: None
-                """
-            freezer = Freezer(self.app, settings)
-            freezer.freeze()
