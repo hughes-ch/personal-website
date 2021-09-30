@@ -7,17 +7,17 @@
 import flask_frozen
 
 from .blog import Blog
-from .freezer import Freezer
+from .builder import Builder
 
-def create_app(test_config=None, frozen=False):
+def create_app(test_config=None, is_hosting_static=False):
     """ Create and configure blog app """
     config = Blog.get_config()
     blog = Blog(config)
 
-    if frozen:
-        freezer = Freezer(blog.app, config)
-        freezer.freeze()
+    if is_hosting_static:
+        builder = Builder(blog.app, config)
+        builder.build()
         print('--- Static App Ready ---')
-        return flask_frozen.Freezer(blog.app).make_static_app()
+        return builder.host_static_app()
     else:
         return blog.app

@@ -1,5 +1,5 @@
 """
-    Defines the Freezer class
+    Defines the Builder class
 
     :copyright: Copyright (c) 2021 Chris Hughes
     :license: MIT License. See LICENSE.md for details
@@ -10,7 +10,7 @@ import shutil
 
 from .postlist import PostList
 
-class Freezer:
+class Builder:
     """ Converts blog to static HTML/CSS """
 
     def __init__(self, app, settings):
@@ -49,10 +49,17 @@ class Freezer:
             for post in self.postlist:
                 yield {'name': post.rel_url}
 
-    def freeze(self):
+    def build(self):
         """ Converts blog to static HTML/CSS
 
             :return: None
             """
-        shutil.rmtree(self.freezer.root)
+        shutil.rmtree(self.freezer.root, ignore_errors=True)
         self.freezer.freeze()
+
+    def host_static_app(self):
+        """ Hosts the static application after it is built
+
+            :return: Flask app instance
+            """
+        return self.freezer.make_static_app()
