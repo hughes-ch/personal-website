@@ -211,5 +211,5 @@ class TestRenderer(unittest.TestCase):
             """
         with self.blog.app.test_client() as client:
             response = client.get(f'/{self.config["Routes"]["ArchiveUrl"]}')
-            test.util.validate_links(self, response.data)
+            test.util.validate_links(self, client, response.data)
 

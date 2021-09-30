@@ -134,7 +134,7 @@ class Renderer:
         try: 
             context['canonical_url'] = (
                 f'{self._settings["Routes"]["BaseUrl"]}'
-                f'{posts_per_page[page-1][0].full_url}')
+                f'{posts_per_page[page-1][0].full_url}/')
         except IndexError:
             context['canonical_url'] = (
                 f'{self._settings["Routes"]["BaseUrl"]}')
@@ -191,7 +191,7 @@ class Renderer:
         # Render SEO
         context['json_script'] = f'{post.rel_url}.json'
         context['canonical_url'] = (
-            f'{self._settings["Routes"]["BaseUrl"]}{post.full_url}')
+            f'{self._settings["Routes"]["BaseUrl"]}{post.full_url}/')
 
         # Render post
         try:
@@ -216,7 +216,7 @@ class Renderer:
             'json_script': self._settings['Routes']['AboutJson'],
             'canonical_url': (
                 f'{self._settings["Routes"]["BaseUrl"]}/'
-                f'{self._settings["Routes"]["AboutUrl"]}')
+                f'{self._settings["Routes"]["AboutUrl"]}/')
         }
 
         return flask.render_template(
@@ -239,7 +239,7 @@ class Renderer:
             'json_script': self._settings['Routes']['ArchiveJson'],
             'canonical_url': (
                 f'{self._settings["Routes"]["BaseUrl"]}/'
-                f'{self._settings["Routes"]["ArchiveUrl"]}')
+                f'{self._settings["Routes"]["ArchiveUrl"]}/')
         }
 
         return flask.render_template(

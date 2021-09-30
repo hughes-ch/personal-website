@@ -5,8 +5,6 @@
     :license: MIT License. See LICENSE.md for details
 """
 import bs4
-import configparser
-import pathlib
 
 from src.blog import Blog
 
@@ -16,12 +14,8 @@ def load_test_config():
         :param: None
         :return: Config from INI modified to be in a test config
         """
-    ini_file_path = pathlib.Path(__file__).parent / 'blog.ini'
-    config = configparser.ConfigParser(
-        interpolation=configparser.ExtendedInterpolation())
-    config.read(str(ini_file_path))
+    config = Blog.get_config()
     config['Flask']['Testing'] = 'True'
-
     return config
 
 def create_blog():
@@ -33,10 +27,11 @@ def create_blog():
     config = load_test_config()
     return Blog(config)
 
-def validate_links(context, html):
+def validate_links(context, client, html):
     """ Validates all links on page
 
         :param context: Unit test context (self)
+        :param client: Which client to use to retry links
         :param html: <str> HTML response from client
         :return: None
         """
@@ -53,13 +48,12 @@ def validate_links(context, html):
         elif 'mailto' in href:
             pass
         else:
-            with create_blog().app.test_client() as client:
-                response = client.get(href)
+            response = client.get(href)
 
-        context.assertNotIn(
-            response.status_code,
-            bad_status_codes,
-            msg=f'{response.status_code} returned by "{href}"')
+            context.assertNotIn(
+                response.status_code,
+                bad_status_codes,
+                msg=f'{response.status_code} returned by "{href}"')
 
 def get_latest_url():
     """ Finds the latest blog post URL
