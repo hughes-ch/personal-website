@@ -9,11 +9,11 @@
 {% block content %}
 <h2 class='page-title'>About Me</h2>
 <article>
-  <img src='{{ url_for("static", filename="img/me.webp") }}' alt='Picture of Me'>
+  <img src='{{ url_for("static", filename="img/me.webp") }}' alt='Picture of Chris Hughes'>
   <p>Hi, I'm Chris Hughes, a freelance web developer specializing in Python.</p>
   <p>I started my career with Raytheon Technologies after graduating from Northeastern University with a BS in Computer Engineering.</p>
   <p>I spent five years at Raytheon, and was fortunate enough for some awesome experiences travelling, developing, integrating, and learning. My primary languages were C++, Perl, and MATLAB, though I troubleshot several more (including a proprietary language - Yikes!). Due to the incredible scale of the systems, I learned how to integrate massive, multi-process systems. I look forward to applying those skills in my career going forward.</p>
-  <p>Now that I'm out of the defense and aerospace industry, I look forward to diving into cutting-edge software technologies. Though I'm new and self taught in the web development sphere, I'm constantly adding to my Python, Flask, and Django knowledge. I intend to contribute as a full-stack web developer to build fast, scalable web applications.</p>
+  <p>Now that I'm out of the defense and aerospace industry, I look forward to diving into cutting-edge software technologies. Though I'm new and self taught in the web development sphere, I'm constantly adding to my Python, Flask, and Django knowledge.</p>
   <p>For more information, check out my resume below:</p>
   <iframe id='pdf-js-viewer' src='{{ url_for("static", filename="js/pdfjs/web/viewer.html") }}?file={{ url_for("static", filename="doc/resume.pdf") }}' title='Resume'></iframe>
   <p>
