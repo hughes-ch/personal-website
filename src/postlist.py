@@ -115,7 +115,7 @@ class PostList:
         post_list = []
 
         post_path = (pathlib.Path(self._root_path) /
-                     self._settings['Routes']['FlaskTemplate'] /
+                     flask.current_app.template_folder /
                      self._settings['Routes']['PostsUrl'])
 
         for path in post_path.glob('*.html'):

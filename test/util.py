@@ -5,8 +5,10 @@
     :license: MIT License. See LICENSE.md for details
 """
 import bs4
+import src.cli
 
 from src.blog import Blog
+from src.setting import Settings
 
 def load_test_config():
     """ Loads a generic test configuration
@@ -14,8 +16,8 @@ def load_test_config():
         :param: None
         :return: Config from INI modified to be in a test config
         """
-    config = Blog.get_config()
-    config['Flask']['Testing'] = 'True'
+    config = Settings.instance()
+    config['Flask']['TESTING'] = 'True'
     return config
 
 def create_blog():
@@ -39,8 +41,8 @@ def validate_links(context, client, html):
 
     # Find all links on page
     soup = bs4.BeautifulSoup(html, 'html.parser')
-    for a in soup.find_all('a'):
-        href = a.get('href')
+    for link in soup.find_all('a'):
+        href = link.get('href')
         if 'http' in href:
             # Do not send external requests during development...
             #response = requests.head(href)
@@ -71,3 +73,13 @@ def get_latest_url():
         for link in links:
             if config['Routes']['PostsUrl'] in link['href']:
                 return link['href']
+
+def build_static(app):
+    """ Builds the static version of the site
+
+        :param: Current Flask instance
+        :return: Result of CLI invocation
+        """
+    runner = app.test_cli_runner()
+    return runner.invoke(src.cli.build)
+

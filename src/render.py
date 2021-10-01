@@ -142,7 +142,7 @@ class Renderer:
         # Render all posts to template
         context['title'] = self._settings['Render']['IndexTitle']
 
-        return flask.render_template(
+        return flask.render_template( 
             self._settings['Templates']['Index'],
             **context)
 
@@ -211,12 +211,12 @@ class Renderer:
             raise RendererNotConfiguredException
 
         context = {
-            'settings': self._settings,
-            'title': self._settings['Render']['AboutTitle'],
-            'json_script': self._settings['Routes']['AboutJson'],
             'canonical_url': (
                 f'{self._settings["Routes"]["BaseUrl"]}/'
-                f'{self._settings["Routes"]["AboutUrl"]}/')
+                f'{self._settings["Routes"]["AboutUrl"]}/'),
+            'json_script': self._settings['Routes']['AboutJson'],
+            'settings': self._settings,
+            'title': self._settings['Render']['AboutTitle'],
         }
 
         return flask.render_template(
