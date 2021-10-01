@@ -5,8 +5,6 @@
     :license: MIT License. See LICENSE.md for details
 """
 import bs4
-import click.testing
-import flask.cli
 import json
 import os
 import pathlib
@@ -17,6 +15,7 @@ import unittest
 from datetime import date
 from parameterized import parameterized
 from src.blog import Blog
+from src.setting import Settings
 
 class TestBlog(unittest.TestCase):
     """Tests the Blog class"""
@@ -30,6 +29,10 @@ class TestBlog(unittest.TestCase):
         os.environ['FLASK_APP'] = 'src'
         self.config = test.util.load_test_config()
         self.blog = Blog(self.config)
+
+    def tearDown(self):
+        """ Clean up after each test """
+        Settings.destroy()
 
     def get_index_page(self):
         """ Returns the contents of the index page
@@ -366,10 +369,3 @@ class TestBlog(unittest.TestCase):
                 self.assertEqual(
                     client.get(canonical_links[0]['href']).status_code,
                     200)
-
-    def test_build(self):
-        """ Test that the build command finishes successfully """
-        runner = self.blog.app.test_cli_runner()
-        result = runner.invoke(Blog.build)
-        self.assertEquals(result.exit_code, 0)
-            
