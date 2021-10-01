@@ -5,6 +5,7 @@
     :license: MIT License. See LICENSE.md for details
 """
 import configparser
+import os
 import pathlib
 
 class Settings:
@@ -18,13 +19,25 @@ class Settings:
             :return: Settings instance
             """
         if Settings._instance is None:
-            ini_file_path = pathlib.Path(__file__).parent / 'blog.ini'
-    
-            Settings._instance = configparser.ConfigParser(
-                interpolation=configparser.ExtendedInterpolation())
-    
-            Settings._instance.read(str(ini_file_path))
+            # Load the default.ini (must be read)
+            default_ini_path = pathlib.Path(__file__).parent / 'default.ini'
             
+            with default_ini_path.open() as default_ini:
+                Settings._instance = configparser.ConfigParser(
+                    interpolation=configparser.ExtendedInterpolation())
+                Settings._instance.optionxform = str
+                Settings._instance.read_file(default_ini)
+
+            # Load the configuration specific .ini (optional)
+            try:
+                config_spec_ini_path = (
+                    pathlib.Path(__file__).parent /
+                    os.environ['CONFIG_SPEC_INI'])
+                
+                Settings._instance.read(str(config_spec_ini_path))
+            except KeyError:
+                pass
+                
         return Settings._instance
 
     @staticmethod

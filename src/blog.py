@@ -22,12 +22,8 @@ class Blog:
             :return: New instance
             """
         # Create and configure flask instance
-        self.app = flask.Flask(
-            __name__,
-            root_path=settings['Routes'].get('FlaskRoot', None),
-            template_folder=settings['Routes']['FlaskTemplate'])
-
-        self.app.config.from_mapping(settings['Flask'])
+        self.app = flask.Flask(__name__)
+        self.app.config.update(**settings['Flask'])
         self.app.url_map.strict_slashes = False
 
         # Add CLI commands

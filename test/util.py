@@ -17,7 +17,7 @@ def load_test_config():
         :return: Config from INI modified to be in a test config
         """
     config = Settings.instance()
-    config['Flask']['Testing'] = 'True'
+    config['Flask']['TESTING'] = 'True'
     return config
 
 def create_blog():
@@ -41,8 +41,8 @@ def validate_links(context, client, html):
 
     # Find all links on page
     soup = bs4.BeautifulSoup(html, 'html.parser')
-    for a in soup.find_all('a'):
-        href = a.get('href')
+    for link in soup.find_all('a'):
+        href = link.get('href')
         if 'http' in href:
             # Do not send external requests during development...
             #response = requests.head(href)

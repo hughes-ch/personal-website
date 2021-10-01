@@ -18,7 +18,7 @@ class BuilderTest(unittest.TestCase):
 
     def setUp(self):
         """ Sets up test case - called each time """
-        self.blog = Blog(Settings.instance())
+        self.blog = Blog(test.util.load_test_config())
         self.builder = Builder(self.blog.app)
 
     def tearDown(self):
