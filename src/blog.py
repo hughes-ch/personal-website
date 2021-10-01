@@ -4,42 +4,14 @@
     :copyright: Copyright (c) 2021 Chris Hughes
     :license: MIT License. See LICENSE.md for details
 """
-import click
-import configparser
 import flask
-import flask.cli
-import flask_frozen
 import pathlib
 
 from .render import Renderer
-from .builder import Builder
+from . import cli
 
 class Blog:
     """ Creates and maintains the Flask app """
-
-    def get_config():
-        """ class method used to get the Blog config
-
-            :param: None
-            :return: <configparser.ConfigParser>
-            """
-        ini_file_path = pathlib.Path(__file__).parent / 'blog.ini'
-    
-        config = configparser.ConfigParser(
-            interpolation=configparser.ExtendedInterpolation())
-    
-        config.read(str(ini_file_path))
-        return config
-
-    @click.command('build')
-    @flask.cli.with_appcontext
-    def build():
-        """ Builds static HTML files from the flask app
-
-            :return: None
-            """
-        builder = Builder(flask.current_app, Blog.get_config())
-        builder.build()
 
     def __init__(self, settings):
         """ Constructor
@@ -59,7 +31,8 @@ class Blog:
         self.app.url_map.strict_slashes = False
 
         # Add CLI commands
-        self.app.cli.add_command(Blog.build)
+        self.app.cli.add_command(cli.build)
+        self.app.cli.add_command(cli.run_static)
         
         # Create renderer object
         self.renderer = Renderer(settings)
@@ -85,7 +58,7 @@ class Blog:
         @self.app.route(f'/{settings["Routes"]["ArchiveUrl"]}/')
         def archive():
             return self.renderer.render_archive()
-
+ 
         # Create individual post pages
         @self.app.route(f'/{settings["Routes"]["PostsUrl"]}/<name>/')
         def blog_post(name=None):

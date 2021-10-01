@@ -13,6 +13,7 @@ from datetime import datetime
 from src.blog import Blog
 from src.render import Renderer
 from src.render import RendererNotConfiguredException
+from src.setting import Settings
 from test.template import Template
 
 class TestRenderer(unittest.TestCase):
@@ -26,6 +27,10 @@ class TestRenderer(unittest.TestCase):
             """
         self.config = test.util.load_test_config()
         self.blog = Blog(self.config)
+
+    def tearDown(self):
+        """ Clean up after each test """
+        Settings.destroy()
     
     def test_renderer_config_check(self):
         """ Test a renderer must be configured to render something

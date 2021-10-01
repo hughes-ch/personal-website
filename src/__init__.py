@@ -8,16 +8,11 @@ import flask_frozen
 
 from .blog import Blog
 from .builder import Builder
+from .setting import Settings
 
-def create_app(test_config=None, is_hosting_static=False):
+def create_app():
     """ Create and configure blog app """
-    config = Blog.get_config()
+    config = Settings.instance()
     blog = Blog(config)
+    return blog.app
 
-    if is_hosting_static:
-        builder = Builder(blog.app, config)
-        builder.build()
-        print('--- Static App Ready ---')
-        return builder.host_static_app()
-    else:
-        return blog.app
