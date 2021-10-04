@@ -310,7 +310,7 @@ class TestBlog(unittest.TestCase):
                 f'/{latest_post_url.stem}.json').data
 
             loaded_json = json.loads(response)
-            self.assertIn(f'"@type": "BlogPosting"', str(response))
+            self.assertIn(f'"@type": "Article"', str(response))
             link_attempt_resp = client.get(loaded_json['url'])
             self.assertEquals(link_attempt_resp.status_code, 200)
 
