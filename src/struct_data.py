@@ -103,7 +103,7 @@ class StructuredDataBlogPost:
             """
         return {
             '@context': SCHEMA_CONTEXT,
-            '@type': 'BlogPosting',
+            '@type': 'Article',
             'articlebody': self._post.contents,
             'author': self._author.as_dict(),
             'dateCreated': self._post.date.strftime('%Y-%m-%d'),
