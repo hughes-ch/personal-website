@@ -1,0 +1,21 @@
+version: 2.1
+
+jobs:
+  unit-test:
+    docker:
+      - image: cimg/python:3.8.10
+
+    steps:
+      - run:
+          name: "Install"
+          command: "pip install -r requirements.txt"
+      - run:
+          name: "Start unit tests"
+          environment:
+            CONFIG_SPEC_INI: development.ini
+          command: "nosetests -sv --with-coverage --cover-package=src"
+
+workflows:
+  unit-test-workflow:
+    jobs:
+      - unit-test
