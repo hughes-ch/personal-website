@@ -27,7 +27,6 @@
     {% block meta %}
     <meta name='description' content='{{ settings["Render"]["BlogDescription"] }}'>
     {% endblock %}
-    <script src='{{ url_for("serve_json", name=json_script) }}' type="application/ld+json"></script>
     <link rel='canonical' href='{{ canonical_url }}'>
   </head>
   <body>
@@ -65,5 +64,10 @@
         </div>
       </footer>
     </div>
+    {% if struct_data is defined() %}
+    <script type="application/ld+json">
+      {{ struct_data | tojson | safe }}
+    </script>
+    {% endif %}
   </body>
 </html>

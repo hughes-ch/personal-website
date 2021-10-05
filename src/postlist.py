@@ -54,7 +54,7 @@ class Post:
         # Find meta description. Will be contained in comment
         comment = soup.find(text=lambda text:isinstance(text, bs4.Comment))
         if comment is not None:
-            self.description = comment
+            self.description = str(comment).replace('\n', ' ').strip()
         else:
             self.description = ''
 
