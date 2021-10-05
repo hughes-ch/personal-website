@@ -88,13 +88,3 @@ class Blog:
                 pathlib.Path(self.app.static_folder) /
                 settings['Routes']['RobotsLocation'],
                 robots)
-
-        # Serve JSON
-        @self.app.route(f'/{settings["Routes"]["Json"]}/<name>')
-        def serve_json(name):
-            """ Serves JSON, primarily for SEO structured data
-
-                :param name: <str> Name of json file (with .json)
-                :return: JSON file
-                """
-            return self.renderer.serve_json(name)

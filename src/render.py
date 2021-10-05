@@ -6,6 +6,7 @@
 """
 import flask
 import jinja2
+import json
 import math
 import pathlib
 import pygments
@@ -130,7 +131,6 @@ class Renderer:
                 return self.render_404()
 
         # Render SEO content
-        context['json_script'] = self._settings['Routes']['IndexJson']
         try: 
             context['canonical_url'] = (
                 f'{self._settings["Routes"]["BaseUrl"]}'
@@ -141,6 +141,11 @@ class Renderer:
 
         # Render all posts to template
         context['title'] = self._settings['Render']['IndexTitle']
+
+        # Render json
+        struct_data_factory = StructuredDataFactory(self._settings)
+        context['struct_data'] = struct_data_factory.create_blog(
+            self._postlist).as_dict()
 
         return flask.render_template( 
             self._settings['Templates']['Index'],
@@ -158,7 +163,6 @@ class Renderer:
         context = {
             'settings': self._settings,
             'title': self._settings['Render']['ErrorTitle'],
-            'json_script': self._settings['Routes']['ArchiveJson'],
         }
 
         return flask.render_template(
@@ -189,9 +193,13 @@ class Renderer:
             return self.render_404()
 
         # Render SEO
-        context['json_script'] = f'{post.rel_url}.json'
         context['canonical_url'] = (
             f'{self._settings["Routes"]["BaseUrl"]}{post.full_url}/')
+
+        # Render json
+        struct_data_factory = StructuredDataFactory(self._settings)
+        context['struct_data'] = struct_data_factory.create_post(
+            post).as_dict()
 
         # Render post
         try:
@@ -214,10 +222,13 @@ class Renderer:
             'canonical_url': (
                 f'{self._settings["Routes"]["BaseUrl"]}/'
                 f'{self._settings["Routes"]["AboutUrl"]}/'),
-            'json_script': self._settings['Routes']['AboutJson'],
             'settings': self._settings,
             'title': self._settings['Render']['AboutTitle'],
         }
+
+        # Render json
+        struct_data_factory = StructuredDataFactory(self._settings)
+        context['struct_data'] = struct_data_factory.create_about().as_dict()
 
         return flask.render_template(
             self._settings['Templates']['About'],
@@ -236,40 +247,20 @@ class Renderer:
             'settings': self._settings,
             'posts': list(self._postlist),
             'title': self._settings['Render']['ArchiveTitle'],
-            'json_script': self._settings['Routes']['ArchiveJson'],
             'canonical_url': (
                 f'{self._settings["Routes"]["BaseUrl"]}/'
                 f'{self._settings["Routes"]["ArchiveUrl"]}/')
         }
 
+        # Render json
+        struct_data_factory = StructuredDataFactory(self._settings)
+        context['struct_data'] = struct_data_factory.create_archive(
+            self._postlist).as_dict()
+
         return flask.render_template(
             self._settings['Templates']['Archive'],
             **context)
 
-    def serve_json(self, json_script_name):
-        """ Serve up json file. Dynamically created.
-
-            :param name: <str> Name of json script to serve
-            :return: JSON contents or 404
-            """
-        if not self._is_configured():
-            raise RendererNotConfiguredException
-
-        struct_data_factory = StructuredDataFactory(self._settings)
-
-        if self._settings['Routes']['IndexJson'] == json_script_name:
-            return str(struct_data_factory.create_blog(self._postlist))
-        elif self._settings['Routes']['ArchiveJson'] == json_script_name:
-            return str(struct_data_factory.create_archive(self._postlist))
-        elif self._settings['Routes']['AboutJson'] == json_script_name:
-            return str(struct_data_factory.create_about())
-        else:
-            for post in self._postlist:
-                if json_script_name == f'{post.rel_url}.json':
-                    return str(struct_data_factory.create_post(post))
-
-            return self.render_404()
-            
     def _is_configured(self):
         """ Checks that an instance is configured enough to render a template
 

@@ -5,11 +5,13 @@
     :license: MIT License. See LICENSE.md for details
 """
 import concurrent.futures
+import test.util
 import time
 import unittest
 import unittest.mock as mock
 
 from src.postlist import PostList
+from src.setting import Settings
 
 class TestPostList(unittest.TestCase):
     """ Defines unit tests for the PostList class """
@@ -35,3 +37,15 @@ class TestPostList(unittest.TestCase):
                 executor.submit(postlist._check_configure)
 
         postlist._load_posts.assert_called_once()
+
+    def test_load_description(self):
+        """ Test that descriptions are loaded without newlines """
+
+        blog = test.util.create_blog()
+
+        with blog.app.test_request_context():
+            postlist = PostList(Settings.instance(), blog.app.root_path)
+
+            for post in postlist:
+                self.assertNotIn('\n', post.description)
+                self.assertNotEqual(' ', post.description[0])
