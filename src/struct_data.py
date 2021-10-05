@@ -104,7 +104,7 @@ class StructuredDataBlogPost:
         return {
             '@context': SCHEMA_CONTEXT,
             '@type': 'Article',
-            'articlebody': self._post.contents,
+            'articlebody': self._post.contents.replace('\n', '\\n'),
             'author': self._author.as_dict(),
             'dateCreated': self._post.date.strftime('%Y-%m-%d'),
             'dateModified': self._post.mod_date.strftime('%Y-%m-%d'),
@@ -142,6 +142,13 @@ class StructuredDataBlog:
 
             :return: <str> Representing object in JSON
             """
+        return json.dumps(self.as_dict())
+
+    def as_dict(self):
+        """ Returns a dict representation of a blog 
+
+            :return: <dict> Representation of blog 
+            """
         blog_data = {
             '@context': SCHEMA_CONTEXT,
             '@type': 'Blog',
@@ -154,7 +161,10 @@ class StructuredDataBlog:
             'url': f'{self._settings["Struct"]["BaseUrl"]}/',
         }
 
-        for post in self._postlist:
+        for idx, post in enumerate(self._postlist):
+            if idx >= int(self._settings['Render']['RenderedPostCount']):
+                break
+            
             struct_post = StructuredDataBlogPost(
                 post=post,
                 author=self._author,
@@ -166,7 +176,7 @@ class StructuredDataBlog:
             blog_data['mainEntity'] = StructuredDataThing(
                 blog_data['blogPost'][0]).as_dict()
 
-        return json.dumps(blog_data)
+        return blog_data
         
 class StructuredDataFactory:
     """ Holds common build settings and constructs objects """

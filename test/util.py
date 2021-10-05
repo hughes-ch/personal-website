@@ -5,6 +5,7 @@
     :license: MIT License. See LICENSE.md for details
 """
 import bs4
+import json
 import src.cli
 
 from src.blog import Blog
@@ -82,4 +83,16 @@ def build_static(app):
         """
     runner = app.test_cli_runner()
     return runner.invoke(src.cli.build)
+
+def load_page_json(html):
+    """ Loads the StructuredData JSON for the page
+
+        :param html: HTML response
+        :return: Loaded JSON
+        """
+    soup = bs4.BeautifulSoup(html, 'html.parser')
+    script_text = soup.find('script', type='application/ld+json').string
+    return json.loads(str(script_text).strip())
+            
+
 
