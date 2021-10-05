@@ -1,5 +1,8 @@
-# My Blog and Online Resume <insert CI tags here>
-This is the code repository for Chris Hughes' blog and online resume, developed with Python 3.8 and Flask 2.0.1. 
+[![hughes-ch](https://circleci.com/gh/hughes-ch/personal-website.svg?style=shield)](https://app.circleci.com/pipelines/github/hughes-ch/personal-website)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/c420dc8f-2881-403b-8479-6718169fdb56/deploy-status)](https://app.netlify.com/sites/zen-engelbart-f16ad6/deploys)
+
+# My Blog and Online Resume
+This is the code repository for Chris Hughes' blog and online resume, developed with Python 3.8 and Flask 2.0.1.
 
 ## Installation
 The easiest way to install onto a local machine is just by pulling from github. Next, create a virtual environment
