@@ -35,7 +35,7 @@
 	<meta property="og:url" content="{{ url }}" />
 	<meta property="og:site_name" content='{{ settings["Render"]["BlogTitle"] }}' />
 	<meta property="og:image" content='{{ url_for("static", filename="img/logo.png") }}' />
-    <meta property='og:author' content='{{ settings["Struct"]["AuthorName"] }}' />
+    <meta name='author' content='{{ settings["Struct"]["AuthorName"] }}' />
 
     {% block meta %}
     <meta name='description' content='{{ settings["Render"]["BlogDescription"] }}'>
