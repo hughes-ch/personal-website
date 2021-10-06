@@ -88,7 +88,11 @@ class TestBlog(unittest.TestCase):
         with self.blog.app.test_client() as client:
             index_data = client.get('/').data
             page1_response = client.get(f'/{page_url}/1')
-            self.assertEqual(index_data, page1_response.data)
+
+            index_soup = bs4.BeautifulSoup(index_data, 'html.parser')
+            page1_soup = bs4.BeautifulSoup(page1_response.data, 'html.parser')
+            
+            self.assertEqual(index_soup.body, page1_soup.body)
             self.assertEqual(page1_response.status_code, 200)
 
             # Request following pages and verify they differ from last
