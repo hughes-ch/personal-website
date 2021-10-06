@@ -24,6 +24,22 @@
     <link href='{{ url_for("static", filename="icon/favicon-192x192.png") }}' rel='icon' sizes='192x192' type='image/png'>
     <link href='{{ url_for("static", filename="icon/favicon-192x192.png") }}' rel='apple-touch-icon' type='image/png' sizes='192x192'>
 
+	<meta property="og:locale" content="en_US" />
+	<meta property="og:type" content="article" />
+	<meta property="og:title" content="{{ title }}" />
+    {% if post_description is defined() %}
+	<meta property="og:description" content="{{ post_description }}" />
+    {% else %}
+    <meta property='og:description' content='{{ settings["Render"]["BlogDescription"] }}' />
+    {% endif %}
+	<meta property="og:url" content="{{ url }}" />
+	<meta property="og:site_name" content='{{ settings["Render"]["BlogTitle"] }}' />
+	<meta
+      property="og:image"
+      content='{{ settings["Routes"]["BaseUrl"] }}{{ url_for("static", filename="icon/favicon-192x192.png") }}' />
+	<meta property="og:image:width" content="192" />
+	<meta property="og:image:height" content="192" />
+
     {% block meta %}
     <meta name='description' content='{{ settings["Render"]["BlogDescription"] }}'>
     {% endblock %}
