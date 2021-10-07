@@ -49,7 +49,7 @@ class Post:
         self.datestr = self.date.strftime('%b %d, %Y')
 
         # Find the title of the post
-        self.title = soup.find('h3').string
+        self.title = soup.find('h3').a.string
 
         # Find meta description. Will be contained in comment
         comment = soup.find(text=lambda text:isinstance(text, bs4.Comment))

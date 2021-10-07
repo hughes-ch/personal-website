@@ -55,6 +55,12 @@ class Renderer:
                 'formatter': pygments.formatters.HtmlFormatter(
                     wrapcode=True)
             },
+            'html': {
+                'lexer': pygments.lexers.HtmlLexer(),
+                'formatter': pygments.formatters.HtmlFormatter(
+                    linenos=True,
+                    wrapcode=True)
+            },
             'py': {
                 'lexer': pygments.lexers.PythonLexer(),
                 'formatter': pygments.formatters.HtmlFormatter(

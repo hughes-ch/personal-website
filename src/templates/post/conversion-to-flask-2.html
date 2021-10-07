@@ -1,0 +1,64 @@
+{#
+ #   Blog post contents
+ #
+ #   :copyright: Copyright (c) 2021 Chris Hughes
+ #   :license: MIT License. See LICENSE.md for details. All rights reserved for post contents
+ #}
+<!--
+This blog post is part 2 in a series on how to convert from a Wix webite to a website implemented 
+in Flask. This covers the choices made in the HTML/CSS.
+-->
+<h3><a href='{{ post_url }}' class='link'>Implementing my Website in Flask - Part 2</a></h3>
+<p class='post-caption' id='date'>Oct 1, 2021</p>
+<p>
+  Check out <a href='{{url_for("blog_post", name="conversion-to-flask-1") }}' class='underlined link'>
+    part 1 of this series
+  </a> for an introduction to the overall website design and layout. As I stated there, you can also
+  <a href='https://github.com/hughes-ch/personal-website' target='_blank' class='underlined link'>
+    find the source on Github
+  </a>.
+</p>
+<p>
+  In this blog post, I'd like to cover some of the HTML/CSS choices that I made. This has been a
+  iterative process, and I'm sure after I publish this post I'll make adjustments (maybe even during
+  this post as I explain my rationale). If you look at the commit history, you can see I've come a
+  long way from the first static HTML page, and what Flask now serves.
+</p>
+<h4>Semantic, Tidy HTML</h4>
+<p>
+  I try to design code that is maintainable and easy to understand so that I (or someone else) can
+  pick it up a year from now and still understand what I did. Therefore I try to stick to as many
+  of the <a href='https://www.w3schools.com/html/html5_syntax.asp' class='underlined link'>
+    recommended HTML styles and best practices
+  </a>
+  as I can, and use
+  <a href='https://www.w3schools.com/html/html5_semantic_elements.asp' class='underlined link'>
+    semantic HTML
+  </a>.
+</p>
+<p>
+  A lot of these things are pretty easy, and I just had to remember to check them off as I was
+  writing the HTML. Things like:
+</p>
+<ul>
+  <li>Declaring the document type (the {{ codeify("<!DOCTYPE html>") }} at the top of a page)</li>
+  <li>
+    Avoiding long code lines -
+    I tried to keep mine under 100 characters unless dynamically rendered
+  </li>
+  <li>
+    Including the {{ codeify("<title>") }} tag. Plus, the title adds a cool phrase to the tab which
+    is holding the site, like {{ settings['Render']['BlogTitle'] }}.
+  </li>
+  <li>Setting
+<ol>
+  <li>Correct structure (html, body, head)</li>
+  <li>Add lang attribute</li>
+  <li>Charset</li>
+  <li>Setting viewport</li>
+</ol>
+<h4>So meta</h4>
+<h4>Favicon</h4>
+<h4>What are OG?</h4>
+<h4>Stylesheets, bro</h4>
+  

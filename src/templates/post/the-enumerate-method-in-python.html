@@ -5,17 +5,27 @@
  #   :license: MIT License. See LICENSE.md for details. All rights reserved for post contents
  #}
 
-<!--Python's 'enumerate' keyword provides the index AND the object when iterating. I find it really useful. Here, I'll explain how to use it.-->
+<!--
+Python's 'enumerate' keyword provides the index AND the object when iterating. I find it really
+useful. Here, I'll explain how to use it.
+-->
 <h3><a href='{{ post_url }}' class='link'>The Enumerate Method in Python</a></h3>
 <p class='post-caption' id='date'>May 6, 2021</p>
 <p>
-  I'm just starting my journey into Python 3.8 from C++98. It's a long way to go, and as I learn more, I realize just how far behind the times I am. Nevertheless, it's incredibly rewarding. I find so many examples of how a programming language created in the last decade solves problems that I run into on a daily basis at work.
+  I'm just starting my journey into Python 3.8 from C++98. It's a long way to go, and as I learn
+  more, I realize just how far behind the times I am. Nevertheless, it's incredibly rewarding. I
+  find so many examples of how a programming language created in the last decade solves problems
+  that I run into on a daily basis at work.
 </p>
 <p>
-  A really simple example of this is the enumerate method. Most times I see this method being used is in examples which are nearly impossible to understand as a new Pythonista. These examples (while showing how incredibly powerful the language is) makes the enumerate keyword seem nearly unusable until having a strong command of the language.
+  A really simple example of this is the enumerate method. Most times I see this method being used
+  is in examples which are nearly impossible to understand as a new Pythonista. These examples
+  (while showing how incredibly powerful the language is) makes the enumerate keyword seem nearly
+  unusable until having a strong command of the language.
 </p>
 <p>
-  In reality, I might be able to use the enumerate method every single day (though maybe that just comes because of my heavy C++ accent as I slowly get used to Python). Here's an example:
+  In reality, I might be able to use the enumerate method every single day (though maybe that just
+  comes because of my heavy C++ accent as I slowly get used to Python). Here's an example:
 </p>
 {{ codeify("
 names = [
@@ -30,25 +40,35 @@ for ii in range(len(names)):
 
 ", lang='py') }}
 <p>
-  In C++, this is just the way things are done. However, Python's enumerate method makes this loop a little more simple and more Pythonic:
+  In C++, this is just the way things are done. However, Python's enumerate method makes this loop
+  a little more simple and more Pythonic:
 </p>
 {{ codeify("
 for pos,name in enumerate(names):
     print(f'The name at position {pos} is {name}')
 
 ", lang='py') }}
-  You might even be able to do that last for loop as a one-liner, but I'm not clever enough to figure that one out.
+<p>
+  You might even be able to do that last for loop as a one-liner, but I'm not clever enough to
+figure that one out.
 </p>
 <p>
-  What the enumerate method does is return each index of the iterable as an index, value pair represented by a tuple. For instance, if I were to enumerate the names list, I would get:
+  What the enumerate method does is return each index of the iterable as an index, value pair
+  represented by a tuple. For instance, if I were to enumerate the names list, I would get:
 </p>
 {{ codeify("
 >>> print(list(enumerate(names)))
 [(0, 'Abigail'), (1, 'Betty'), (2, 'Carlos'), (3, 'Dan')]
 
 ", lang='pycon') }}
-  Instead of having to maintain your own counter, the enumerate method maintains it for you. So you'll no longer have to use the ugly 'i', 'ii', 'idx', 'count' variable which is so prevalent in C++. Instead, you can use descriptive variable names, and you'll never again fall victim to the easy mistake of forgetting to increment your counter and ending up with an infinite loop.
+<p>
+  Instead of having to maintain your own counter, the enumerate method maintains it for you. So 
+you'll no longer have to use the ugly 'i', 'ii', 'idx', 'count' variable which is so prevalent in
+  C++. Instead, you can use descriptive variable names, and you'll never again fall victim to the
+  easy mistake of forgetting to increment your counter and ending up with an infinite loop.
 </p>
 <p>
-  Anyways, since this just clicked for me yesterday, I thought I would share it. I hope I can make it click for another new Python user. If you have any good examples of how you use the enumerate method, feel free to shoot me an email.
+  Anyways, since this just clicked for me yesterday, I thought I would share it. I hope I can make
+  it click for another new Python user. If you have any good examples of how you use the enumerate
+  method, feel free to shoot me an email.
 </p>

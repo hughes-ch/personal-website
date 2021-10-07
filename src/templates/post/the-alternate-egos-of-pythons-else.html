@@ -5,11 +5,20 @@
  #   :license: MIT License. See LICENSE.md for details. All rights reserved for post contents
  #}
 
-<!--Python's 'else' keyword has some neat functionalities that I haven't run into in other languages. Here, I'll dive into my favorites.-->
+<!--
+Python's 'else' keyword has some neat functionalities that I haven't run into in other languages.
+Here, I'll dive into my favorites.
+-->
 <h3><a href='{{ post_url }}' class='link'>The Alternate Egos of Python's 'Else'</a></h3>
 <p class='post-caption' id='date'>Jun 12, 2021</p>
 <p>
-  Python's {{ codeify("else") }} keyword has some neat functionalities that I haven't run into in other programming languages. As someone new to the language, you'll obviously know the {{ codeify("if") }}/{{ codeify("else") }} block, exemplified in this simplified selection of a preposition (<a href='https://www.grammar.com/a-vs-an-when-to-use/' target='_blank' class='underlined link'>if you go to this article</a>, you can find plenty of examples where this function is inadequate):
+  Python's {{ codeify("else") }} keyword has some neat functionalities that I haven't run into in
+  other programming languages. As someone new to the language, you'll obviously know the
+  {{ codeify("if") }}/{{ codeify("else") }} block, exemplified in this simplified selection of a
+  preposition (
+  <a href='https://www.grammar.com/a-vs-an-when-to-use/' target='_blank' class='underlined link'>
+    if you go to this article
+  </a>, you can find plenty of examples where this function is inadequate):
 </p>
 {{ codeify("
 def select_preposition(word):
@@ -45,7 +54,8 @@ a wombat
 ") }}
 <p>But did you also know that the else keyword can be used with for loops?</p>
 <p>
-  Here's an example of a script which adds friends' contact information to a spreadsheet if an entry has not been found:
+  Here's an example of a script which adds friends' contact information to a spreadsheet if an entry
+  has not been found:
 </p>
 {{ codeify("
 def get_contact_info(name):
@@ -88,13 +98,19 @@ if __name__ == '__main__':
               f'Email:{contact_info[\"email\"]}')
 ", lang='py') }}
 <p>
-  Within the {{ codeify("with") }} block, each line of the file is searched for the friend's name. If the name is found, a new record with the contact information is populated and the loop is exited with the {{ codeify("break") }} keyword. This avoids the functionality in the {{ codeify("else") }} block of the loop.
+  Within the {{ codeify("with") }} block, each line of the file is searched for the friend's name.
+  If the name is found, a new record with the contact information is populated and the loop is
+  exited with the {{ codeify("break") }} keyword. This avoids the functionality in the {{ codeify("else") }}
+  block of the loop.
 </p>
 <p>
-  If the loop is able to complete without breaking, the {{ codeify("else") }} block is executed. In this case, that means that a record was not found for the friend that was requested. A new record is written to the CSV.
+  If the loop is able to complete without breaking, the {{ codeify("else") }} block is executed. In
+  this case, that means that a record was not found for the friend that was requested. A new record
+  is written to the CSV.
 </p>
 <p>
-  Here's the output of the program when Janet's and Chris' contact information is in the CSV and Bob must be added:
+  Here's the output of the program when Janet's and Chris' contact information is in the CSV and Bob
+  must be added:
 </p>
 {{ codeify("
 Name:Janet
@@ -116,16 +132,22 @@ Chris,555-5555,chris@christhesoftwareguy.com
 Bob,,
 ") }}
 <p>
-  No new records were created for Janet and Chris, since they were found in the file and the function broke early from the loop. A new record was created for Bob since the loop was allowed to complete.
+  No new records were created for Janet and Chris, since they were found in the file and the function
+  broke early from the loop. A new record was created for Bob since the loop was allowed to complete.
 </p>
 <p>
   The same functionality can be used for the {{ codeify("while") }} statement.
 </p>
 <p>
-  The {{ codeify("else") }} keyword's third hat is related to the {{ codeify("try") }}/{{ codeify("except") }} block. It can be placed after except to execute any code which should only run if an exception is not encountered. Note that this is different than a {{ codeify("finally") }} block which runs after the {{ codeify("try") }}/{{ codeify("except") }} whether or not there was an exception encountered.
+  The {{ codeify("else") }} keyword's third hat is related to the {{ codeify("try") }}/
+  {{ codeify("except") }} block. It can be placed after except to execute any code which should only
+  run if an exception is not encountered. Note that this is different than a {{ codeify("finally") }}
+  block which runs after the {{ codeify("try") }}/{{ codeify("except") }} whether or not there was an
+  exception encountered.
 </p>
 <p>
-  The next example of a file reader demonstrates the difference between the 'finally' and 'else' keywords in the context of a {{ codeify("try") }}/{{ codeify("except") }} block.
+  The next example of a file reader demonstrates the difference between the 'finally' and 'else'
+  keywords in the context of a {{ codeify("try") }}/{{ codeify("except") }} block.
 </p>
 {{ codeify("
 def read_file_contents(path):
@@ -183,9 +205,16 @@ Characters read: 0
 File not_a_file.txt not found
 ") }}
 <p>
-  You can see that the {{ codeify("except") }} and the {{ codeify("else") }} block are exclusive, while the {{ codeify("finally") }} block will always be executed, even if an exception is raised. Note that if there are multiple {{ codeify("except") }} blocks (for multiple exception types), there is still only one {{ codeify("else") }} block. No need for an {{ codeify("else") }} after each exception type.
+  You can see that the {{ codeify("except") }} and the {{ codeify("else") }} block are exclusive,
+  while the {{ codeify("finally") }} block will always be executed, even if an exception is raised.
+  Note that if there are multiple {{ codeify("except") }} blocks (for multiple exception types),
+  there is still only one {{ codeify("else") }} block. No need for an {{ codeify("else") }} after
+  each exception type.
 </p>
 <p>
-  I find that this is really helpful in writing explicit code. Instead of having to guess where exceptions come from in a giant {{ codeify("try") }} block, the {{ codeify("else") }} keyword guides the readers of your code to what is expected to raise an exception, and what is just a dependency of the suspect code (and is not expected to raise an exception itself).
+  I find that this is really helpful in writing explicit code. Instead of having to guess where
+  exceptions come from in a giant {{ codeify("try") }} block, the {{ codeify("else") }} keyword
+  guides the readers of your code to what is expected to raise an exception, and what is just a
+  dependency of the suspect code (and is not expected to raise an exception itself).
 </p>
 <p>And isn't explicit code the beauty of Python?</p>
