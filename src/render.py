@@ -52,9 +52,21 @@ class Renderer:
                     linenos=True,
                     wrapcode=True)
             },
+            'css': {
+                'lexer': pygments.lexers.CssLexer(),
+                'formatter': pygments.formatters.HtmlFormatter(
+                    linenos=True,
+                    wrapcode=True)
+            },
             'default': {
                 'lexer': pygments.lexers.TextLexer(),
                 'formatter': pygments.formatters.HtmlFormatter(
+                    wrapcode=True)
+            },
+            'html': {
+                'lexer': pygments.lexers.HtmlLexer(),
+                'formatter': pygments.formatters.HtmlFormatter(
+                    linenos=True,
                     wrapcode=True)
             },
             'py': {

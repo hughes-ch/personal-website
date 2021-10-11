@@ -9,16 +9,35 @@
 <h3><a href='{{ post_url }}' class='link'>Troubleshooting Threads with GDB</a></h3>
 <p class='post-caption' id='date'>Jun 19, 2021</p>
 <p>
-  <a class='underlined link' href='/post/introduction-to-asynchronous-programming-with-pythons-yield-keyword/'>A few posts ago</a>, I raved about the benefits of using asynchronous programming over threads due to the difficulty in designing and troubleshooting a multi-threaded system. But what if you find yourself using threads? How can you understand problems like deadlock, thread priorities, and thread interactions in your application?
+  <a class='underlined link'
+     href='/post/introduction-to-asynchronous-programming-with-pythons-yield-keyword/'>
+    A few posts ago
+  </a>, I raved about the benefits of using asynchronous programming over threads due to the
+  difficulty in designing and troubleshooting a multi-threaded system. But what if you find
+  yourself using threads? How can you understand problems like deadlock, thread priorities, and
+  thread interactions in your application?
 </p>
 <p>
-  One really simple (yet still powerful) way is through gdb, the GNU debugger. By attaching to a running program or by analyzing a core file, it is able to tell you tons of information about a thread. I'll just go into one application of it in this blog post, one that I used recently in my work to get myself out of a sticky situation.
+  One really simple (yet still powerful) way is through gdb, the GNU debugger. By attaching to a
+  running program or by analyzing a core file, it is able to tell you tons of information about a
+  thread. I'll just go into one application of it in this blog post, one that I used recently in my
+  work to get myself out of a sticky situation.
 </p>
 <p>
-  The actual situation that I had to debug was fairly complex, so I won't include all of the code here. However, what it came down to was a few threads which were deadlocked. One thread had locked a shared resource and was waiting for a second thread to release a second shared resource. The second thread was waiting on the first thread to release its shared resource before it continued. Needless to say, neither thread got what it needed to and eventually event queues filled up and crashed the entire program.
+  The actual situation that I had to debug was fairly complex, so I won't include all of the code
+  here. However, what it came down to was a few threads which were deadlocked. One thread had locked
+  a shared resource and was waiting for a second thread to release a second shared resource. The
+  second thread was waiting on the first thread to release its shared resource before it continued.
+  Needless to say, neither thread got what it needed to and eventually event queues filled up and
+  crashed the entire program.
 </p>
 <p>
-  The deadlock can be exemplified in the following C++ program. In this program, the shared resource is a string which is printed to the screen. Four threads are created. Three of the threads simply output the previous thread's message and create their own message for the next thread to print. The fourth thread calls the 'ruin_everything' method, which locks the shared resource and then loops forever, never unlocking the resource. This eventually causes a deadlock-like situation. Here's the code:
+  The deadlock can be exemplified in the following C++ program. In this program, the shared resource
+  is a string which is printed to the screen. Four threads are created. Three of the threads simply
+  output the previous thread's message and create their own message for the next thread to print. The
+  fourth thread calls the 'ruin_everything' method, which locks the shared resource and then loops
+  forever, never unlocking the resource. This eventually causes a deadlock-like situation. Here's the
+  code:
 </p>
 {{ codeify("
 #include <iostream>
@@ -105,15 +124,34 @@ Thread 1: Thread 3 wuz here!
   So what happened?
 </p>
 <ol>
-  <li>Thread 1 woke up and printed the current message. Then it updated the message to say that it 'wuz here'.</li>
-  <li>Thread 1 and 2 woke up at the same time. Thread 2 won the race and locked the message. It printed thread 1's message and updated it to be its own. </li>
-  <li>Thread 1 (which was waiting for the shared resource during thread 2's updates) now gets the shared resource, prints thread 2's message and updates it for itself. </li>
-  <li>Thread 3 wakes up and contents with thread 1 for the shared resource. Thread 3 wins, prints and updates the message.</li>
-  <li>Thread 1 now locks the shared resource, prints thread 3's message and updates the message for itself. </li>
-  <li>Thread 4 finally wakes up, locks the shared resource, and then enters its never-ending while loop. It will stay here until the program is manually ended. </li>
+  <li>
+    Thread 1 woke up and printed the current message. Then it updated the message to say that it
+    'wuz here'.
+  </li>
+  <li>
+    Thread 1 and 2 woke up at the same time. Thread 2 won the race and locked the message. It
+    printed thread 1's message and updated it to be its own. 
+  </li>
+  <li>
+    Thread 1 (which was waiting for the shared resource during thread 2's updates) now gets the
+    shared resource, prints thread 2's message and updates it for itself. 
+  </li>
+  <li>
+    Thread 3 wakes up and contents with thread 1 for the shared resource. Thread 3 wins, prints
+    and updates the message.
+  </li>
+  <li>
+    Thread 1 now locks the shared resource, prints thread 3's message and updates the message for
+    itself. 
+  </li>
+  <li>
+    Thread 4 finally wakes up, locks the shared resource, and then enters its never-ending while
+    loop. It will stay here until the program is manually ended. 
+  </li>
 </ol>
 <p>
-  This program isn't so hard to reason through. But what about more complex problems? That's where gdb comes in handy.</p>
+  This program isn't so hard to reason through. But what about more complex problems? That's where
+  gdb comes in handy.</p>
 <p>
   The -p option allows gdb to attach to a specific, running process ID.
 </p>
@@ -168,32 +206,63 @@ __pthread_clockjoin_ex (threadid=139760597890816, thread_return=0x0, clockid=<op
   Make sure to use 'sudo' or you will not be able to attach to a running program.
 </p>
 <p>
-  At the bottom of the previous code block is the text (gdb). This is the GNU debugger prompt. To get information on the currently running threads, type {{ codeify("thread apply all where") }}. It will dump a ton of information, even in a small program like the example above. Below is the information for each thread, starting with Thread 5:
+  At the bottom of the previous code block is the text (gdb). This is the GNU debugger prompt. To
+  get information on the currently running threads, type {{ codeify("thread apply all where") }}.
+  It will dump a ton of information, even in a small program like the example above. Below is the
+  information for each thread, starting with Thread 5:
 </p>
-<img src='{{ url_for("static", filename="img/troubleshooting-threads-with-gdb-1.png") }}' alt='Output of "thread apply all where"'>
+<img 
+  src='{{ url_for("static", filename="img/troubleshooting-threads-with-gdb-1.png") }}' 
+  alt='Output of "thread apply all where"'>
 <p>Thread 4:</p>
-<img src='{{ url_for("static", filename="img/troubleshooting-threads-with-gdb-2.png") }}' alt='Output of "thread apply all where"'>
+<img 
+  src='{{ url_for("static", filename="img/troubleshooting-threads-with-gdb-2.png") }}' 
+  alt='Output of "thread apply all where"'>
 <p>Thread 3:</p>
-<img src='{{ url_for("static", filename="img/troubleshooting-threads-with-gdb-3.png") }}' alt='Output of "thread apply all where"'>
+<img 
+  src='{{ url_for("static", filename="img/troubleshooting-threads-with-gdb-3.png") }}' 
+  alt='Output of "thread apply all where"'>
 <p>Threads 2 and 1:</p>
-<img src='{{ url_for("static", filename="img/troubleshooting-threads-with-gdb-4.png") }}' alt='Output of "thread apply all where"'>
+<img 
+  src='{{ url_for("static", filename="img/troubleshooting-threads-with-gdb-4.png") }}' 
+  alt='Output of "thread apply all where"'>
 <p>
-  While the example is running, five threads are active. Each thread shows a backtrace of the call stack that got them to the currently executing function. For example, thread 1 is currently executing line 0: {{ codeify("__pthread_clockjoin_ex") }}, an OS library call. That might not sound familiar. However, its caller on line 1, {{ codeify("std::thread::join()") }} is something that we actually coded in our main function. Now we know the main function is stuck on the join calls. 
+  While the example is running, five threads are active. Each thread shows a backtrace of the call
+  stack that got them to the currently executing function. For example, thread 1 is currently
+  executing line 0: {{ codeify("__pthread_clockjoin_ex") }}, an OS library call. That might not
+  sound familiar. However, its caller on line 1, {{ codeify("std::thread::join()") }} is something
+  that we actually coded in our main function. Now we know the main function is stuck on the join
+  calls. 
 </p>
 <p>
-  Look at the backtraces for the other threads. You'll notice that Thread 2 through Thread 4 are running our {{ codeify("print_and_update_msg()") }} function. The currently executing line of code for all three is the attempt to lock the shared resource. Thread 5, on the other hand, is still happily executing its {{ codeify("ruin_everything()") }} function. This is suspicious. If you were unable to reason through this example, this would at least tell you which function is holding the lock for the shared resource and blocking all the other threads. In a more complicated example, this could help to narrow it down to a single function in a codebase of millions of lines of code.
+  Look at the backtraces for the other threads. You'll notice that Thread 2 through Thread 4 are
+  running our {{ codeify("print_and_update_msg()") }} function. The currently executing line of code
+  for all three is the attempt to lock the shared resource. Thread 5, on the other hand, is still
+  happily executing its {{ codeify("ruin_everything()") }} function. This is suspicious. If you were
+  unable to reason through this example, this would at least tell you which function is holding the
+  lock for the shared resource and blocking all the other threads. In a more complicated example,
+  this could help to narrow it down to a single function in a codebase of millions of lines of code.
 </p>
 <p>
-  The {{ codeify("thread apply all where") }} command can be run post-mortem as well. If a core file was generated as a result of the unfortunate thread interaction, gdb can be run with:
+  The {{ codeify("thread apply all where") }} command can be run post-mortem as well. If a core file
+  was generated as a result of the unfortunate thread interaction, gdb can be run with:
 </p>
 {{ codeify("
 gdb <prog_name> <core>
 ") }}
 <p>
-  Once at the gdb prompt, the thread dump can be done in the same way as with a running program. This also has the added benefit of not needing to be run as 'sudo'. For an introduction on how to get an executable to generate a core file, see <a class='underlined link' href='https://stackoverflow.com/questions/6152232/how-to-generate-core-dump-file-in-ubuntu' target='_blank'>this Stack Overflow question</a>.
+  Once at the gdb prompt, the thread dump can be done in the same way as with a running program.
+  This also has the added benefit of not needing to be run as 'sudo'. For an introduction on how
+  to get an executable to generate a core file, see 
+  <a class='underlined link' 
+     href='https://stackoverflow.com/questions/6152232/how-to-generate-core-dump-file-in-ubuntu' 
+     target='_blank'>
+     this Stack Overflow question
+  </a>.
 </p>
 <p>
-  Finally, I'd like to leave you with a nifty little command which runs the previous command and outputs the results into a file without needing to enter the gdb prompt:
+  Finally, I'd like to leave you with a nifty little command which runs the previous command and
+  outputs the results into a file without needing to enter the gdb prompt:
 </p>
 {{ codeify("
 gdb -ex 'thread apply all where' <prog_name> <core> -batch >! thread_dump.txt

@@ -5,78 +5,164 @@
  #   :license: MIT License. See LICENSE.md for details. All rights reserved for post contents
  #}
 
-<!--The async and await keywords in Python are really interesting concepts that were introduced in Python 3.5. Here, I'll introduce the motivation using yield and yield from.-->
-<h3><a href='{{ post_url }}' class='link'>Introduction to Asynchronous Programming with Python's Yield Keyword</a></h3>
+<!--
+The async and await keywords in Python are really interesting concepts that were introduced in
+Python 3.5. Here, I'll introduce the motivation using yield and yield from.
+-->
+<h3>
+  <a href='{{ post_url }}' class='link'>
+    Introduction to Asynchronous Programming with Python's Yield Keyword
+  </a>
+</h3>
 <p class='post-caption' id='date'>Jun 5, 2021</p>
 <p>
-  In this final installment of exploring Python's generators and coroutines, I'll introduce asynchronous programming using the {{ codeify("yield") }} and {{ codeify("yield from") }} keywords.
+  In this final installment of exploring Python's generators and coroutines, I'll introduce
+  asynchronous programming using the {{ codeify("yield") }} and {{ codeify("yield from") }}
+  keywords.
 </p>
 <p>
-  I'd like to note that my resource for these features was Luciano Ramalho's excellent book called <em>Fluent Python</em>. At the time of this post, he is revising his First Edition to cover more modern features of Python, like the {{ codeify("await") }} and {{ codeify("async") }} keywords. These are what truly provides Python with its exciting asynchronous programming feature. However, his First Edition (what I have) was written before {{ codeify("async") }} and {{ codeify("await") }}, so asynchronous programming was introduced to me in its infancy. It shows his incredible foresight that he had an aside at the end of the chapter which introduces {{ codeify("yield") }} and {{ codeify("yield from") }} explaining how additional keywords would make asynchronous programming much more explicit (and therefore easier to adapt).
+  I'd like to note that my resource for these features was Luciano Ramalho's excellent book
+  called <em>Fluent Python</em>. At the time of this post, he is revising his First Edition to
+  cover more modern features of Python, like the {{ codeify("await") }} and {{ codeify("async") }}
+  keywords. These are what truly provides Python with its exciting asynchronous programming
+  feature. However, his First Edition (what I have) was written before {{ codeify("async") }} and
+  {{ codeify("await") }}, so asynchronous programming was introduced to me in its infancy. It shows
+  his incredible foresight that he had an aside at the end of the chapter which introduces
+  {{ codeify("yield") }} and {{ codeify("yield from") }} explaining how additional keywords would
+  make asynchronous programming much more explicit (and therefore easier to adapt).
 </p>
 <p>
-  Since I am not yet fluent in {{ codeify("async") }} and {{ codeify("await") }}, I'll leave a link at the bottom to another resource which provides an excellent description of the keywords. However, I'd like to use {{ codeify("yield") }} and {{ codeify("yield from") }} to introduce asynchronous programming with syntax that is familiar.
+  Since I am not yet fluent in {{ codeify("async") }} and {{ codeify("await") }}, I'll leave a link
+  at the bottom to another resource which provides an excellent description of the keywords.
+  However, I'd like to use {{ codeify("yield") }} and {{ codeify("yield from") }} to introduce
+  asynchronous programming with syntax that is familiar.
 </p>
 <p>First, let me introduce asynchronous programming.</p>
 <p>
-  Coming from C++, there are a few ways which I'm familiar with handling multiple requests at the same time (requests being messages, events, HTTP requests, etc). The simplest is just handling them serially by working through requests from a container (whether that be a queue, stack, etc). Typically in the software systems that I worked with, a very quick-lived thread would wake up and fill the container as needed. Another longer-running thread would plow through the work continuously.
+  Coming from C++, there are a few ways which I'm familiar with handling multiple requests at the
+  same time (requests being messages, events, HTTP requests, etc). The simplest is just handling
+  them serially by working through requests from a container (whether that be a queue, stack, etc).
+  Typically in the software systems that I worked with, a very quick-lived thread would wake up and
+  fill the container as needed. Another longer-running thread would plow through the work
+  continuously.
 <p>
   Here's a representation of this implementation with a queue:
 </p>
-<img src='{{ url_for("static", filename="img/introduction-to-asynchronous-programming-with-pythons-yield-keyword-1.webp") }}' alt='Single worker thread representation'>
+<img
+  src='{{ url_for("static", filename="img/introduction-to-asynchronous-programming-with-pythons-yield-keyword-1.webp") }}'
+  alt='Single worker thread representation'>
 <p>
-  You can see that only one request is processed at a time. Each time one is finished, it is thrown into my elegantly named "Done Bucket" and the next one is taken off the queue to be processed. This method is very simple, and no interactions between different workers must be coordinated. However, this can be slow, especially if each request can be processed somewhat independently of one another.
+  You can see that only one request is processed at a time. Each time one is finished, it is thrown
+  into my elegantly named "Done Bucket" and the next one is taken off the queue to be processed.
+  This method is very simple, and no interactions between different workers must be coordinated.
+  However, this can be slow, especially if each request can be processed somewhat independently of
+  one another.
 </p>
 <p>
-  The next architecture is running multiple threads concurrently from the same shared container. This has benefits and drawbacks. Let's cover the basic case and imagine the ideal scenario. Here's how that would look:
+  The next architecture is running multiple threads concurrently from the same shared container.
+  This has benefits and drawbacks. Let's cover the basic case and imagine the ideal scenario. Here's
+  how that would look:
 </p>
-<img src='{{ url_for("static", filename="img/introduction-to-asynchronous-programming-with-pythons-yield-keyword-2.webp") }}' alt='Multiple worker thread representation'>
+<img
+  src='{{ url_for("static", filename="img/introduction-to-asynchronous-programming-with-pythons-yield-keyword-2.webp") }}'
+  alt='Multiple worker thread representation'>
 <p>
-  In this case, there are two workers processing requests from both sides of the container. This means that we can process double the requests in the same amount of time, right?
+  In this case, there are two workers processing requests from both sides of the container. This
+  means that we can process double the requests in the same amount of time, right?
 </p>
 <p>Not necessarily.</p>
 <p>
-  In this case, the container is a shared resource between the two threads. What happens if both of them get to the last request at the same time?
+  In this case, the container is a shared resource between the two threads. What happens if both of
+  them get to the last request at the same time?
 </p>
-<img src='{{ url_for("static", filename="img/introduction-to-asynchronous-programming-with-pythons-yield-keyword-3.webp") }}' alt='Thread contention'>
+<img
+  src='{{ url_for("static", filename="img/introduction-to-asynchronous-programming-with-pythons-yield-keyword-3.webp") }}'
+  alt='Thread contention'>
 <p>Who wins?</p>
 <p>
-  No one. In fact, both workers will take the request out of the container at the same time, not realizing that the other has done the same. That last request will be processed twice. In some cases, this might be almost harmless. In others, it can completely nullify the important work that was done by one of the threads. This can be especially nasty if the output of the thread is actually a shared resource.
+  No one. In fact, both workers will take the request out of the container at the same time, not
+  realizing that the other has done the same. That last request will be processed twice. In some
+  cases, this might be almost harmless. In others, it can completely nullify the important work that
+  was done by one of the threads. This can be especially nasty if the output of the thread is
+  actually a shared resource.
 </p>
 <p>
-  For instance, let's imagine that the request is as simple as incrementing a shared number, starting at zero. For the first iteration, Worker 1 and Worker 2 would both see the shared number as zero. Both would then output the number 1 as a result, instead of 2 as you would expect. Worker 2 nullified the work of Worker 1. In this case, the speed is simply reduced, but you can imagine more devastating results if the threads were working on databases.
+  For instance, let's imagine that the request is as simple as incrementing a shared number,
+  starting at zero. For the first iteration, Worker 1 and Worker 2 would both see the shared
+  number as zero. Both would then output the number 1 as a result, instead of 2 as you would expect.
+  Worker 2 nullified the work of Worker 1. In this case, the speed is simply reduced, but you can
+  imagine more devastating results if the threads were working on databases.
 </p>
 <p>
-  To protect against this, an application can introduce mechanisms such as mutexes to ensure only one thread is working on a resource at a time. Even with these mechanisms, threading is hard, and debugging them is how I spend most of my time at work.
+  To protect against this, an application can introduce mechanisms such as mutexes to ensure only
+  one thread is working on a resource at a time. Even with these mechanisms, threading is hard,
+  and debugging them is how I spend most of my time at work.
 </p>
 <p>
-  Note that above I chose to refer to threads as "concurrency" with the idea that these locking mechanisms prevented threads from running completely parallel to one another. The CPython interpreter also limits applications to a single thread of execution, unless using a third party module. Although the application may think it's starting multiple threads, they are actually sharing a single CPU and quickly switching contexts instead of running in parallel.
+  Note that above I chose to refer to threads as "concurrency" with the idea that these locking
+  mechanisms prevented threads from running completely parallel to one another. The CPython
+  interpreter also limits applications to a single thread of execution, unless using a third party
+  module. Although the application may think it's starting multiple threads, they are actually
+  sharing a single CPU and quickly switching contexts instead of running in parallel.
 </p>
 <p>
-  In practice (especially in C++), threads can run in parallel quite often in multi-core CPUs when they are not burdened by too many shared resources. However, I wanted to keep it separate from the third architecture that I see quite often in C++, which is parallel processing.
+  In practice (especially in C++), threads can run in parallel quite often in multi-core CPUs when
+  they are not burdened by too many shared resources. However, I wanted to keep it separate from
+  the third architecture that I see quite often in C++, which is parallel processing.
 </p>
 <p>
-  Parallel processing gets all of the benefits of multi-threading without many of the drawbacks. In this architecture, multiple independent processes execute a backlog of work in nearly isolated silos. Ideally, they can work freely without having to interact or wait for any shared resources or other processes. Here's the example from above designed using parallel processing:
+  Parallel processing gets all of the benefits of multi-threading without many of the drawbacks. In
+  this architecture, multiple independent processes execute a backlog of work in nearly isolated
+  silos. Ideally, they can work freely without having to interact or wait for any shared resources
+  or other processes. Here's the example from above designed using parallel processing:
 </p>
-<img src='{{ url_for("static", filename="img/introduction-to-asynchronous-programming-with-pythons-yield-keyword-4.webp") }}' alt='Parallel processing'>
+<img
+  src='{{ url_for("static", filename="img/introduction-to-asynchronous-programming-with-pythons-yield-keyword-4.webp") }}'
+  alt='Parallel processing'>
 <p>
-  In this example, each worker has its own request pile, so they can churn through the requests twice as quick as the serial example. However, when one worker reaches the end of its pile, it simply stops working. It does not need to notify the other worker or have to worry about locking the container, like in the multi-threading example.
+  In this example, each worker has its own request pile, so they can churn through the requests
+  twice as quick as the serial example. However, when one worker reaches the end of its pile, it
+  simply stops working. It does not need to notify the other worker or have to worry about locking
+  the container, like in the multi-threading example.
 </p>
 <p>
-  While this seems great, parallel processing has its own challenges. Not every problem can be solved with it. It also doesn't make sense to use this architecture when the number of CPUs on your server is less than the number of things that must be processed at once (think of a internet server which might receive hundreds of requests at once - there probably aren't hundreds of CPUs available). Also, if there are requests to shared resources, this architecture will run into the same issues as multi-threading. 
+  While this seems great, parallel processing has its own challenges. Not every problem can be
+  solved with it. It also doesn't make sense to use this architecture when the number of CPUs on
+  your server is less than the number of things that must be processed at once (think of a internet
+  server which might receive hundreds of requests at once - there probably aren't hundreds of CPUs
+  available). Also, if there are requests to shared resources, this architecture will run into the
+  same issues as multi-threading. 
 </p>
 <p>
-  So which one do you choose if you need to solve a problem? It really depends on the architecture. For massive processing-heavy calculations where there are few constraints on the hardware resources (lots of memory and CPU power), parallel processing is the way to go. For simple calculations where latency is not an issue, the serial approach is probably the best bet. If latency is an issue but requests must be handled using shared or limited resources, multi-threading would usually be my choice, even knowing the risks of having to lock shared resources and tune thread priorities. Python gives a great alternative, though.
+  So which one do you choose if you need to solve a problem? It really depends on the architecture.
+  For massive processing-heavy calculations where there are few constraints on the hardware
+  resources (lots of memory and CPU power), parallel processing is the way to go. For simple
+  calculations where latency is not an issue, the serial approach is probably the best bet. If
+  latency is an issue but requests must be handled using shared or limited resources, multi-
+  threading would usually be my choice, even knowing the risks of having to lock shared resources
+  and tune thread priorities. Python gives a great alternative, though.
 </p>
 <p>
-  Instead of multiple threads running simultaneously with the OS as the arbitrator of which one gets CPU time, the {{ codeify("yield") }} and {{ codeify("yield from") }} keywords allow the application to decide when a thread of execution will change contexts. This is asynchronous programming.
+  Instead of multiple threads running simultaneously with the OS as the arbitrator of which one
+  gets CPU time, the {{ codeify("yield") }} and {{ codeify("yield from") }} keywords allow the
+  application to decide when a thread of execution will change contexts. This is asynchronous
+  programming.
 </p>
 <p>This is big.</p>
 <p>
-  Now, instead of needing to tune the performance of threads by changing priorities, implementing locks, changing scheduling algorithms, etc, the application can make a section of code essentially atomic (cannot be interrupted by the OS). After the atomic operation, then the {{ codeify("yield") }} keyword changes context so that other parts of the application can execute. Plus, because only one context is executing at a time, there is no need to lock a shared resource. Just make sure that the context does not yield until after the shared resource has been closed.
+  Now, instead of needing to tune the performance of threads by changing priorities, implementing
+  locks, changing scheduling algorithms, etc, the application can make a section of code essentially
+  atomic (cannot be interrupted by the OS). After the atomic operation, then the
+  {{ codeify("yield") }} keyword changes context so that other parts of the application can execute.
+  Plus, because only one context is executing at a time, there is no need to lock a shared resource.
+  Just make sure that the context does not yield until after the shared resource has been closed.
 </p>
 <p>
-  While this may be slower than multi-threading in processing-heavy situations, it is an excellent choice for any cases where there are long waits, such as HTTP requests or large file IO. Instead of having a high-priority thread waiting for something to complete and starving all other threads, it can yield the CPU to another context until the long-running request completes. Here's an example examining the time of execution of the infamous bogosort algorithm:
+  While this may be slower than multi-threading in processing-heavy situations, it is an excellent
+  choice for any cases where there are long waits, such as HTTP requests or large file IO. Instead
+  of having a high-priority thread waiting for something to complete and starving all other threads,
+  it can yield the CPU to another context until the long-running request completes. Here's an
+  example examining the time of execution of the infamous bogosort algorithm:
 </p>
 {{ codeify("
 import random
@@ -183,10 +269,15 @@ if __name__ == '__main__':
   This is a big example, so let's break it down piece by piece.
 </p>
 <p>
-  First, the bogosort algorithm is a theoretical sorting algorithm where a list is sorted by randomly re-ordering it and then checking if it has been sorted. I've implemented this with the {{ codeify("bogosort()") }} function and the random module. This example is trying to sort a list of ten elements between 0 and 99.
+  First, the bogosort algorithm is a theoretical sorting algorithm where a list is sorted by
+  randomly re-ordering it and then checking if it has been sorted. I've implemented this with
+  the {{ codeify("bogosort()") }} function and the random module. This example is trying to sort
+  a list of ten elements between 0 and 99.
 </p>
 <p>
-  A counter function maintains the amount of time which has elapsed between the start of the bogosort and the end. Since this is a random function, it can deviate wildly. Here was the output of my attempt:
+  A counter function maintains the amount of time which has elapsed between the start of the
+  bogosort and the end. Since this is a random function, it can deviate wildly. Here was the
+  output of my attempt:
 </p>
 {{ codeify("
 Elapsed Time: 0
@@ -202,22 +293,46 @@ Sorted list is: [6, 10, 35, 38, 51, 56, 61, 64, 91, 93]
 ")}}
 <p>It almost took a minute!</p>
 <p>
-  Now the cool thing about this example is the bogosort algorithm and the counter were executing at the same time without the use of threads. That was possible because they were both generators being driven by the {{ codeify("run_async()") }} function. Let's first examine {{ codeify("run_async()") }}.
+  Now the cool thing about this example is the bogosort algorithm and the counter were executing
+  at the same time without the use of threads. That was possible because they were both generators
+  being driven by the {{ codeify("run_async()") }} function. Let's first examine
+  {{ codeify("run_async()") }}.
 </p>
 <p>
-  It's actually pretty simple. It just takes a list of generators and iterates through them, calling {{ codeify("next()") }} on each. When one yields, {{ codeify("run_async()") }} goes to the next in a simple round-robin scheduling algorithm. After each generator has had its turn, {{ codeify("run_async()") }} continues until one of the generators raises StopIteration. At this point, it returns the value corresponding to the StopIteration exception.
+  It's actually pretty simple. It just takes a list of generators and iterates through them, calling
+  {{ codeify("next()") }} on each. When one yields, {{ codeify("run_async()") }} goes to the next in
+  a simple round-robin scheduling algorithm. After each generator has had its turn, 
+{{ codeify("run_async()") }} continues until one of the generators raises StopIteration. At this
+  point, it returns the value corresponding to the StopIteration exception.
 </p>
 <p>
-  The key to {{ codeify("run_async()") }} is that all of the generators passed into it yield execution when they get to a point where they can safely interrupt execution. In {{ codeify("counter()") }}, that's when it determines that it doesn't have anything to print (since it's been less than a second). In {{ codeify("bogosort()") }}, that's when it determines that it will have to try sorting again.
+  The key to {{ codeify("run_async()") }} is that all of the generators passed into it yield
+  execution when they get to a point where they can safely interrupt execution. In 
+{{ codeify("counter()") }}, that's when it determines that it doesn't have anything to print
+  (since it's been less than a second). In {{ codeify("bogosort()") }}, that's when it determines
+  that it will have to try sorting again.
 </p>
 <p>
-  Between the {{ codeify("yield") }}s, both methods can assume the code is atomic. If either were writing to a shared resource (like a database), it wouldn't have to worry about the OS automatically changing context to another thread which may completely change the resource. Furthermore, if written correctly, there are no deadlocks, no starved threads, and you can customize your scheduling algorithm.
+  Between the {{ codeify("yield") }}s, both methods can assume the code is atomic. If either were
+  writing to a shared resource (like a database), it wouldn't have to worry about the OS
+  automatically changing context to another thread which may completely change the resource.
+  Furthermore, if written correctly, there are no deadlocks, no starved threads, and you can
+  customize your scheduling algorithm.
 </p>
 <p>I think that's pretty neat.</p>
 <p>
-  Now, like I said at the top, this is just an introduction into a fairly new feature of Python that has since been expanded upon. The {{ codeify("yield") }} and {{ codeify("yield from") }} keywords are able to introduce asynchronous programming using a fairly straightforward syntax, but {{ codeify("async") }} and {{ codeify("await") }} are specifically designed for it. I still have reading to do on those two keywords, but <a href='https://snarky.ca/how-the-heck-does-async-await-work-in-python-3-5/' target='_blank' class='underlined link'>this</a> is an excellent resource (and he has the same enthusiasm that I do about asynchronous programming).
+  Now, like I said at the top, this is just an introduction into a fairly new feature of Python that
+  has since been expanded upon. The {{ codeify("yield") }} and {{ codeify("yield from") }} keywords
+  are able to introduce asynchronous programming using a fairly straightforward syntax, but
+  {{ codeify("async") }} and {{ codeify("await") }} are specifically designed for it. I still have
+  reading to do on those two keywords, but 
+<a href='https://snarky.ca/how-the-heck-does-async-await-work-in-python-3-5/' target='_blank' class='underlined link'>this</a>
+  is an excellent resource (and he has the same enthusiasm that I do about asynchronous programming).
 </p>
 <p>
-  I can't wait to start playing around with this feature. I've spent way too much time trying to debug multi-threading issues, and it's good to know the language designers at Python provided an alternative. Just another reason to migrate to a language that's not quite as old as I am, I guess.
+  I can't wait to start playing around with this feature. I've spent way too much time trying to
+  debug multi-threading issues, and it's good to know the language designers at Python provided an
+  alternative. Just another reason to migrate to a language that's not quite as old as I am, I
+  guess.
 </p>
 
