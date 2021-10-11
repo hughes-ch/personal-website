@@ -21,13 +21,12 @@ This blog post is part 1 in a series on how to convert from a Wix webite to a we
   bloggers than someone like me. I wanted simple. Also, I needed a little bit more customization,
   like syntax highlighting.
 </p>
-<img
-  src='{{ url_for("static", filename="img/conversion-to-flask-1-1.png") }}'
-  alt='Picture of my old website on Wix'>
 <caption>
   Here's the old website. Looks OK, but the focus is more on the graphics than the text. I imagine
   most software blogs are not that graphics-heavy. 
 </caption>
+<img src='{{ url_for("static", filename="img/conversion-to-flask-1-1.png") }}'
+     alt='Picture of my old website on Wix'>
 <p>
   I think the thing that drove me up the wall the hardest was that any code block had to be a
   separate piece of HTML. There was no way to use common CSS, common scripts, etc.
@@ -272,6 +271,7 @@ print('hello world!')
   copyrights for my blog content. 
 </p>
 <p>
-  With the layout ready and a concrete goal in mind, I was ready to start coding away! Next post,
-  I'll cover the contents of that original .html file and the rationale for my design.
+  With the layout ready and a concrete goal in mind, I was ready to start coding away!
+  <a href='/post/conversion-to-flask-2/' class='underlined link'>Next post</a>, I'll cover the
+  contents of that original .html file and the rationale for my design.
 </p>

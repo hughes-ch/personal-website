@@ -5,6 +5,7 @@
     :license: MIT License. See LICENSE.md for details
 """
 import bs4
+import json
 import src.cli
 
 from src.blog import Blog
@@ -17,7 +18,7 @@ def load_test_config():
         :return: Config from INI modified to be in a test config
         """
     config = Settings.instance()
-    config['Flask']['Testing'] = 'True'
+    config['Flask']['TESTING'] = 'True'
     return config
 
 def create_blog():
@@ -41,8 +42,8 @@ def validate_links(context, client, html):
 
     # Find all links on page
     soup = bs4.BeautifulSoup(html, 'html.parser')
-    for a in soup.find_all('a'):
-        href = a.get('href')
+    for link in soup.find_all('a'):
+        href = link.get('href')
         if 'http' in href:
             # Do not send external requests during development...
             #response = requests.head(href)
@@ -82,4 +83,16 @@ def build_static(app):
         """
     runner = app.test_cli_runner()
     return runner.invoke(src.cli.build)
+
+def load_page_json(html):
+    """ Loads the StructuredData JSON for the page
+
+        :param html: HTML response
+        :return: Loaded JSON
+        """
+    soup = bs4.BeautifulSoup(html, 'html.parser')
+    script_text = soup.find('script', type='application/ld+json').string
+    return json.loads(str(script_text).strip())
+            
+
 

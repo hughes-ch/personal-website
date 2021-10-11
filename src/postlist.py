@@ -11,6 +11,7 @@ import pathlib
 import threading
 
 from datetime import datetime
+from src.setting import Settings
 
 class Post:
     """ Contains data for a single post """
@@ -31,7 +32,8 @@ class Post:
         
         self.contents = flask.render_template(
             str(self.rel_path),
-            post_url=f'{self.full_url}/')
+            post_url=f'{self.full_url}/',
+            settings=Settings.instance())
         
         soup = bs4.BeautifulSoup(self.contents, 'html.parser')
 
@@ -54,7 +56,7 @@ class Post:
         # Find meta description. Will be contained in comment
         comment = soup.find(text=lambda text:isinstance(text, bs4.Comment))
         if comment is not None:
-            self.description = comment
+            self.description = str(comment).replace('\n', ' ').strip()
         else:
             self.description = ''
 
@@ -115,7 +117,7 @@ class PostList:
         post_list = []
 
         post_path = (pathlib.Path(self._root_path) /
-                     self._settings['Routes']['FlaskTemplate'] /
+                     flask.current_app.template_folder /
                      self._settings['Routes']['PostsUrl'])
 
         for path in post_path.glob('*.html'):

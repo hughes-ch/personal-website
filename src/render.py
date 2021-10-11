@@ -5,7 +5,9 @@
     :license: MIT License. See LICENSE.md for details
 """
 import flask
+import inspect
 import jinja2
+import json
 import math
 import pathlib
 import pygments
@@ -46,6 +48,12 @@ class Renderer:
             },
             'cpp': {
                 'lexer': pygments.lexers.CppLexer(),
+                'formatter': pygments.formatters.HtmlFormatter(
+                    linenos=True,
+                    wrapcode=True)
+            },
+            'css': {
+                'lexer': pygments.lexers.CssLexer(),
                 'formatter': pygments.formatters.HtmlFormatter(
                     linenos=True,
                     wrapcode=True)
@@ -110,11 +118,10 @@ class Renderer:
         posts_per_page = self._find_posts_per_page(
             int(self._settings['Render']['RenderedPostCount']))
 
-        context = {
-            'settings': self._settings,
-            'prev_page': None,
-            'next_page': None,
-        }
+        context = self._define_base_context()
+        context['title'] = self._settings['Render']['IndexTitle']
+        context['prev_page'] = None
+        context['next_page'] = None
         
         if len(posts_per_page) > 0:
             if page < 1 or page > len(posts_per_page):
@@ -136,7 +143,6 @@ class Renderer:
                 return self.render_404()
 
         # Render SEO content
-        context['json_script'] = self._settings['Routes']['IndexJson']
         try: 
             context['canonical_url'] = (
                 f'{self._settings["Routes"]["BaseUrl"]}'
@@ -145,10 +151,12 @@ class Renderer:
             context['canonical_url'] = (
                 f'{self._settings["Routes"]["BaseUrl"]}')
 
-        # Render all posts to template
-        context['title'] = self._settings['Render']['IndexTitle']
+        # Render json
+        struct_data_factory = StructuredDataFactory(self._settings)
+        context['struct_data'] = struct_data_factory.create_blog(
+            self._postlist).as_dict()
 
-        return flask.render_template(
+        return flask.render_template( 
             self._settings['Templates']['Index'],
             **context)
 
@@ -161,11 +169,8 @@ class Renderer:
         if not self._is_configured():
             raise RendererNotConfiguredException
 
-        context = {
-            'settings': self._settings,
-            'title': self._settings['Render']['ErrorTitle'],
-            'json_script': self._settings['Routes']['ArchiveJson'],
-        }
+        context = self._define_base_context()
+        context['title'] =  self._settings['Render']['ErrorTitle']
 
         return flask.render_template(
             self._settings['Templates']['Err404'],
@@ -184,20 +189,23 @@ class Renderer:
         try:
             post = self._postlist.get(post_name)
 
-            context = {
-                'settings': self._settings,
-                'title': f'{post.title} - {self._settings["Render"]["BlogTitle"]}',
-                'post': flask.Markup(post.contents),
-                'post_description': post.description,
-            }
+            context = self._define_base_context()
+            context['post'] = flask.Markup(post.contents)
+            context['post_description'] = post.description
+            context['title'] = (
+                f'{post.title} - {self._settings["Render"]["BlogTitle"]}')
             
         except ValueError:
             return self.render_404()
 
         # Render SEO
-        context['json_script'] = f'{post.rel_url}.json'
         context['canonical_url'] = (
             f'{self._settings["Routes"]["BaseUrl"]}{post.full_url}/')
+
+        # Render json
+        struct_data_factory = StructuredDataFactory(self._settings)
+        context['struct_data'] = struct_data_factory.create_post(
+            post).as_dict()
 
         # Render post
         try:
@@ -216,14 +224,15 @@ class Renderer:
         if not self._is_configured():
             raise RendererNotConfiguredException
 
-        context = {
-            'settings': self._settings,
-            'title': self._settings['Render']['AboutTitle'],
-            'json_script': self._settings['Routes']['AboutJson'],
-            'canonical_url': (
+        context = self._define_base_context()
+        context['canonical_url'] = (
                 f'{self._settings["Routes"]["BaseUrl"]}/'
                 f'{self._settings["Routes"]["AboutUrl"]}/')
-        }
+        context['title'] = self._settings['Render']['AboutTitle']
+
+        # Render json
+        struct_data_factory = StructuredDataFactory(self._settings)
+        context['struct_data'] = struct_data_factory.create_about().as_dict()
 
         return flask.render_template(
             self._settings['Templates']['About'],
@@ -238,44 +247,23 @@ class Renderer:
         if not self._is_configured():
             raise RendererNotConfiguredException
 
-        context = {
-            'settings': self._settings,
-            'posts': list(self._postlist),
-            'title': self._settings['Render']['ArchiveTitle'],
-            'json_script': self._settings['Routes']['ArchiveJson'],
-            'canonical_url': (
+        context = self._define_base_context()
+        context['settings'] = self._settings
+        context['posts'] = list(self._postlist)
+        context['title'] = self._settings['Render']['ArchiveTitle']
+        context['canonical_url'] = (
                 f'{self._settings["Routes"]["BaseUrl"]}/'
                 f'{self._settings["Routes"]["ArchiveUrl"]}/')
-        }
+
+        # Render json
+        struct_data_factory = StructuredDataFactory(self._settings)
+        context['struct_data'] = struct_data_factory.create_archive(
+            self._postlist).as_dict()
 
         return flask.render_template(
             self._settings['Templates']['Archive'],
             **context)
 
-    def serve_json(self, json_script_name):
-        """ Serve up json file. Dynamically created.
-
-            :param name: <str> Name of json script to serve
-            :return: JSON contents or 404
-            """
-        if not self._is_configured():
-            raise RendererNotConfiguredException
-
-        struct_data_factory = StructuredDataFactory(self._settings)
-
-        if self._settings['Routes']['IndexJson'] == json_script_name:
-            return str(struct_data_factory.create_blog(self._postlist))
-        elif self._settings['Routes']['ArchiveJson'] == json_script_name:
-            return str(struct_data_factory.create_archive(self._postlist))
-        elif self._settings['Routes']['AboutJson'] == json_script_name:
-            return str(struct_data_factory.create_about())
-        else:
-            for post in self._postlist:
-                if json_script_name == f'{post.rel_url}.json':
-                    return str(struct_data_factory.create_post(post))
-
-            return self.render_404()
-            
     def _is_configured(self):
         """ Checks that an instance is configured enough to render a template
 
@@ -335,3 +323,13 @@ class Renderer:
             code,
             self._lang_config.get(lang, fallback_config)['lexer'],
             self._lang_config.get(lang, fallback_config)['formatter'])
+
+    def _define_base_context(self):
+        """ Returns the base context of the class
+
+            :return: Context dict for every use case
+            """
+        return {
+            'settings': self._settings,
+            'url': flask.request.url
+        }

@@ -10,11 +10,12 @@ import flask.cli
 import os
 
 from .builder import Builder
+from .setting import Settings
 
 @click.command('build')
 @flask.cli.with_appcontext
 def build():
-    """ Builds static HTML files from the flask app
+    """ Builds static HTML files for deployment
 
         :return: None
         """

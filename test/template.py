@@ -4,6 +4,7 @@
     :copyright: Copyright (c) 2021 Chris Hughes
     :license: MIT License. See LICENSE.md for details
 """
+import flask
 import pathlib
 import test.util
 
@@ -19,10 +20,9 @@ class Template:
             :param template_html: <str> The template HTML
             :return: New object
             """
-        self.template_name = template_name
+        self.template_name = pathlib.Path('unittest') / template_name
         self.template_html = template_html
-        self.root_path = pathlib.Path(__file__).parent.absolute()
-
+        
     def get(self, blog):
         """ Gets the template
 
@@ -31,14 +31,18 @@ class Template:
             """
         # Create test client to get template
         config = test.util.load_test_config()
-        config['Routes']['FlaskRoot'] = str(self.root_path)
-        config['Routes']['FlaskTemplate'] = str(self.root_path)
-        config['Templates']['Index'] = self.template_name
+        config['Templates']['Index'] = str(self.template_name)
         blog = Blog(config)
 
         with blog.app.test_client() as client:
             # Create local HTML file
-            template_path = pathlib.Path(self.root_path) / self.template_name
+            template_path = (
+                pathlib.Path(blog.app.root_path) /
+                blog.app.template_folder /
+                self.template_name)
+
+            template_path.parent.mkdir(exist_ok=True)
+            
             with template_path.open(mode='w') as f_handle:
                 f_handle.write(self.template_html)
 
@@ -47,3 +51,4 @@ class Template:
                 return client.get('/').data
             finally:
                 template_path.unlink(missing_ok=True)
+                template_path.parent.rmdir()

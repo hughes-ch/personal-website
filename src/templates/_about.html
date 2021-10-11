@@ -9,7 +9,7 @@
 {% block content %}
 <h2 class='page-title'>About Me</h2>
 <article>
-  <img src='{{ url_for("static", filename="img/me.webp") }}' alt='Picture of Chris Hughes'>
+  <img src='{{ settings["Struct"]["AuthorImage"] }}' alt='Picture of Chris Hughes'>
   <p>Hi, I'm Chris Hughes, a freelance web developer specializing in Python.</p>
   <p>
     I started my career with Raytheon Technologies after graduating from Northeastern University
@@ -27,12 +27,10 @@
     edge software technologies. Though I'm new and self taught in the web development sphere, I'm
     constantly adding to my Python, Flask, and Django knowledge.
   </p>
-  <p>For more information, check out my resume below:</p>
-  <iframe
-    id='pdf-js-viewer'
-    src='{{ url_for("static", filename="js/pdfjs/web/viewer.html") }}?file={{ url_for("static", filename="doc/resume.pdf") }}'
-    title='Resume'>
-  </iframe>
+  <p>
+    For more information,
+    <a href='{{ settings["Routes"]["ResumeSrc"] }}' class='underlined link'>check out my resume</a>.
+  </p>
   <p>
     Thanks for stopping by. If you'd like to get in contact, the best way is to use the social media
     links at the top or bottom of the page. I'm always learning, so if some of the content on the

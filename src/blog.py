@@ -22,12 +22,8 @@ class Blog:
             :return: New instance
             """
         # Create and configure flask instance
-        self.app = flask.Flask(
-            __name__,
-            root_path=settings['Routes'].get('FlaskRoot', None),
-            template_folder=settings['Routes']['FlaskTemplate'])
-
-        self.app.config.from_mapping(settings['Flask'])
+        self.app = flask.Flask(__name__)
+        self.app.config.update(**settings['Flask'])
         self.app.url_map.strict_slashes = False
 
         # Add CLI commands
@@ -92,13 +88,3 @@ class Blog:
                 pathlib.Path(self.app.static_folder) /
                 settings['Routes']['RobotsLocation'],
                 robots)
-
-        # Serve JSON
-        @self.app.route(f'/{settings["Routes"]["Json"]}/<name>')
-        def serve_json(name):
-            """ Serves JSON, primarily for SEO structured data
-
-                :param name: <str> Name of json file (with .json)
-                :return: JSON file
-                """
-            return self.renderer.serve_json(name)
