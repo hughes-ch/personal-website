@@ -6,7 +6,24 @@
  #}
 
 <div>
-  <a href='{{ settings["Render"]["LinkedinUrl"] }}' target='_blank'><img src='{{ url_for("static", filename="icon/linkedin.png") }}' alt='LinkedIn Logo' class='icon'></a>
-  <a href='{{ settings["Render"]["GithubUrl"] }}' target='_blank'><img src='{{ url_for("static", filename="icon/github.png") }}' alt='GitHub Logo' class='icon'></a>
-  <a href='{{ settings["Render"]["EmailUrl"] }}'><img src='{{ url_for("static", filename="icon/gmail.png") }}' alt='Gmail Logo' class='icon'></a>
+  <a href='{{ settings["Render"]["LinkedinUrl"] }}'
+     target='_blank'
+     class='link'>
+    <img
+      src='{{ url_for("static", filename="icon/linkedin.png") }}'
+      alt='LinkedIn Logo' class='icon'>
+  </a>
+  <a href='{{ settings["Render"]["GithubUrl"] }}'
+     target='_blank'
+     class='link'>
+    <img
+      src='{{ url_for("static", filename="icon/github.png") }}'
+      alt='GitHub Logo' class='icon'>
+  </a>
+  <a href='{{ settings["Render"]["EmailUrl"] }}'
+     class='link'>
+    <img
+      src='{{ url_for("static", filename="icon/gmail.png") }}'
+      alt='Gmail Logo' class='icon'>
+  </a>
 </div>

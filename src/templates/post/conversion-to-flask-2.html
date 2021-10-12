@@ -1,0 +1,329 @@
+{#
+ #   Blog post contents
+ #
+ #   :copyright: Copyright (c) 2021 Chris Hughes
+ #   :license: MIT License. See LICENSE.md for details. All rights reserved for post contents
+ #}
+<!--
+This blog post is part 2 in a series on how to convert from a Wix webite to a website implemented 
+in Flask. This covers the choices made in the HTML/CSS.
+-->
+<h3><a href='{{ post_url }}' class='link'>Implementing my Website in Flask - Part 2</a></h3>
+<p class='post-caption' id='date'>Oct 11, 2021</p>
+<p>
+  Check out <a href='{{url_for("blog_post", name="conversion-to-flask-1") }}' class='underlined link'>
+    part 1 of this series
+  </a> for an introduction to the overall website design and layout. As I stated there, you can also
+  <a href='https://github.com/hughes-ch/personal-website' target='_blank' class='underlined link'>
+    find the source on Github
+  </a>.
+</p>
+<p>
+  In this blog post, I'd like to cover some of the HTML/CSS choices that I made. This has been a
+  iterative process, and I'm sure after I publish this post I'll make adjustments (maybe even during
+  this post as I explain my rationale). If you look at the commit history, you can see I've come a
+  long way from the first static HTML page, and what Flask now serves.
+</p>
+<h4>General HTML Choices</h4>
+<section>
+  <p>
+    I try to design code that is maintainable and easy to understand so that I (or someone else) can
+    pick it up a year from now and still understand what I did. Therefore I try to stick to as many
+    of the <a href='https://www.w3schools.com/html/html5_syntax.asp' class='underlined link'>
+      recommended HTML styles and best practices
+    </a>
+    as I can, and use
+    <a href='https://www.w3schools.com/html/html5_semantic_elements.asp' class='underlined link'>
+      semantic HTML
+    </a>.
+  </p>
+  <p>
+    A lot of these things are pretty easy, and I just had to remember to check them off as I was
+    writing the HTML. Things like:
+  </p>
+  <ul>
+    <li>Declaring the document type to be {{ codeify("<!DOCTYPE html>") }} at the top of a page.</li>
+    <li>
+      Avoiding long code lines -
+      I tried to keep mine under 100 characters unless dynamically rendered.
+    </li>
+    <li>
+      Including the {{ codeify("<title>") }} tag. Bonus: "{{ settings['Render']['BlogTitle'] }}" is
+        shown on the tab.
+    </li>
+    <li>
+      Setting the {{ codeify("lang") }} attribute, charset, and viewport. These help search engines and
+      browsers understand what they're looking at. 
+    </li>
+  </ul>
+  <p>All together, the beginning of the document looks like:</p>
+{{ codeify("
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <title>Ramblings of a Software Dev</title>
+", lang='html') }}
+  <p>
+    Next, to help out the browser, any search engines that hit my page, and future me, I wrapped my
+    contents in semantic HTML. What this looks like is:
+  </p>
+  <ul>
+    <li>
+      All my navigation content goes in a {{ codeify("<nav>") }} tag.
+    </li>
+    <li>
+      All my blog content (posts, archive, "about" page) goes within the {{ codeify("<main>") }} tag.
+    </li>
+    <li>
+      Within my {{ codeify("<main>") }} block, I have several {{ codeify("<article>") }}s.
+    </li>
+    <li>
+      At the end of it all, my footer content goes within a {{ codeify("<footer>") }} tag.
+    </li>
+  </ul>
+  <p>
+    The semantic HTML almost makes the page self-documenting, instead of using a bunch of
+    {{ codeify("<div>") }}s. Another added benefit was that the tags were an easy way to split up the
+      content into different Flask templates (more on that in a later blog post).
+  </p>
+  <p>
+    If you <a href='view-source:{{ settings["Routes"]["BaseUrl"] }}/'
+              class='underlined link',
+              target='_blank'>
+      view the source of my main page
+    </a> you can see there's a few more tags that I didn't mention. These are for search engine
+    optimization, which deserves its own post.
+  </p>
+</section>
+<h4>Responsive CSS</h4>
+<section>
+  <p>
+    <a href='view-source:{{ settings["Routes"]["BaseUrl"] }}/'
+       class='underlined link'
+       target='_blank'>
+      Looking at the page source
+    </a>, you'll see two stylesheets. One (pygments.css) is for the code rendering feature, which
+    I'll cover in a separate post. The stylesheet.css file is the generic stylesheet for the
+    project.
+  </p>
+  <p>
+    I elected to use flexboxes whenever there is a container that could be larger than a mobile
+    phone screen. The benefit is that it dynamically renders to fit the smaller screen without the
+    need for JavaScript. Specifically, these features are the navigation at the top of the screen
+    and the general page content (whether that be the blog post, about page, or archive).
+  </p>
+  <p>
+    Specific to the nav bar, each element is contained within a {{ codeify("<div>") }} styled with
+    {{ codeify("white-space: nowrap") }} so they couldn't break. Then, the nav bar was styled like
+    so:
+  </p>
+{{ codeify("
+nav {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-evenly;
+}
+", lang='css') }}
+  <p>
+    This made the unbreakable pieces wrap to the next line on small mobile screens, but stay on a
+    single line on wide screens. For example:
+  </p>
+  <caption>Narrow screens look like this:</caption>
+  <div class='bordered-img-container'>
+    <img src='{{ url_for("static", filename="img/conversion-to-flask-2-2.png") }}'
+         alt='Picture of nav bar on narrow screens.'
+         class='thin-pic' />
+  </div>
+  <br />
+  <caption>...and wide screens look like this:</caption>
+  <div class='bordered-img-container'>
+    <img src='{{ url_for("static", filename="img/conversion-to-flask-2-1.png") }}'
+         alt='Picture of nav bar on wide screens.' />
+  </div>
+  <p>
+    However, I did have to hide the social media block for mobile, because it was flowing onto a
+    third line. I accomplished that with a {{ codeify("@media") }} block:
+  </p>
+{{ codeify("
+@media (max-width: 40em) {
+    .nav-social-media-block div * {
+        display: none;
+    }
+}
+", lang='css') }}
+  <p>
+    I had to experiment to determine the max-width to use.
+  </p>
+  <p>
+    Another benefit of flexbox is that it's really easy to center. For example, my main page
+    contents can be styled like this:
+  </p>
+{{ codeify("
+.page-content {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+}
+", lang='css') }}
+  <p>
+    Then, by setting a {{ codeify("max-width") }}, the page can be rendered in the middle of the
+    screen at a size that's easy to read. 
+  </p>
+  <p>
+    The only place where I didn't go with the flexbox is the pagination feature at the bottom.
+    Instead, I split this into a grid with a width of 100%. The "Prev" button went in one column
+    and the "Next" button went on the other. It seemed like the most logical choice since they
+    should always be next to each other (instead of wrapping), even when the page is small.
+  </p>
+  <p>
+    Here's the related CSS:
+  </p>
+{{ codeify("
+.page-control-section {
+    display: grid;
+    width: 100%;
+}
+#next-nav {
+    grid-column: 2 / span 1;
+    grid-row: 1 / span 1;
+    text-align: right;
+}
+#prev-nav {
+    grid-column: 1 / span 1;
+    grid-row: 1 / span 1;
+    text-align: left;
+}
+", lang='css') }}
+  <p>
+    Note that the {{ codeify(".page-control-section") }} class is the containing div of the "Prev"
+    and "Next" buttons. The {{ codeify("#next-nav") }} and  {{ codeify("#prev-nav") }} IDs are
+    the actual buttons. 
+  </p>
+  <p>
+    The main benefit of using a grid is that the two columns will always remain on a single row,
+    even on smartphone screens.
+  </p>
+</section>
+<h4>Fonts</h4>
+<section>
+  <p>
+    I'm not too picky about my font. I just needed something that was readable and conventional,
+    so I picked a popular sans-serif font from
+    <a href='https://fonts.google.com/' target='_blank' class='underlined link'>Google Fonts</a>. 
+  </p>
+  <p>
+    There's two things that need to be done to use the font. First, load the font style in the head
+    of the html:
+  </p>
+{{ codeify("
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <link rel='preconnect' href='https://fonts.googleapis.com'>
+    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+    <link href='https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap' rel='stylesheet'>
+", lang='html') }}
+  <p>
+    Google is really helpful in this regard, as they provide the tags to use in the HTML after
+    picking the desired font. Then I can just copy/paste.
+  </p>
+  <p>
+    Then load the font in the CSS:  
+  </p>
+{{ codeify("
+body {
+    font-family: 'Source Sans Pro', sans-serif;
+}
+", lang='css') }}
+  <p>
+    I could get away with loading the font in the body since I'm using the same font throughout the
+    site. Of course, you could load it in a more specific tag, class, or ID if you needed to.
+  </p>
+</section>
+<h4>Meta Tags</h4>
+<section>
+  <p>
+    Meta tags were something I didn't realize I needed until I tried to post to LinkedIn. Without
+    them, LinkedIn's link preview was super ugly. It looked something like this:
+  </p>
+  <div class='bordered-img-container'>
+    <img src='{{ url_for("static", filename="img/conversion-to-flask-2-4.png") }}'
+         alt='LinkedIn link preview without meta tags.'
+         class='thin-pic' />
+  </div>
+  <p>
+    Turns out, LinkedIn uses a
+    <a href='https://www.linkedin.com/post-inspector/'
+       target='_blank'
+       class='underlined link'>
+      Post Inspector
+    </a> on all of its links. It gets the necessary information like the website logo, author,
+    title, etc from meta tags. If they're not found, it does its best to parse the information
+    from the HTML. However, it doesn't always return an expected result. The Post Inspector is
+    pretty helful in providing what tags need to be defined. Using the result from my website, I
+    added these tags to the header:
+  </p>
+{{ codeify("
+<meta property='og:locale' content='en_US' />
+<meta property='og:type' content='article' />
+<meta property='og:title' content='Ramblings of a Software Dev' />
+<meta property='og:description' content='Blog and portfolio for Chris Hughes' />
+<meta property='og:site_name' content='Ramblings of a Software Dev' />
+<meta property='og:image' content='/static/img/logo.png' />
+<meta name='author' content='Chris Hughes' />
+", lang='html') }}
+  <p>
+    Now an acceptable image is displayed over the (no longer repeated) title of the website.
+  </p>
+  <p>
+    It's not just LinkedIn that uses these tags. Search engines and other applications that wish to
+    show a link preview (text messaging apps, Facebook, etc) use these tags to display a preview of
+    the website to entice users to click the link (or not).
+  </p>
+</section>
+<h4>The Favicon</h4>
+<section>
+  <p>
+    The last thing I'd like to cover is how to add a neat icon to the current tab or favorites menu,
+    called a "Favicon." These icons are pretty easy to add and make the website look a little bit more
+    polished.
+  </p>
+  <p>
+    <a href='https://en.wikipedia.org/wiki/Favicon' target='_blank' class='underlined link'>
+      Wikipedia's favicon article
+    </a> is really useful in understanding what browsers and applications are looking for when
+    displaying a favicon. In summary, at a minimum, websites need to provide one icon size and any
+    modern browser or application will scale down to the size it needs.
+  </p>
+  <p>
+    Both Android and iOS have the capability of saving a website to the home screen. Instead of the
+    brower icon, the website favicon will be displayed. Android requires an icon size of 192x192,
+    while iOS requires up to 180x180. I chose 192x192 for my single favicon to meet the Android
+    requirement, since it can just be scaled down for iOS. 
+  </p>
+  <p>
+    Internet browsers and Android use the "icon" link to find which image should be used for the
+    favicon, while iOS uses "apple-touch-icon". Here's the code I used to satisfy both cases:
+  </p>
+{{ codeify("
+<link href='/static/icon/favicon-192x192.png'
+      rel='icon'
+      sizes='192x192'
+      type='image/png'>
+<link href='/static/icon/favicon-192x192.png'
+      rel='apple-touch-icon'
+      type='image/png'
+      sizes='192x192'>
+", lang='html') }}
+  <p>
+    And that's it! Now I have a neat icon next to my title on the current tab and in the favorites
+    menu.
+  </p>
+  <p>
+    With the favicon out of the way, that's everything that I wanted to cover as far as design
+    choices for the HTML and CSS. Next week, we can get to more of the fun stuff - the Python
+    backend!
+  </p>
+</section>

@@ -5,14 +5,24 @@
  #   :license: MIT License. See LICENSE.md for details. All rights reserved for post contents
  #}
 
-<!--This blog post introduces the simple use cases for Python coroutines using the yield and yield from keywords.-->
+<!--
+This blog post introduces the simple use cases for Python coroutines using the yield and yield from
+keywords.
+-->
 <h3><a href='{{ post_url }}' class='link'>Introduction to Coroutines</a></h3>
 <p class='post-caption' id='date'>May 15, 2021</p>
 <p>
-  <a href='/post/python-yield-keyword/' class='underlined link'>Last week</a>, I wrote about the {{ codeify("yield") }} keyword in Python. To continue on with a series of posts about my new favorite topic, I'll introduce the basics of coroutines by building on the {{ codeify("yield") }} keyword.
+  <a href='/post/python-yield-keyword/' class='underlined link'>Last week</a>, I wrote about the
+  {{ codeify("yield") }} keyword in Python. To continue on with a series of posts about my new
+  favorite topic, I'll introduce the basics of coroutines by building on the
+  {{ codeify("yield") }} keyword.
 </p>
 <p>
-  Every programmer is familiar with functions. A basic coroutine is defined just like a function in Python. Like generator functions, it delegates to the {{ codeify("yield") }} keyword to do its magic. However, unlike generators, the {{ codeify("yield") }} keyword is placed on the right side of the assignment operator, and it actually returns a value that can be passed from the calling code.
+  Every programmer is familiar with functions. A basic coroutine is defined just like a function in
+  Python. Like generator functions, it delegates to the {{ codeify("yield") }} keyword to do its
+  magic. However, unlike generators, the {{ codeify("yield") }} keyword is placed on the right side
+  of the assignment operator, and it actually returns a value that can be passed from the calling
+  code.
 </p>
 <p>
   It might be best to show an example and then to explain the features:
@@ -52,13 +62,24 @@ for ii in range(10):
 0 1 3 6 10 15 21 28 36 45
 ") }}
 <p>
-  As you can see, the {{ codeify("accumulate()") }} coroutine keeps a cumulative sum of each number that is passed to it by the calling function. Each time a new number is passed to it, it returns the current sum. The main method body simply prints the output from accumulating 0 through 9.
+  As you can see, the {{ codeify("accumulate()") }} coroutine keeps a cumulative sum of each number
+  that is passed to it by the calling function. Each time a new number is passed to it, it returns
+  the current sum. The main method body simply prints the output from accumulating 0 through 9.
 </p>
 <p>
-  Let's start with the syntax of the coroutine body. It looks just like a function, except it does not have a {{ codeify("return") }} statement. Coroutines can have one, but at that point it stops iterating forever. We'll cover that below. Instead of a {{ codeify("return") }}, it has a {{ codeify("yield") }} statement to pass values back to the calling code. Otherwise, coroutine bodies are just like method bodies. The trickiest part is that when the {{ codeify("yield") }} keyword is encountered, the context is switched back to the calling code. The state of the coroutine is frozen until the calling code calls the coroutine again with {{ codeify("send()") }} or {{ codeify("next()") }}.
+  Let's start with the syntax of the coroutine body. It looks just like a function, except it does
+  not have a {{ codeify("return") }} statement. Coroutines can have one, but at that point it stops
+  iterating forever. We'll cover that below. Instead of a {{ codeify("return") }}, it has a
+  {{ codeify("yield") }} statement to pass values back to the calling code. Otherwise, coroutine
+  bodies are just like method bodies. The trickiest part is that when the {{ codeify("yield") }}
+  keyword is encountered, the context is switched back to the calling code. The state of the
+  coroutine is frozen until the calling code calls the coroutine again with {{ codeify("send()") }}
+  or {{ codeify("next()") }}.
 </p>
 <p>
-  Note that coroutines don't need to pass anything back to the calling code. Instead, they can be delegated to for their side effects only. For example, an accumulator which simply prints the sum (instead of returning it) would look like this:
+  Note that coroutines don't need to pass anything back to the calling code. Instead, they can be
+  delegated to for their side effects only. For example, an accumulator which simply prints the sum
+  (instead of returning it) would look like this:
 </p>
 {{ codeify("
 def accumulate():
@@ -71,10 +92,16 @@ def accumulate():
   This is completely valid, though the syntax looks a little strange.
 </p>
 <p>
-  Before continuing on, it's important to understand the difference between calling {{ codeify("next()") }} and {{ codeify("send()") }}. The {{ codeify("next()") }} function is almost like an alias for {{ codeify("send(None)") }}. There are two cases to familiarize yourself with here.
+  Before continuing on, it's important to understand the difference between calling
+  {{ codeify("next()") }} and {{ codeify("send()") }}. The {{ codeify("next()") }} function is
+  almost like an alias for {{ codeify("send(None)") }}. There are two cases to familiarize yourself
+  with here.
 </p>
 <p>
-  The first case is when 'priming' the coroutine. This mechanism is needed to tell the coroutine to execute to the first yield keyword. The only acceptable value that the calling code can pass in this case is {{ codeify("None") }}. Trying to pass something other than {{ codeify("None") }} to an un-primed coroutine creates an error:
+  The first case is when 'priming' the coroutine. This mechanism is needed to tell the coroutine to
+  execute to the first yield keyword. The only acceptable value that the calling code can pass in
+  this case is {{ codeify("None") }}. Trying to pass something other than {{ codeify("None") }} to
+  an un-primed coroutine creates an error:
 </p>
 {{ codeify("
 >>> def accumulate():
@@ -90,10 +117,15 @@ Traceback (most recent call last):
 TypeError: can't send non-None value to a just-started generator
 ", lang='pycon') }}
 <p>
-  Make sure  to prime those coroutines! A really cool design pattern that is covered by Luciano Ramalho's <em>Fluent Python</em> is to define a priming decorator. That pattern is out of scope for this blog post, but it shouldn't be hard to find online (or just buy his book - he's coming out with a new version soon!).
+  Make sure  to prime those coroutines! A really cool design pattern that is covered by Luciano
+  Ramalho's <em>Fluent Python</em> is to define a priming decorator. That pattern is out of scope
+  for this blog post, but it shouldn't be hard to find online (or just buy his book - he's coming
+  out with a new version soon!).
 </p>
 <p>
-  The second case to note is when {{ codeify("next()") }} or {{ codeify("send(None)") }} is called on a coroutine which is expecting a value other than {{ codeify("None") }}. A coroutine will need to handle this case or a runtime error will result:
+  The second case to note is when {{ codeify("next()") }} or {{ codeify("send(None)") }} is called
+  on a coroutine which is expecting a value other than {{ codeify("None") }}. A coroutine will need
+  to handle this case or a runtime error will result:
 </p>
 {{ codeify("
 >>> import time
@@ -116,13 +148,23 @@ Traceback (most recent call last):
 StopIteration
 ", lang='pycon') }}
 <p>
-  The above state machine waits for the calling code to pass a timeout value. Before transitioning to the next state, it waits for the timeout and then prints out the next statement to the user. It also shows an interesting point about the flow control of the {{ codeify("yield") }} keyword. The first call to {{ codeify("next()") }} actually returns the first state in the list, instead of waiting until the calling code delegates back to the coroutine. This makes sense, since Python executes the entire right side of a statement before assigning to the left side of the assignment operator (in this case 'timeout').
+  The above state machine waits for the calling code to pass a timeout value. Before transitioning
+  to the next state, it waits for the timeout and then prints out the next statement to the user.
+  It also shows an interesting point about the flow control of the {{ codeify("yield") }} keyword.
+  The first call to {{ codeify("next()") }} actually returns the first state in the list, instead
+  of waiting until the calling code delegates back to the coroutine. This makes sense, since Python
+  executes the entire right side of a statement before assigning to the left side of the assignment
+  operator (in this case 'timeout').
 </p>
 <p>
   Try this example yourself!
 </p>
 <p>
-  The last topic to cover in this second installment of coroutines is returning a value. Let's go back to our accumulator method. Instead of returning a value with each iteration, suppose that you wanted to return a final value after all numbers have been accumulated. This functionality can be supported with coroutines. We just need to send {{ codeify("None") }} from the caller to signal that the list has been exhausted. Here's how it would be implemented:
+  The last topic to cover in this second installment of coroutines is returning a value. Let's go
+  back to our accumulator method. Instead of returning a value with each iteration, suppose that
+  you wanted to return a final value after all numbers have been accumulated. This functionality
+  can be supported with coroutines. We just need to send {{ codeify("None") }} from the caller to
+  signal that the list has been exhausted. Here's how it would be implemented:
 </p>
 {{ codeify("
 def accumulate():
@@ -153,13 +195,23 @@ except StopIteration as exception:
 Sum is 45
 ") }}
 <p>
-  Let's break this down a little bit, starting with the {{ codeify("yield") }} keyword. Since it's alone on the right side of the assignment operator, it returns {{ codeify("None") }} to the calling code, so the return value of {{ codeify("send()") }} can be ignored. The {{ codeify("new_num") }} attribute is then checked for {{ codeify("None") }}. If it is {{ codeify("None") }}, the {{ codeify("while") }} loop is exited and the total is returned to the calling code. At this point, the {{ codeify("StopIteration") }} exception is raised.
+  Let's break this down a little bit, starting with the {{ codeify("yield") }} keyword. Since it's
+  alone on the right side of the assignment operator, it returns {{ codeify("None") }} to the
+  calling code, so the return value of {{ codeify("send()") }} can be ignored. The
+  {{ codeify("new_num") }} attribute is then checked for {{ codeify("None") }}. If it is
+  {{ codeify("None") }}, the {{ codeify("while") }} loop is exited and the total is returned to the
+  calling code. At this point, the {{ codeify("StopIteration") }} exception is raised.
 </p>
 <p>
-  As you can see, the return value is actually encapsulated in the exception (if you think that's a little bit ugly, I'd have to agree). To access the return value is through the value attribute of the {{ codeify("StopIteration") }} exception. Any object can be encapsulated in the exception, including tuples which can be used to return multiple values.
+  As you can see, the return value is actually encapsulated in the exception (if you think that's
+  a little bit ugly, I'd have to agree). To access the return value is through the value attribute
+  of the {{ codeify("StopIteration") }} exception. Any object can be encapsulated in the exception,
+  including tuples which can be used to return multiple values.
 </p>
 <p>
-  After reading about coroutines, I was pretty disappointed that this was the best that Python could do to return a value. However, I was proved wrong. Python has a much better way to return values from coroutines. It will be the subject of next week's post. 
+  After reading about coroutines, I was pretty disappointed that this was the best that Python could
+  do to return a value. However, I was proved wrong. Python has a much better way to return values
+  from coroutines. It will be the subject of next week's post. 
 </p>
     
   

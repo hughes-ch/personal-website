@@ -11,6 +11,7 @@ import pathlib
 import threading
 
 from datetime import datetime
+from src.setting import Settings
 
 class Post:
     """ Contains data for a single post """
@@ -31,7 +32,8 @@ class Post:
         
         self.contents = flask.render_template(
             str(self.rel_path),
-            post_url=f'{self.full_url}/')
+            post_url=f'{self.full_url}/',
+            settings=Settings.instance())
         
         soup = bs4.BeautifulSoup(self.contents, 'html.parser')
 
@@ -49,7 +51,7 @@ class Post:
         self.datestr = self.date.strftime('%b %d, %Y')
 
         # Find the title of the post
-        self.title = soup.find('h3').string
+        self.title = soup.find('h3').a.string
 
         # Find meta description. Will be contained in comment
         comment = soup.find(text=lambda text:isinstance(text, bs4.Comment))
