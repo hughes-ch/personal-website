@@ -88,3 +88,16 @@ class Blog:
                 pathlib.Path(self.app.static_folder) /
                 settings['Routes']['RobotsLocation'],
                 robots)
+
+        # Serve RSS feed
+        @self.app.route(f'/{settings["Routes"]["RssFeed"]}')
+        def serve_rss():
+            """ Serves RSS feed
+
+                :param: None
+                :return: Page content
+                """
+            rss_xml = flask.Markup(self.renderer.render_feed())
+            response = flask.make_response(rss_xml)
+            response.headers['Content-Type'] = 'application/rss+xml'
+            return response

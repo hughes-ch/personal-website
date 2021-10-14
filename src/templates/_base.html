@@ -46,20 +46,7 @@
     {% endif %}
 	<meta property="og:url" content="{{ url }}" />
 	<meta property="og:site_name" content='{{ settings["Render"]["BlogTitle"] }}' />
-	<meta property="og:image" content='{{ url_for("static", filename="img/logo.png") }}' />
-    <meta name='author' content='{{ settings["Struct"]["AuthorName"] }}' />
-
-	<meta property="og:locale" content="en_US" />
-	<meta property="og:type" content="article" />
-	<meta property="og:title" content="{{ title }}" />
-    {% if post_description is defined() %}
-	<meta property="og:description" content="{{ post_description }}" />
-    {% else %}
-    <meta property='og:description' content='{{ settings["Render"]["BlogDescription"] }}' />
-    {% endif %}
-	<meta property="og:url" content="{{ url }}" />
-	<meta property="og:site_name" content='{{ settings["Render"]["BlogTitle"] }}' />
-	<meta property="og:image" content='{{ url_for("static", filename="img/logo.png") }}' />
+	<meta property="og:image" content='{{ url_for("static", filename=settings["Routes"]["Logo"]) }}' />
     <meta name='author' content='{{ settings["Struct"]["AuthorName"] }}' />
 
     {% block meta %}

@@ -264,6 +264,26 @@ class Renderer:
             self._settings['Templates']['Archive'],
             **context)
 
+    def render_feed(self):
+        """ Renders the RSS feed
+
+            :param: None
+            :return: Page contents
+            """
+        if not self._is_configured():
+            raise RendererNotConfiguredException
+
+        postlist = list(self._postlist)
+
+        context = self._define_base_context()
+        context['last_pub_date'] = postlist[0].date_rfc822
+        context['posts'] = postlist
+        context['settings'] = self._settings
+
+        return flask.render_template(
+            self._settings['Templates']['Feed'],
+            **context)
+
     def _is_configured(self):
         """ Checks that an instance is configured enough to render a template
 

@@ -49,14 +49,16 @@ class Post:
 
         self.date = post_date
         self.datestr = self.date.strftime('%b %d, %Y')
+        self.date_rfc822 = self.date.strftime('%a, %d %b %Y %H:%M:%S EST')
 
         # Find the title of the post
-        self.title = soup.find('h3').a.string
+        self.title = soup.find('h3').a.string.strip()
 
         # Find meta description. Will be contained in comment
         comment = soup.find(text=lambda text:isinstance(text, bs4.Comment))
         if comment is not None:
             self.description = str(comment).replace('\n', ' ').strip()
+            self.description = self.description.replace('  ', ' ')
         else:
             self.description = ''
 
