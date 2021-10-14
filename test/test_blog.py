@@ -11,7 +11,7 @@ import requests
 import test.util
 import unittest
 
-from datetime import date
+from datetime import date, datetime
 from parameterized import parameterized
 from src.blog import Blog
 from src.setting import Settings
@@ -124,7 +124,7 @@ class TestBlog(unittest.TestCase):
 
             status_code = client.get(f'/{page_url}/5000').status_code
             self.assertEqual(status_code, 404)
-
+            
     def test_about_page(self):
         """ Tests the about page is rendered
 
@@ -136,7 +136,7 @@ class TestBlog(unittest.TestCase):
         with self.blog.app.test_client() as client:
             status_code = client.get(f'/{about_url}').status_code
             self.assertEqual(status_code, 200)
-
+            
     def test_404(self):
         """ Tests the 404 page
 
@@ -340,3 +340,22 @@ class TestBlog(unittest.TestCase):
                 self.assertEqual(
                     client.get(canonical_links[0]['href']).status_code,
                     200)
+
+    def test_feed(self):
+        """ Test RSS feed """
+        with self.blog.app.test_client() as client:
+            response = client.get(f'/{self.config["Routes"]["RssFeed"]}')
+            self.assertEqual(response.status_code, 200)
+
+            # As long as this doesn't throw, we can consider a pass
+            soup = bs4.BeautifulSoup(response.data, 'xml')
+            date = datetime.strptime(
+                soup.find('pubDate').string,
+                '%a, %d %b %Y %H:%M:%S EST')
+
+            links = soup.find_all('link')
+            for link in links:
+                try:
+                    self.assertEqual(client.get(link.string).status_code, 200)
+                except AttributeError:
+                    self.assertEqual(client.get(link['href']).status_code, 200)

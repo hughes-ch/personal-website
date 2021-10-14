@@ -39,7 +39,7 @@ class TestPostList(unittest.TestCase):
         postlist._load_posts.assert_called_once()
 
     def test_load_description(self):
-        """ Test that descriptions are loaded without newlines """
+        """ Test that descriptions are loaded correctly """
 
         blog = test.util.create_blog()
 
@@ -49,3 +49,16 @@ class TestPostList(unittest.TestCase):
             for post in postlist:
                 self.assertNotIn('\n', post.description)
                 self.assertNotEqual(' ', post.description[0])
+                self.assertNotIn('  ', post.description)
+
+    def test_load_title(self):
+        """ Test that titles are loaded without newlines or special chars """
+        blog = test.util.create_blog()
+
+        with blog.app.test_request_context():
+            postlist = PostList(Settings.instance(), blog.app.root_path)
+
+            for post in postlist:
+                self.assertNotIn('\n', post.title)
+                self.assertNotEqual(' ', post.title[0])
+                self.assertNotIn(r'&#39', post.title)

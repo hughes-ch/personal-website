@@ -43,6 +43,9 @@ div.bordered-img-container img {
     width: auto;
     max-width: 98%;
 }
+div.bordered-img-container img.thin-pic {
+    max-width: 50%;
+}
 footer {
     margin-block-start: 5em;
     text-align: center;
@@ -179,7 +182,6 @@ table.highlighttable .linenos {
 }
 .page-title {
     color: var(--title-color);
-    font-family: 'Roboto Mono', monospace;
     font-size: 1.5em;
     text-align: center;
 }
@@ -187,9 +189,6 @@ table.highlighttable .linenos {
     text-align: center;
     white-space: nowrap;
     margin-bottom: 1em;
-}
-.thin-pic {
-    max-width: 50%;
 }
 .underlined {
     text-decoration: underline;
