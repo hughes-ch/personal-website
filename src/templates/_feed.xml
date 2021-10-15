@@ -21,7 +21,15 @@
        <url>{{ settings['Routes']['BaseUrl'] }}/static/{{ settings['Routes']['Logo'] }}</url>
        <title>{{ settings['Render']['BlogTitle'] }}</title>
      </image>
-     <atom:link href='{{ settings["Routes"]["BaseUrl"] }}/{{ settings["Routes"]["RssFeed"] }}' rel='self' type='application/rss+xml' />
+     <atom10:link
+         xmlns:atom10="http://www.w3.org/2005/Atom"
+         href='{{ settings["Routes"]["BaseUrl"] }}/{{ settings["Routes"]["RssFeed"] }}'
+         rel="self"
+         type="application/rss+xml" />
+     <atom:link
+         href='{{ settings["Routes"]["BaseUrl"] }}/{{ settings["Routes"]["RssFeed"] }}'
+         rel='self'
+         type='application/rss+xml' />
      {% for post in posts %}
      <item>
        <title>{{ post.title }}</title>
