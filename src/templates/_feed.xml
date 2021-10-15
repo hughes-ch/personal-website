@@ -1,16 +1,12 @@
+<?xml version="1.0" ?>
 {#
  #   Template for RSS feed
  #
  #   :copyright: Copyright (c) 2021 Chris Hughes
  #   :license: MIT License. See LICENSE.md for details
  #}
- <rss version="2.0"
-      xmlns:content="http://purl.org/rss/1.0/modules/content/"
-	  xmlns:wfw="http://wellformedweb.org/CommentAPI/"
-	  xmlns:dc="http://purl.org/dc/elements/1.1/"
-	  xmlns:atom="http://www.w3.org/2005/Atom"
-	  xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
-	  xmlns:slash="http://purl.org/rss/1.0/modules/slash/">
+ <?xml-stylesheet type='text/css' href='{{ settings["Routes"]["BaseUrl"] }}/static/css/stylesheet.css'?>
+ <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
    <channel>
      <title>{{ settings['Render']['BlogTitle'] }}</title>
      <description>{{ settings['Render']['BlogDescription'] }}</description>
@@ -21,11 +17,6 @@
        <url>{{ settings['Routes']['BaseUrl'] }}/static/{{ settings['Routes']['Logo'] }}</url>
        <title>{{ settings['Render']['BlogTitle'] }}</title>
      </image>
-     <atom10:link
-         xmlns:atom10="http://www.w3.org/2005/Atom"
-         href='{{ settings["Routes"]["BaseUrl"] }}/{{ settings["Routes"]["RssFeed"] }}'
-         rel="self"
-         type="application/rss+xml" />
      <atom:link
          href='{{ settings["Routes"]["BaseUrl"] }}/{{ settings["Routes"]["RssFeed"] }}'
          rel='self'
@@ -36,7 +27,7 @@
        <link>{{ settings['Routes']['BaseUrl'] }}{{ post.full_url }}/</link>
        <description>{{ post.description }}</description>
        <pubDate>{{ post.date_rfc822 }}</pubDate>
-       <content:encoded><![CDATA[{{ post.contents }}]]></content:encoded>
+       <content type='html'>{{ post.contents }}></content>
        <guid isPermaLink="false">{{ settings['Routes']['BaseUrl'] }}{{ post.full_url }}/</guid>
      </item>
      {% endfor %}
