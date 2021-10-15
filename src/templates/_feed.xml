@@ -4,7 +4,13 @@
  #   :copyright: Copyright (c) 2021 Chris Hughes
  #   :license: MIT License. See LICENSE.md for details
  #}
- <rss xmlns:media="http://search.yahoo.com/mrss/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+ <rss version="2.0"
+      xmlns:content="http://purl.org/rss/1.0/modules/content/"
+	  xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+	  xmlns:dc="http://purl.org/dc/elements/1.1/"
+	  xmlns:atom="http://www.w3.org/2005/Atom"
+	  xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+	  xmlns:slash="http://purl.org/rss/1.0/modules/slash/">
    <channel>
      <title>{{ settings['Render']['BlogTitle'] }}</title>
      <description>{{ settings['Render']['BlogDescription'] }}</description>
@@ -22,7 +28,7 @@
        <link>{{ settings['Routes']['BaseUrl'] }}{{ post.full_url }}/</link>
        <description>{{ post.description }}</description>
        <pubDate>{{ post.date_rfc822 }}</pubDate>
-       <content>{{ post.contents }}</content>
+       <content:encoded><![CDATA[{{ post.contents }}]]></content:encoded>
        <guid isPermaLink="false">{{ settings['Routes']['BaseUrl'] }}{{ post.full_url }}/</guid>
      </item>
      {% endfor %}
