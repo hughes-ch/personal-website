@@ -22,6 +22,7 @@
        <link>{{ settings['Routes']['BaseUrl'] }}{{ post.full_url }}/</link>
        <description>{{ post.description }}</description>
        <pubDate>{{ post.date_rfc822 }}</pubDate>
+       <content>{{ post.contents }}</content>
        <guid isPermaLink="false">{{ settings['Routes']['BaseUrl'] }}{{ post.full_url }}/</guid>
      </item>
      {% endfor %}
