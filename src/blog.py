@@ -97,7 +97,22 @@ class Blog:
                 :param: None
                 :return: Page content
                 """
-            rss_xml = flask.Markup(self.renderer.render_feed())
+            rss_xml = self.renderer.render_feed()
             response = flask.make_response(rss_xml)
-            response.headers['Content-Type'] = 'application/rss+xml'
+            response.headers['Content-Type'] = 'application/xml'
             return response
+
+        # Serve style for RSS feed
+        @self.app.route(f'/{settings["Routes"]["RssFeedXsl"]}')
+        def serve_rss_style():
+            """ Serves RSS feed stylesheet
+
+                :param: None
+                :return: Page content
+                """
+            rss_xsl = self.renderer.render_feed_style()
+            response = flask.make_response(rss_xsl)
+            response.headers['Content-Type'] = 'application/xml'
+            return response
+        
+        

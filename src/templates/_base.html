@@ -8,9 +8,6 @@
 <!DOCTYPE html>
 <html lang='en'>
   <head>
-    <meta charset='utf-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
-
     <title>{{ title }}</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,23 +16,9 @@
     <link
       href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap"
       rel="stylesheet">
+
+    {% include '_style.html' %}
     
-    <link href='{{ url_for("static", filename="css/stylesheet.css") }}'
-          rel='stylesheet'
-          type='text/css' media='screen'>
-    <link href='{{ url_for("static", filename="css/pygments.css") }}'
-          rel='stylesheet' type='text/css'
-          media='screen'>
-
-    <link href='{{ url_for("static", filename="icon/favicon-192x192.png") }}'
-          rel='icon'
-          sizes='192x192'
-          type='image/png'>
-    <link href='{{ url_for("static", filename="icon/favicon-192x192.png") }}'
-          rel='apple-touch-icon'
-          type='image/png'
-          sizes='192x192'>
-
 	<meta property="og:locale" content="en_US" />
 	<meta property="og:type" content="article" />
 	<meta property="og:title" content="{{ title }}" />
@@ -52,7 +35,6 @@
     {% block meta %}
     <meta name='description' content='{{ settings["Render"]["BlogDescription"] }}'>
     {% endblock %}
-    <link rel='canonical' href='{{ canonical_url }}'>
   </head>
   <body>
     <div class='page-content'>
@@ -79,21 +61,7 @@
       </main>
       {% block pagination %}
       {% endblock %}
-      <footer>
-        <p class='footer-title'>
-          <strong>
-            <a href='{{ url_for("index") }}' class='link'>
-              {{ settings['Render']['BlogTitle'] }}
-            </a>
-          </strong>
-        </p>
-        <p>Copyright © 2021 All Rights Reserved</p>
-        <br>
-        <p><strong>Want to get in touch?</strong></p>
-        <div>
-          {% include '_socialmedia.html' %}
-        </div>
-      </footer>
+      {% include '_footer.html' %}
     </div>
     {% if struct_data is defined() %}
     <script type="application/ld+json">

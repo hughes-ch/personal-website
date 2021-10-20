@@ -1,10 +1,6 @@
-{#
- #   Template for RSS feed
- #
- #   :copyright: Copyright (c) 2021 Chris Hughes
- #   :license: MIT License. See LICENSE.md for details
- #}
- <rss xmlns:media="http://search.yahoo.com/mrss/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+<?xml version="1.0" encoding='utf-8'?>
+<?xml-stylesheet href="/feed.xsl" type="text/xsl"?>
+ <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
    <channel>
      <title>{{ settings['Render']['BlogTitle'] }}</title>
      <description>{{ settings['Render']['BlogDescription'] }}</description>
@@ -15,14 +11,16 @@
        <url>{{ settings['Routes']['BaseUrl'] }}/static/{{ settings['Routes']['Logo'] }}</url>
        <title>{{ settings['Render']['BlogTitle'] }}</title>
      </image>
-     <atom:link href='{{ settings["Routes"]["BaseUrl"] }}/{{ settings["Routes"]["RssFeed"] }}' rel='self' type='application/rss+xml' />
+     <atom:link
+         href='{{ settings["Routes"]["BaseUrl"] }}/{{ settings["Routes"]["RssFeed"] }}'
+         rel='self'
+         type='application/rss+xml' />
      {% for post in posts %}
      <item>
        <title>{{ post.title }}</title>
        <link>{{ settings['Routes']['BaseUrl'] }}{{ post.full_url }}/</link>
        <description>{{ post.description }}</description>
        <pubDate>{{ post.date_rfc822 }}</pubDate>
-       <content>{{ post.contents }}</content>
        <guid isPermaLink="false">{{ settings['Routes']['BaseUrl'] }}{{ post.full_url }}/</guid>
      </item>
      {% endfor %}

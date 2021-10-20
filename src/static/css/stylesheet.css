@@ -17,7 +17,7 @@ a.page-control-button:hover {
     background-color: var(--title-color);
     color: white;
 }
-article {
+article, item {
     max-width: 95vw;
     width: var(--max-width);
 }
@@ -183,6 +183,28 @@ table.highlighttable .linenos {
 .page-title {
     color: var(--title-color);
     font-size: 1.5em;
+    text-align: center;
+}
+.rss {
+    max-width: 40em;
+}
+.rss a div {
+    padding: 20px;
+}
+.rss a div:hover {
+    background-color: var(--code-background);
+}
+.rss h1 {
+    color: var(--title-color);
+    text-align: center;
+}
+.rss h2 {
+    color: var(--title-color);
+}
+hr {
+    margin-block-start: 0px;
+}
+.rss .caption {
     text-align: center;
 }
 .title-block {

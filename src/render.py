@@ -278,10 +278,28 @@ class Renderer:
         context = self._define_base_context()
         context['last_pub_date'] = postlist[0].date_rfc822
         context['posts'] = postlist
-        context['settings'] = self._settings
 
         return flask.render_template(
             self._settings['Templates']['Feed'],
+            **context)
+
+    def render_feed_style(self):
+        """ Renders the RSS feed stylesheet
+
+            Note that this includes contact info at the bottom so it has to
+            be a template and not a static file...
+
+            :param: None
+            :return: Page contents
+            """
+        if not self._is_configured():
+            raise RendererNotConfiguredException
+
+        postlist = list(self._postlist)
+        context = self._define_base_context()
+
+        return flask.render_template(
+            self._settings['Templates']['FeedXsl'],
             **context)
 
     def _is_configured(self):
