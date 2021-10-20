@@ -1,0 +1,21 @@
+{#
+ #   Template for the footer
+ #
+ #   :copyright: Copyright (c) 2021 Chris Hughes
+ #   :license: MIT License. See LICENSE.md for details
+ #}
+<footer>
+  <p class='footer-title'>
+    <strong>
+      <a href='{{ url_for("index") }}' class='link'>
+        {{ settings['Render']['BlogTitle'] }}
+      </a>
+    </strong>
+  </p>
+  <p>Copyright © 2021 All Rights Reserved</p>
+  <br/>
+  <p><strong>Want to get in touch?</strong></p>
+  <div>
+    {% include '_socialmedia.html' %}
+  </div>
+</footer>

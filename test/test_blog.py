@@ -359,3 +359,9 @@ class TestBlog(unittest.TestCase):
                     self.assertEqual(client.get(link.string).status_code, 200)
                 except AttributeError:
                     self.assertEqual(client.get(link['href']).status_code, 200)
+
+            self.assertEqual(
+                client.get(f'/{self.config["Routes"]["RssFeedXsl"]}').status_code,
+                200)
+            
+                    

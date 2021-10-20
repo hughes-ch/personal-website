@@ -1,11 +1,5 @@
-<?xml version="1.0" ?>
-{#
- #   Template for RSS feed
- #
- #   :copyright: Copyright (c) 2021 Chris Hughes
- #   :license: MIT License. See LICENSE.md for details
- #}
- <?xml-stylesheet type='text/css' href='{{ settings["Routes"]["BaseUrl"] }}/static/css/stylesheet.css'?>
+<?xml version="1.0" encoding='utf-8'?>
+<?xml-stylesheet href="/feed.xsl" type="text/xsl"?>
  <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
    <channel>
      <title>{{ settings['Render']['BlogTitle'] }}</title>
@@ -27,7 +21,6 @@
        <link>{{ settings['Routes']['BaseUrl'] }}{{ post.full_url }}/</link>
        <description>{{ post.description }}</description>
        <pubDate>{{ post.date_rfc822 }}</pubDate>
-       <content type='html'>{{ post.contents }}></content>
        <guid isPermaLink="false">{{ settings['Routes']['BaseUrl'] }}{{ post.full_url }}/</guid>
      </item>
      {% endfor %}
