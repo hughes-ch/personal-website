@@ -12,11 +12,10 @@ in Flask. This covers the choices made in the HTML/CSS.
 <p class='post-caption' id='date'>Oct 11, 2021</p>
 <p>
   Check out <a href='{{url_for("blog_post", name="conversion-to-flask-1") }}' class='underlined link'>
-    part 1 of this series
-  </a> for an introduction to the overall website design and layout. As I stated there, you can also
+    part 1 of this series</a> for an introduction to the overall website design and layout. As I
+  stated there, you can also
   <a href='https://github.com/hughes-ch/personal-website' target='_blank' class='underlined link'>
-    find the source on Github
-  </a>.
+    find the source on Github</a>.
 </p>
 <p>
   In this blog post, I'd like to cover some of the HTML/CSS choices that I made. This has been a
@@ -30,12 +29,9 @@ in Flask. This covers the choices made in the HTML/CSS.
     I try to design code that is maintainable and easy to understand so that I (or someone else) can
     pick it up a year from now and still understand what I did. Therefore I try to stick to as many
     of the <a href='https://www.w3schools.com/html/html5_syntax.asp' class='underlined link'>
-      recommended HTML styles and best practices
-    </a>
-    as I can, and use
+      recommended HTML styles and best practices</a> as I can, and use
     <a href='https://www.w3schools.com/html/html5_semantic_elements.asp' class='underlined link'>
-      semantic HTML
-    </a>.
+      semantic HTML </a>.
   </p>
   <p>
     A lot of these things are pretty easy, and I just had to remember to check them off as I was
@@ -89,24 +85,16 @@ in Flask. This covers the choices made in the HTML/CSS.
       content into different Flask templates (more on that in a later blog post).
   </p>
   <p>
-    If you <a href='view-source:{{ settings["Routes"]["BaseUrl"] }}/'
-              class='underlined link',
-              target='_blank'>
-      view the source of my main page
-    </a> you can see there's a few more tags that I didn't mention. These are for search engine
-    optimization, which deserves its own post.
+    If you view the source of my main page you can see there's a few more tags that I didn't mention.
+    These are for search engine optimization, which deserves its own post.
   </p>
 </section>
 <h4>Responsive CSS</h4>
 <section>
   <p>
-    <a href='view-source:{{ settings["Routes"]["BaseUrl"] }}/'
-       class='underlined link'
-       target='_blank'>
-      Looking at the page source
-    </a>, you'll see two stylesheets. One (pygments.css) is for the code rendering feature, which
-    I'll cover in a separate post. The stylesheet.css file is the generic stylesheet for the
-    project.
+    Again looking at the page source, you'll see two stylesheets. One (pygments.css) is for the code
+    rendering feature, which I'll cover in a separate post. The stylesheet.css file is the generic
+    stylesheet for the project.
   </p>
   <p>
     I elected to use flexboxes whenever there is a container that could be larger than a mobile
@@ -257,13 +245,11 @@ body {
     Turns out, LinkedIn uses a
     <a href='https://www.linkedin.com/post-inspector/'
        target='_blank'
-       class='underlined link'>
-      Post Inspector
-    </a> on all of its links. It gets the necessary information like the website logo, author,
-    title, etc from meta tags. If they're not found, it does its best to parse the information
-    from the HTML. However, it doesn't always return an expected result. The Post Inspector is
-    pretty helful in providing what tags need to be defined. Using the result from my website, I
-    added these tags to the header:
+       class='underlined link'>Post Inspector</a> on all of its links. It gets the necessary
+    information like the website logo, author, title, etc from meta tags. If they're not found,
+    it does its best to parse the information from the HTML. However, it doesn't always return
+    an expected result. The Post Inspector is pretty helful in providing what tags need to be
+    defined. Using the result from my website, I added these tags to the header:
   </p>
 {{ codeify("
 <meta property='og:locale' content='en_US' />
@@ -292,10 +278,9 @@ body {
   </p>
   <p>
     <a href='https://en.wikipedia.org/wiki/Favicon' target='_blank' class='underlined link'>
-      Wikipedia's favicon article
-    </a> is really useful in understanding what browsers and applications are looking for when
-    displaying a favicon. In summary, at a minimum, websites need to provide one icon size and any
-    modern browser or application will scale down to the size it needs.
+      Wikipedia's favicon article</a> is really useful in understanding what browsers and applications
+    are looking for when displaying a favicon. In summary, at a minimum, websites need to provide one
+    icon size and any modern browser or application will scale down to the size it needs.
   </p>
   <p>
     Both Android and iOS have the capability of saving a website to the home screen. Instead of the
