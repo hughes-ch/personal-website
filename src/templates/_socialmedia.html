@@ -26,4 +26,10 @@
       src='{{ url_for("static", filename="icon/gmail.png") }}'
       alt='Gmail Logo' class='icon'/>
   </a>
+  <a href='/{{ settings["Routes"]["RssFeed"] }}'
+     class='link'>
+    <img
+      src='{{ url_for("static", filename="icon/rss.png") }}'
+      alt='RSS Feed Icon' class='icon'/>
+  </a>
 </div>
