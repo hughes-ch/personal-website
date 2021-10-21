@@ -50,6 +50,9 @@ footer {
     margin-block-start: 5em;
     text-align: center;
 }
+footer img {
+    padding: 2px;
+}
 hr {
     margin-block-start: 5em;
 }
