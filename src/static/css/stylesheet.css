@@ -31,6 +31,9 @@ body {
 code {
     background-color: var(--code-background);
 }
+code.inline {
+    white-space: nowrap;
+}
 div.bordered-img-container {
     align-items: center;
     display: flex;
@@ -156,10 +159,6 @@ table.highlighttable .linenos {
     text-align: center;
     margin-left: var(--link-block-margin);
 }
-.mono {
-    font-family: monospace;
-    background-color: var(--code-background);
-}
 .page-content {
     align-items: center;
     display: flex;
@@ -204,7 +203,7 @@ table.highlighttable .linenos {
 .rss h2 {
     color: var(--title-color);
 }
-hr {
+.rss hr {
     margin-block-start: 0px;
 }
 .rss .caption {

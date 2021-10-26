@@ -1,0 +1,420 @@
+{#
+ #   Blog post contents
+ #
+ #   :copyright: Copyright (c) 2021 Chris Hughes
+ #   :license: MIT License. See LICENSE.md for details. All rights reserved for post contents
+ #}
+<!--
+This blog post is part 3 in a series on how to convert from a click-and-drag webite builder to a
+website implemented in Python. This post covers the Python setup and design using the Flask
+framework. 
+-->
+<h3><a href='{{ post_url }}' class='link'>Implementing my Website in Flask - Part 3</a></h3>
+<p class='post-caption' id='date'>Oct 21, 2021</p>
+<p>
+  Check out <a href='{{url_for("blog_post", name="conversion-to-flask-2") }}' class='underlined link'>
+    part 2 of this series</a> for an overview of the HTML and CSS which is being served to display
+  the content on this webpage. As I stated there, you can also
+  <a href='https://github.com/hughes-ch/personal-website' target='_blank' class='underlined link'>
+    find the website source on Github</a>.
+</p>
+<p>
+  In this post, I'd like to cover the basics of serving a website with Python, particularly its
+  really lightweight
+  <a href='https://flask.palletsprojects.com/en/2.0.x/' target='_blank' class='underlined link'>
+    Flask framework</a>, which I've decided to use for this project. 
+</p>
+<p>
+  In my search for the most well supported and well liked Python web frameworks, there were a few
+  that always topped the chart. In the top three most popular on every tutorial I found were always
+  Flask and Django. Flask is marketed as a fast, lightweight "micro" framework that provides just
+  enough to be productive and then "gets out of your way." Django is marketed as "fully loaded" with
+  features in order to handle data-driven websites.
+</p>
+<p>
+  I decided to go with Flask because I knew my website would be simple. I didn't even expect to have
+  a database, so Django seemed like overkill. I think I made the right decision, even if it was just
+  so I wasn't overwhelmed learning all of the features of Django. 
+</p>
+<h4>The Basic Flask App</h4>
+<section>
+  <p>
+    I was surprised at how little code is actually needed in order to get a simple app working:
+  </p>
+{{ codeify("  
+from flask import Flask
+app = Flask(__name__)
+
+@app.route('/')
+    def index():
+        return 'Hello World!'
+
+if __name__ == '__main__':
+    app.run()
+", lang='py') }}
+  <p>
+    Then you can run it from the command line like this:
+  </p>
+{{ codeify("
+$ python hello.py
+* Running on http://localhost:5000/
+", lang='bash') }}
+  <p>
+    ... and that's it! 
+  </p>
+  <p>
+    In this case, {{ codeify("app") }} is the web application instance, created as an instantiation
+    of Flask. Line 4 tells the app that any requests to relative URL "/" should be served the string
+    {{ codeify("Hello World!") }}. Of course, this wouldn't include any style information or
+    anything, but Flask does include a default 404 page if any other URLs are requested.
+  </p>
+  <p>
+    Lines 8 and 9 just tell Flask to run the development server if the script is called directly
+    (opposed to being imported as a module).
+  </p>
+</section>
+<h4>Flask Templates</h4>
+<section>
+  <p>
+    If you'd like to serve real HTML instead of simple strings, Flask provides a couple options, the
+    most straightforward being the {{ codeify('render_template') }} method. Most of my URLs are
+    handled this way. The basic usage looks like this:
+  </p>
+{{ codeify("  
+import flask
+app = flask.Flask(__name__)
+
+@app.route('/')
+    def index():
+        context = { 'content': 'Hello World!' }
+        return flask.render_template('index.html', context)
+
+if __name__ == '__main__':
+    app.run()
+", lang='py') }}
+  <p>
+    The first argument in {{ codeify('render_template') }} is the template Flask will use to render
+    the content of the page (more on that in a second). The second variable is the 'context', or a
+    dict of all the variables that should be available to the template.
+  </p>
+  <p>
+    Of course, there's no real benefit to throwing Python into the mix if a website is completely
+    static and unchanging. In that case, its possible to just define the HTML and CSS to be
+    standalone. But if the website is based on data that can change regularly, the HTML will need to
+    be changed on the fly between requests based on the latest data. That's where Python comes in. 
+  </p>
+  <p>
+    To dynamically render HTML, Flask is dependent on the
+    <a href='https://www.palletsprojects.com/p/jinja/' target='_blank' class='underlined link'>Jinja
+      template engine</a> and its handy HTML templates.
+  </p>
+  <p>
+    Jinja templates look really similar to HTML, just with some new Python-like syntax thrown in
+    where content needs to be dynamically rendered. Here's an example for the hypothetical
+    {{ codeify('Hello World') }} website from earlier:
+  </p>
+  {{ codeify("
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <title>Hello World!</title>
+  </head>
+  <body>
+    <h1>{{ content }}</h1>
+  </body>
+</html>
+", lang='html') }}
+  <p>
+    The string between the {{ codeify('h1') }} tags on line 7 is actually referring to the
+    {{ codeify('content') }} key of the {{ codeify('context') }} dict that was passed as the
+    second argument to {{ codeify("render_template") }} in the previous example. Whatever value is
+    stored for the {{ codeify('content') }} key (in this case, 'Hello World!') will be substituted
+    between the {{ codeify('h1') }} tags.
+  </p>
+  <p>
+    Jinja also provides syntax for conditionals and control flow. For example, if a block of HTML
+    should be conditionally included, the {{ codeify('{% if %}') }} syntax can be used. An example
+    from this website would be the Next/Prev page navigation links at the bottom of the index page.
+    The code for the Next link looks like this:
+  </p>
+{{ codeify("
+{% if next_page is none %}
+  <span>Next</span>
+{% else %}
+  <a href='/page/{{ next_page }}/'>Next</a>
+{% endif %}
+  ", lang='html') }}
+  <p>
+    This example first checks if there's a valid next page of posts. If that's the case, the Next
+    button is rendered as a link. If not, the Next button still looks the same, but it's rendered as
+    a {{ codeify('span') }} so the user can't select it. 
+  </p>
+  <p> Jinja also provides more complex expressions to use in conditionals. For the complete list,
+    <a href='https://jinja.palletsprojects.com/en/3.0.x/templates/#expressions'
+       target='_blank'
+       class='underlined link'>see the documentation</a>.
+  </p>
+  <p>
+    Along with conditionals, Jinja also provides loops. They use a very similar syntax to Python
+    loops. Just like conditionals, they are specified within {{ codeify('{% %}') }} blocks. An
+    example from this blog is again from the index page, where I show the latest blog posts:
+  </p>
+{{ codeify("
+{% for post in posts %}
+  <article>
+    {{ post }}
+  </article>
+  <hr>
+{% endfor %}
+", lang='html') }}
+  <p>
+    Jinja then repeats the pattern for each post that the Flask application provides to the template,
+    wrapping each post in an {{ codeify('article') }} tag and adding a horizontal line underneath.
+    This can be really helpful when maintaining repetitive pages. Instead of having to copy/paste
+    multiple times, I can just specify the pattern once and Jinja repeats it for each iteration of
+    the loop. 
+  </p>
+  <p>
+    Another great feature of Jinja templates are their ability to extend other templates. For
+    example, each one of my pages includes roughly the same information in the HTML head, the
+    navigation area, and the footer. It would be a real pain to need to maintain them separately
+    for each page. Instead, I can add these features once to a template called base.html:
+  </p>
+{{ codeify("
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <title>{{ title }}</title>
+  </head>
+  <body>
+    <nav>
+      <h1>{{ blog-title }}</h1>
+      <p>{{ blog-caption }}</p>
+      <div>
+        <h3><a href='/about'>About Me</a></h3>
+        <h3><a href='/archive'>Archive</a>
+      </div>
+    </nav>
+    <main>
+      {% block content %}
+      {% endblock %}
+    </main>
+    <footer>
+      <p><strong>{{ blog-title }}</strong></p>
+      <p>Copyright © 2021 All Rights Reserved</p>
+      <br/>
+    </footer>
+  </body>
+</html>
+", lang='html') }} 
+  <p>
+    Then any template can 'extend' this base template. The key here is the two lines on 16 and 17.
+    This notifies Jinja that the {{ codeify('content') }} block has not been defined yet, and it should look for
+    other templates which define {{ codeify('content') }}. Note that {{ codeify('content') }} is not
+    a reserved word or anything. {{ codeify('{% block example %}') }} would work exactly the same,
+    as long as another template actually defined what was in the {{ codeify('example') }} block.
+  </p>
+  <p>
+    To define the {{ codeify('content') }} block, create another template called posts.html:
+  </p>
+{{ codeify("
+{% extends '_base.html' %}
+{% block content %}
+  <h2>Latest Posts</h2>
+  {% for post in posts %}
+    <article>
+      {{ post }}
+    </article>
+    <hr>
+  {% endfor %}
+{% endblock %}
+", lang='html') }}
+  <p>
+    Now, the contents of each post will be substituted for {{ codeify("{% block content %}") }} in
+    the rendered HTML any time {{ codeify('render_template') }} is called for posts.html.
+  </p>
+  <p>
+    One last Jinja templates feature I found myself using a lot was the {{ codeify("{% include %}") }}
+    tag. This substitutes the contents of the included template in place of the tag. This allows
+    larger templates to be a composition of smaller, more modular ones. I found this particularly
+    useful when adding the social media buttons to the header and footer. Since both use the same
+    code, it made sense to just factor it out into its own template. Then it can be included into
+    the footer like this:
+  </p>
+{{ codeify("
+<footer>
+  <p><strong>{{ blog-title }}</strong></p>
+  <p>Copyright © 2021 All Rights Reserved</p>
+  <br/>
+  <p><strong>Want to get in touch?</strong></p>
+  <div>
+    {% include 'socialmedia.html' %}
+  </div>
+</footer>
+", lang='html') }}
+  <p>
+    (Note the {{ codeify("{% include %}") }} on line 7)
+  </p>
+</section>
+<h4>How I Chose My Templates</h4>
+<section>
+  <p>
+    Each of my page types are defined as a template, based off of the base template. For example,
+    the 404 page, about page, archive page, etc all are their own templates. Then, any features
+    that I found myself using in multiple places are defined as their own template to be
+    {{ codeify('{% include %}') }}'ed. The actual blog posts are a special case and also designed
+    to be {{ codeify('{% include %}') }}'ed.
+  </p>
+  <p>
+    Here's a picture describing the relationships between templates. Note the arrows pointing to
+    the left are inheritance ({{ codeify("{% extends %}") }}). The arrows pointing to the right are
+    composition ({{ codeify("{% include %}") }}). 
+  </p>
+  <img src='{{ url_for("static", filename="img/conversion-to-flask-3-1.svg") }}'
+       alt='Relation of templates.' />
+  <p>
+  </p>
+</section>
+<h4>Flask Design Patterns I Implemented</h4>
+<section>
+  <p>
+    While the basic Flask app at the beginning of this post is impressive at how little code is
+    actually needed, it isn't scalable, even for something as simple as a blog.
+  </p>
+  <p>
+    I knew that the application would need multiple Python modules, so I followed what's called
+    the <a href='https://flask.palletsprojects.com/en/2.0.x/tutorial/factory/'
+           target='_blank'
+           class='underlined link'>application factory design pattern</a>. This made it so that
+    I wouldn't have to rely on access to a global variable in order to access my Flask instance.
+    Instead, I could use the {{ codeify('flask.current_app') }} property to access my Flask
+    instance.
+  </p>
+  <p>
+    This pattern also provides access to the {{ codeify('flask') }} command line tool. I could now
+    run my app with the following commands:
+  </p>
+{{ codeify("
+$ export FLASK_APP=src
+$ export FLASK_ENV=development
+$ flask run
+", lang='bash') }}
+  <p>
+    I could also add further CLI tools for my app which could be accessed like {{ codeify('flask run') }}.
+  </p>
+  <p>
+    For example, the 'build' tool (which I'll cover in a later blog post) can be defined with the
+    following code:
+  </p>
+{{ codeify("
+self.app = flask.Flask(__name__)
+self.app.cli.add_command(cli.build)
+", lang='py') }}
+  <p>
+    ...and then accessed from the command line like this:
+  </p>
+{{ codeify("
+$ export FLASK_APP=src
+$ export FLASK_ENV=development
+$ flask build
+", lang='bash') }}  
+  <p>
+    My application factory didn't turn out exactly as the pattern specifies in the Flask
+    documentation. I wanted to keep my application as object-oriented as possible, so my
+    {{ codeify("__init__.py") }} looks like this, instead of containing the actual creation of the
+    flask instance:
+  </p>
+{{ codeify('
+def create_app():
+    """ Create and configure blog app """
+    config = Settings.instance()
+    blog = Blog(config)
+    return blog.app
+', lang='py') }}
+  <p>
+    Then, my flask instance is created within the Blog class as {{ codeify('Blog.app') }}. Note that
+    the {{ codeify("Settings.instance()") }} above is another module in my application which defines
+    configurations like relative routes, the name of the blog, etc.
+  </p>
+  <p>
+    The {{ codeify('Blog') }} constructor needs to look like this to provide {{ codeify('create_app') }}
+    with the configured Flask instance:
+  </p>
+{{ codeify("  
+  class Blog:
+
+    def __init__(self, settings):
+        self.app = flask.Flask(__name__)
+        self.app.cli.add_command(cli.build)
+
+        @self.app.route('/')
+        def index():
+...
+", lang='py') }}        
+  <p>
+    Note that I elected to define all the routes within the {{ codeify('Blog') }} constructor. This
+    is similar to the <a href='https://flask.palletsprojects.com/en/2.0.x/tutorial/factory/'
+                         target='_blank'
+                         class='underlined link'>application factory pattern</a> shown in the Flask
+    tutorial, just with all of the Flask-specific stuff wrapped in my {{ codeify('Blog') }} class.
+  </p>
+  <p>
+    Unlike the simple Flask app at the beginning of this post, there are several URLs which need
+    to be dynamically generated, like those associated with blog posts. In those cases, instead of
+    using hard-coded routes, I used Flask's dynamic URL processing feature. These are specified in
+    angle brackets, like the routes of the two methods below:
+  </p>
+{{ codeify("
+@self.app.route('/')
+@self.app.route('/page/<int:page>/')
+def index(page=1):
+    \"\"\" Creates the index page with latest blog posts \"\"\"
+    pass
+    
+@self.app.route('/post/<name>/')
+def blog_post(name=None):
+    \"\"\" Creates a blog post page \"\"\"
+    pass
+", lang='py') }}      
+  <p>
+    This feature is really useful. In the case of the first method, it passes the value stored in
+    {{ codeify('page') }} as the first parameter to the method. If a page is not specified (like in
+    the default route {{ codeify('/') }}), the page will default to page 1. The {{ codeify('int') }}
+    specifier before {{ codeify('page') }} tells Flask to only accept integer values here. If a
+    string is passed instead, Flask will render the 404 page.
+  </p>
+  <p>
+    In the second method on line 7, the {{ codeify('name') }} parameter can be any string since
+    there is no specifier in front. It is worth mentioning that Flask escapes these strings and
+    does its best to ensure that there are no characters which may cause a security problem.
+  </p>
+  <p>
+    In both examples, once Flask checks that the URL matches the template URL, it's up to my
+    application to verify whether {{ codeify('page') }} is a valid page and {{ codeify('name') }} is
+    a valid blog post.
+  </p>
+  <p>
+    Since my blog is pretty simple, I didn't use many other advanced Flask design patterns that are
+    mentioned in the documentation. One thing that I regret not implementing, though, is
+    <a href='https://flask.palletsprojects.com/en/2.0.x/blueprints/'
+       target='_blank'
+       class='underlined link'>
+      Blueprints</a>. These provide a very modular approach that would have been easier to test and
+    scale.
+  </p>
+  <p>
+    Instead, I just stuck everything in my Blog class. Initially, this worked great. But as
+    it (unexpectedly) grew, it became a little unwieldy. One thing that I noticed as well was that
+    many of my routes were really similar and ended up sharing data, while others were completely
+    distinct. These lines of shared data would have provided a great boundary to break certain
+    features into new blueprints. 
+  </p>
+  <p>
+    Oh well. If I find myself adding a new feature any time soon, I might roll in blueprints along
+    with it...
+  </p>
+  <p>
+    That covers everything that I wanted to cover in Flask! Next post, I'd like to discuss what went
+    into actually building the context that Flask renders with each template.
+  </p>
+</section>
