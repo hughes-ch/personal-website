@@ -99,7 +99,7 @@ class TestRenderer(unittest.TestCase):
         response = template.get(self.blog)
         self.assertNotIn(b' print', response)
         self.assertNotIn(b'\'', response)
-        self.assertIn(b'<code>', response)
+        self.assertIn(b'<code', response)
 
     def test_index_ordering(self):
         """ Test the ordering of the index page

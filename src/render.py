@@ -324,12 +324,14 @@ class Renderer:
         # Determine if this is a block or inline piece of code
         if is_multiline:
             formatted_code = self._highlight_syntax(formatted_code, lang)
+            code_class = ''
         else:
             formatted_code = flask.escape(formatted_code)
+            code_class = 'class="inline"'
 
         # Return clean string as Markup
         return flask.Markup(
-            f'<code>{formatted_code}</code>')
+            f'<code {code_class}>{formatted_code}</code>')
 
     def _find_posts_per_page(self, count):
         """ Finds which posts to render for each page
