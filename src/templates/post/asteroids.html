@@ -1,0 +1,170 @@
+{#
+ #   Blog post contents
+ #
+ #   :copyright: Copyright (c) 2021 Chris Hughes
+ #   :license: MIT License. See LICENSE.md for details. All rights reserved for post contents
+ #}
+<!--
+This blog post is about a neat little personal project that I did to sharpen my Javascript skills -
+the classic game of Asteroids! 
+-->
+<h3><a href='{{ post_url }}' class='link'>Asteroids!</a></h3>
+<p class='post-caption' id='date'>Oct 27, 2021</p>
+<section>
+  <p>
+    Having just made the crazy leap from my full-time job to full-time freelancing, I've been
+    scrambling to sharpen as many skills as I can. Since I already knew that it was going to be a
+    grind, I wanted my projects to bring me joy, even ones I could finish in a week.
+  </p>
+  <p>
+    One of my favorite projects in college was to implement the classic game of Asteroids using a
+    SoC which had a built-in FPGA HDMA driver. You can actually still find the code on my github.
+  </p>
+  <p>
+    We were <em>supposed to</em> hook in a gyroscope so users could control the ship by
+    tilting the board. Then, they could use the buttons on the PCB to shoot/thrust. Well, we never
+    got the gyroscope working, but it still turned out OK.
+  </p>
+  <p>
+    I decided to relive my college years, but this time create the game in Javascript so it could be
+    played in the browser instead of needing the SoC. And of course, I was going to hook in the
+    gyroscope...
+  </p>
+  <p>
+    The completed game can be found at <a href='https://asteroids.chrishughesdev.com/'
+                                          target='_blank'
+                                          class='underlined link'>asteroids.chrishughesdev.com</a>.
+  </p>
+  <a href='https://asteroids.chrishughesdev.com/' target='_blank'>
+    <img src='https://asteroids.chrishughesdev.com/static/img/logo.png'
+         alt='Thumbnail of the classic asteroids game'/>
+  </a>
+  <p>
+    The directions to play are on the top of the home screen. If you're on desktop, W, A, and D
+    control the ship movements (or arrow keys if you prefer), and the space bar shoots.
+  </p>
+  <p>
+    The fun part is playing on mobile. In that case, the game uses the gyroscope on the mobile phone
+    to steer the craft. Tapping on the right side of the screen shoots and tapping on the left
+    controls the thruster.
+  </p>
+</section>
+<h4>Technologies</h4>
+<section>
+  <p>
+    The app is created with <a href='https://flask.palletsprojects.com/en/2.0.x/'
+                               target='_blank'
+                               class='underlined link'>Python's Flask framework</a> managing the
+    backend and plain-old Javascript in the frontend. The HTML is actually really simple. It just
+    ended up being a huge <a href='https://www.w3schools.com/html/html5_canvas.asp'
+                             target='_blank'
+                             class='underlined link'>HTML5 canvas element</a> that takes the entire
+    screen. Then I used Javascript to render the required graphics directly on the canvas. One
+    of the reasons that I went with the game of Asteroids is because the graphics are really simple,
+    yet it still makes a game which is satisfying to code and play. For this exercise, I just wanted
+    to sharpen my skills in responsive apps, not spend all my time making beautiful graphics. I knew
+    once I went down that rabbit hole, I would never come out. 
+  </p>
+  <p>
+    Anyways, even though the game was "plain-old Javascript," I still needed a unit testing package,
+    a somewhat more advanced math package, and a package to calculate collisions for me. Instead of
+    implementing these myself, I used <a href='https://yarnpkg.com/'
+                                         target='_blank'
+                                         class='underlined link'>Yarn</a> to handle the package
+    management for me. I used <a href='https://webpack.js.org/'
+                                 target='_blank'
+                                 class='underlined link'>Webpack</a> to bundle this stuff together
+    and deliver it to the client.
+  </p>
+  <p>
+    For those curious, the packages I relied on most were:
+  </p>
+  <ul>
+    <li>
+      <a href='https://jestjs.io/' target='_blank' class='underlined link'>Jest</a> for testing
+    </li>
+    <li>
+      <a href='https://mathjs.org/' target='_blank' class='underlined link'>Mathjs</a> for matrix math
+    </li>
+    <li>
+      <a href='https://www.npmjs.com/package/earcut'
+         target='_blank'
+         class='underlined link'>Earcut</a> for collision detection
+    </li>
+  </ul>
+  <p>
+      The site (both front and backend) is hosted on Heroku. If you noticed that the initial load 
+      is a little long, it's because I'm on the
+      <a href='https://devcenter.heroku.com/articles/free-dyno-hours'
+         target='_blank'
+         class='underlined link'>free tier</a>. To save money and push users to use their paid
+      tiers, Heroku actually puts their free tier servers to sleep if they have not received a
+      request in a certain period of time. On the first request after a period of inactivity,
+      it can take several seconds for the server to re-activate. Not ideal, but the fact that they
+      provide a platform where I can just push to Github and they handle all the setup and load
+      balancing for free is already too good to be true, so I can't complain.
+  </p>
+</section>
+<h4>Features and Gameplay</h4>
+<section>
+  <p>
+    The game starts at the main menu, where the only choice the user has is to proceed. If you're
+    on mobile, the first tap will prompt if you wish to allow the website to access motion and
+    orientation. Once you get past the prompt, you'll get to access the rest of the game unimpeded.
+  </p>
+  <p>
+    After the main menu, you'll be dropped into the classic game of asteroids.
+  </p>
+  <img src={{ url_for('static', filename='img/asteroids-1.png') }} alt='Asteroids gameplay'/>
+  <p>I tried to follow the
+    <a href='https://en.wikipedia.org/wiki/Asteroids_(video_game)#gameplay'
+       target='_blank'
+       class='underlined link'>classic gameplay</a> as much as I could, including adding alien
+    saucers which try to shoot at the player. I ignored some of the later-stage dynamics since I
+    would have never seen them live. I haven't been able to get past the first few stages...
+  </p>
+  <p>
+    After losing all of your lives to asteroids or saucers, the game switches to the High Score
+    screen. 
+  </p>
+  <img src={{ url_for('static', filename='img/asteroids-2.png') }}
+       alt='High score screen displayed after losing'/>
+  <p>
+    Here, you are free to enter all of your highest scores along with any memorable names you can
+    think of. The entries persist until the Heroku free tier runs out of database storage.
+  </p>
+  <p>
+    One thing to note is that everyone gets their own set of high scores, so the entries are there
+    for your own enjoyment.
+  </p>
+  <p>
+    If you enter a high score, the new high score will be displayed if the server
+    successfully processed it. Then within a few moments, you will be brought back to the home
+    screen. If you don't want to enter a score, you can press Enter (or Done if you're on mobile)
+    without entering anything into the form, and you'll also be redirected.
+  </p>
+  <p>
+    The game should have the same feel whether you are on your laptop or on mobile. I made sure to
+    scale everything depending on the screen size and device pixel ratio. Even if you change the
+    orientation of your phone mid-game (portrait to landscape or vice-versa), the game should be
+    re-rendered in a way that's expected and doesn't harm gameplay.
+  </p>
+</section>
+<h4>Summary</h4>
+<section>
+  <p>
+    Like all my other recent work, the Asteroids project
+    <a href='https://github.com/hughes-ch/asteroids'
+       target='_blank',
+       class='underlined link'>can be found on Github</a>.
+  </p>
+  <p>
+    Though Asteroids feels like a silly project, it was a blast to implement and I learned a ton
+    while doing so. Games have a way of exposing any weakness in a design and gotchas with languages
+    you might not be that familiar with. Plus, getting this to work well on mobile took quite a bit
+    of fiddling... Well, on to my next project where I can continue to sharpen my Javascript skills!
+  </p>
+  <p>
+    My best score is only about 1080. See if you can beat it!
+  </p>
+</section>
