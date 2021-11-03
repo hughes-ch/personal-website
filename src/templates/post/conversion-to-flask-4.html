@@ -1,0 +1,386 @@
+{#
+ #   Blog post contents
+ #
+ #   :copyright: Copyright (c) 2021 Chris Hughes
+ #   :license: MIT License. See LICENSE.md for details. All rights reserved for post contents
+ #}
+<!--
+This blog post is part 4 in a series on how to convert from a click-and-drag webite builder to a
+website implemented in Python. This post covers how I chose to maintain blog posts.
+-->
+<h3><a href='{{ post_url }}' class='link'>Implementing my Website in Flask - Part 4</a></h3>
+<p class='post-caption' id='date'>Nov 3, 2021</p>
+<section>
+  <p>
+    This is part 4 in a series about implementing a personal blog in Python's
+    <a href='https://flask.palletsprojects.com/en/2.0.x/' target='_blank' class='underlined link'>
+      Flask framework</a>. In this post, I'll cover how I chose to add posts, access them, and
+    render the syntax highlighting of the code.
+  </p>
+  <p>
+    If you're interested, parts 1 through 3 can be found here:
+  </p>
+  <ul>
+    <li>
+      <a href='{{url_for("blog_post", name="conversion-to-flask-1") }}' class='underlined link'>
+        Part 1: Introduction and Project Outline
+      </a>
+    </li>
+    <li>
+      <a href='{{url_for("blog_post", name="conversion-to-flask-2") }}' class='underlined link'>
+        Part 2: Setting Up Static Resources and Styles
+      </a>
+    </li>
+    <li>
+      <a href='{{url_for("blog_post", name="conversion-to-flask-3") }}' class='underlined link'>
+        Part 3: Flask and Jinja
+      </a>
+    </li>
+  </ul>
+</section>
+<h4>Adding New Posts</h4>
+<section>
+  <p>
+    My choice for adding a new blog post is really simple. I just add a new HTML template somewhere
+    where Flask knows to look for it. Then Flask renders the blog post just like any other page.
+  </p>
+  <p>
+    At first, this might not sound that user-friendly since I essentially have to write code each
+    time I want to add a blog post. But my alternatives would be to:
+  </p>
+  <ul>
+    <li>Use a markup language like the one used for Github's READMEs or Wiki articles</li>
+    <li>Implement a rich text editor in a separate Admin screen in my blog</li>
+  </ul>
+  <p>
+    In both cases, I would need to implement some sort of blog post rendering feature beyond what's
+    already being provided by the browser and Jinja. I couldn't convince myself that I would be able
+    to add a feature that wasn't already available with HTML (a markup language in itself). In the
+    second case, I'd also need to create a dynamic Admin screen with a login feature, a database,
+    and a non-trivial user input in the rich text editor.
+  </p>
+  <p>
+    Since my other options didn't seem like great alternatives, I went basic and just stuck to plain
+    HTML. It also gives the added benefit of being version controlled (instead of being stuck in a
+    database) and editable with Emacs (objectively the best text editor).
+  </p>
+</section>
+<h4>Accessing Posts</h4>
+<section>
+  <p>
+    Serving the post contents with HTML templates is also easy. I can essentially route the URI
+    matching the post name to the rendered HTML template contents with Flask. If I ended up using
+    an Admin screen and database to store files, it would require a database lookup. 
+  </p>
+  <p>
+    One huge downside with the HTML template method is accessing metadata about the posts. I first
+    ran into this problem when trying to implement SEO for the website. Search engines need a lot
+    of data about each post including:
+  </p>
+  <ul>
+    <li>Author</li>
+    <li>Date</li>
+    <li>Description</li>
+    <li>Post contents</li>
+    <li>Title</li>
+    <li>URL</li>
+  </ul>
+  <p>
+    Due to how Flask/Jinja's HTML templates are defined, the code that renders the HTML (which
+    contains the SEO content) is pretty much decoupled from the content in the
+    template. The rendering code only knows the template location, not the actual contents of 
+    the template. However, I had to somehow get access to the rendered blog post contents
+    <em>before</em> rendering the rest of the page. 
+  </p>
+  <p>
+    What I came up with isn't great, and it can probably still be improved upon. If someone is
+    considering taking my lazy approach of using HTML templates for posts instead of using a
+    database, they'll have to keep this in mind if they'll need the post metadata.
+  </p>
+  <p>
+    My solution is to load all of the blog posts at startup, render them, and then parse the
+    metadata and blog post contents into a container called the PostList. Afterwards, the PostList
+    can be referenced by the code serving up the HTML if it needs access to any metadata or contents
+    of a blog post. The actual posts in the container are sorted by date, which is convenient for
+    rendering those pages which are time-ordered like the Archive and the index page.
+  </p>
+  <p>
+    Once the PostList is in the template context, accessing the information within is pretty simple.
+    Here's a snippet of the Archive template as it renders the list of titles and dates from the
+    PostList:
+  </p>
+{{ codeify("
+{% for post in post_list %}
+<div>
+<a href='{{ post.full_url }}/'>
+  <p>{{ post.datestr }}</p>
+  <p>{{ post.title }}</p>
+</a>
+</div>
+{% endfor %}
+", lang='html') }}
+  <p>
+    In this example, {{ codeify('post_list') }} is the PostList in template context. What this loop
+    does is create a link to each posts with the post's title and date as the text within the link.
+    Then the client can see a short listing of all posts without having to also comb through the
+    content. If the Archive page still needed the contents for some reason, the rendered contents of
+    the post can be accessed just as easily through the {{ codeify('contents') }} attribute.
+  </p>
+  <p>
+    While the interface is simple, what I don't like about this solution is that I have to render
+    and parse HTML templates <em>before</em> serving the same HTML templates to the client. The
+    redundancy can really slow down processing since it needs to handle so much information between
+    requests. This is most noticeable during unit tests, where the PostList needs to be regenerated
+    for each test, sometimes several times.
+  </p>
+  <p>
+    If you'd like to take a look at my Github, the code I've been referencing is
+    <a href='https://github.com/hughes-ch/personal-website/blob/main/src/postlist.py'
+       target='_blank'
+       class='underlined link'>here</a>.
+  </p>
+  <p>
+    If this was done with a database, the contents of the template wouldn't have to be rendered
+    until it was served to the client. Then it would be up to the user to enter the metadata when
+    they created the post. In most cases that I could imagine, the content would be served much
+    faster at little cost to the maintainer of the blog (at least after they initially set up the
+    database and Admin screen). 
+  </p>
+  <p>
+    It's up to you which approach you go with. If I were to do it again, I'd still stick with the
+    plain HTML. However, I'd probably figure out a way to load the posts once at the beginning of
+    unit testing and then never again to improve testing speed. I'll go into why the slow-ness isn't
+    a factor on the deployed website in my next post about deployment.
+</section>
+<h4>Syntax Highlighting</h4>
+<section>
+  <p>
+    One of my biggest motivating factors to implement my website in Flask instead of using a
+    drag-and-drop website builder was to have more control over the syntax highlighting in the code
+    in my blog posts. To get the syntax highlighting I always dreamed of, I used the Python
+    <a href='https://pygments.org/' target='_blank' class='underlined link'>pygments module</a>.
+    This was actually surprisingly easy to set up and works great. 
+  </p>
+  <p>
+    To get it working, first install with:
+  </p>
+  {{ codeify("
+$ pip install pygments
+  ", lang='bash') }}
+  <p>
+    A quick test in the console will show how it will convert a simple {{ codeify('hello world!') }}
+    function into HTML:
+  </p>
+  {{ codeify("
+>>> import pygments
+>>> import pygments.formatters
+>>> import pygments.lexers
+>>> pygments.highlight('print(\"hello world!\")',
+...     pygments.lexers.PythonLexer(),
+...     pygments.formatters.HtmlFormatter())
+
+'<div class=\"highlight\"><pre><span></span><span class=\"nb\">print</span><span class=\"p\">(</span><span class=\"s2\">&quot;hello world!&quot;</span><span class=\"p\">)</span>\n</pre></div>\n'
+", lang='pycon') }}
+  <p>
+    The {{ codeify('pygments.highlight()') }} method is doing all the work here. The first
+    parameter is the code block to highlight. In this example, we're simply printing
+    {{ codeify('print("hello world!")') }}.
+  </p>
+  <p>
+    The second parameter is what's called a "lexer." This is how pygments knows which words and
+    symbols to highlight. Pygments provides 
+    <a href='https://pygments.org/docs/lexers/' 
+       target='_blank' 
+       class='underlined link'>a ton of lexers to choose from</a> including HTML, Python, CSS, and
+    many others. In this example, I've chosen Python so that {{ codeify('print') }} will be
+    recognized as a keyword.
+  </p>
+  <p>
+    The third parameter is known as a "formatter". This lets pygments know how to output the
+    highlighted code. <a href='https://pygments.org/docs/formatters/'
+                         target='_blank'
+                         class='underlined link'>Pygments doesn't provide quite as many formatters</a>, 
+    and the only ones that were useful to me were the NullFormatter (for plain text) and the 
+    HtmlFormatter. However, the HtmlFormatter takes arguments which allow you to specify how the
+    output code should be formatted, like whether to include line numbers. In this example, I've
+    chosen to output the code as plain HTML without line numbers.
+  </p>
+  <p>
+    The {{ codeify('pygments.highlight()') }} method will only provide us use if we can somehow pass
+    code from the HTML templates to the {{ codeify('pygments.highlight()') }} method. Luckily, Flask
+    provides a way through 
+    <a href='https://flask.palletsprojects.com/en/2.0.x/templating/#context-processors' 
+       target='_blank' 
+       class='underlined link'>context processors</a>. These are functions which run before a
+    template is rendered and inject new variables into the template context. They do so by
+    returning a dict populated with the new variables. Each key is the variable in the template
+    context, while the value is from the app context. 
+  </p>
+  <p>
+    For example:
+  </p>
+{{ codeify("
+@app.context_processor
+def inject_title():
+    return dict(title='My Awesome Webpage')
+", lang='py') }}
+  <p>
+    This would set each instance of {{ codeify('{{ title }}') }} in the Jinja HTML template to
+    {{ codeify('My Awesome Webpage') }}. 
+  </p>
+  <p>
+    Since Python handles all variables as objects (including functions), there's no reason that
+    we can't inject a function as a context processor the same way!
+  </p>
+  <p>
+    Instead of calling {{ codeify('pygments.highlight()') }} directly, I created a wrapper function
+    called {{ codeify('_codeify()') }} which does some pre/post processing before delegating to 
+    pygments like removing whitespace. I've provided this as a context processor to Flask. I'll show
+    an example of how that works in a bit. First, I'd like to explain {{ codeify('_codeify') }}.
+  </p>
+  <p> 
+    One of the most important things my {{ codeify('_codeify') }} method does is to notify Flask
+    that the code is "safe" and that it can be rendered as markup. By default, Flask escapes all
+    dynamically rendered markup. Not doing so could be a huge security risk by allowing user's to
+    inject potentially malicious code. 
+  </p>
+  <p>
+    In this case, I chose to use the {{ codeify('flask.Markup()') }} mechanism to mark my code as
+    safe. My {{ codeify('_codeify()') }} method ends up looking like this:
+  </p>
+{{ codeify("
+def _codeify(self, code):
+    # Remove leading/trailing whitespace
+    formatted_code = code.strip()
+
+    # Syntax highlight
+    formatted_code = pygments.highlight(
+        code,
+        pygments.lexers.PythonLexer(),
+        pygments.formatters.HtmlFormatter())
+
+    # Return code as Markup
+    return flask.Markup(f'<code>{formatted_code}</code>')
+", lang='py') }}
+  <p>
+    I also found it useful to add a third parameter to {{ codeify('_codeify') }} to allow specifying
+    a language. Then I could dynamically select from a dict of lexers and formatters using the
+    language name as a key. Here's an abbreviated version of my {{ codeify('_lang_config') }} dict:
+  </p>
+{{ codeify("
+self._lang_config = {
+    'default': {
+        'lexer': pygments.lexers.TextLexer(),
+        'formatter': pygments.formatters.HtmlFormatter(
+            wrapcode=True)
+    },
+    'py': {
+        'lexer': pygments.lexers.PythonLexer(),
+        'formatter': pygments.formatters.HtmlFormatter(
+            linenos=True,
+            wrapcode=True)
+    },
+", lang='py') }}
+  <p>
+    Then it could be integrated into the previous example like this:
+  </p>
+{{ codeify("
+def _codeify(self, code, lang=None):
+    # Remove leading/trailing whitespace
+    formatted_code = code.strip()
+
+    # Syntax highlight
+    fallback_config = self._lang_config['default']
+    formatted_code = pygments.highlight(
+        code,
+        self._lang_config.get(lang, fallback_config)['lexer'],
+        self._lang_config.get(lang, fallback_config)['formatter'])
+
+    # Return code as Markup
+    return flask.Markup(f'<code>{formatted_code}</code>')
+", lang='py') }}
+  <p>
+    Note how I used {{ codeify('dict.get()') }} instead of the
+    {{ codeify('[]') }} operator so that I could fall back to a default config if a language
+    was not specified. In this case, my default configuration was to use a TextLexer, which
+    didn't add any highlighting.
+  </p>
+  <p>
+    Looking at the second entry of my {{ codeify('_lang_config') }} dict, you'll see that the
+    HtmlFormatter I used for Python has {{ codeify('wrapcode') }} and {{ codeify('linenos') }}
+    set to true. The {{ codeify('wrapcode') }} parameter is needed to meet HTML5 specifications
+    for wrapping code in {{ codeify('<pre>') }} and {{ codeify('<code>') }} blocks. The 
+    {{ codeify('linenos') }} parameter specifies that line numbers should be added to the block.
+  </p>
+  <p>
+    An interesting note is that pygments structures the line numbers as a table, but not in the
+    way you would think. In order to allow easy copy/pasting of code, the table is actually two
+    columns and only one row. Separate lines are only separated by a newline element, not a new
+    table row. That means that the numbers and code need to be using the same text size and font
+    or they will be misaligned. In my case, my table content was also centered vertically, which
+    caused an unexpected misalignment. Keep this quirk in mind as you are developing your page
+    stylesheet.
+  </p>
+  <p>
+    Speaking of stylesheets, <a href='https://pygments.org/docs/quickstart/#command-line-usage'
+                                target='_blank'
+                                class='underlined link'>the pygments quickstart page</a> provides
+    a way to generate a stylesheet that can be used with any pygment-ized HTML. Just execute this
+    on the command line after installing pygments:
+  </p>
+{{ codeify('
+$ pygmentize -S default -f html > pygments.css
+', lang='bash') }}
+  <p>
+    Then include the stylesheet in the head of your HTML along with the rest of the stylesheets.
+  </p>
+  <p>
+    Putting it all together, first define a method which returns the markup which should be
+    injected into the page:
+  </p>
+{{ codeify("
+def _codeify(self, code, lang=None):
+    # Contents abbreviated - see above for full example
+    return flask.Markup(code)
+", lang='py') }}
+  <p>
+    Then notify the Jinja template engine of the new method by declaring it a context processor:
+  </p>
+{{ codeify("
+@app.context_processor
+def add_context_processors():
+    return dict(codeify=self._codeify)
+", lang='py') }}
+  <p>
+    Then use your new method by calling it within a Jinja template, making sure to include the
+    pygments stylesheet:
+  </p>
+{{ codeify("
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <title>Python print method - example usage</title>
+    <link href='pygments.css' rel='stylesheet' />
+  </head>
+  <body>
+    <h1>Example usage of print</h1>
+    {{ codeify('print(\"Hello world!\")', lang='py') }}
+  </body>
+</html>
+", lang='html') }}
+  <p>
+    And with that, you'll have syntax highlighting on your page!
+  </p>
+</section>
+<h4>Summary</h4>
+<section>
+  <p>
+    This post covered a lot, including much of the actual Python that went into this project. I hope
+    anyone who is doing a similar project in the future can take some of the lessons learned from this
+    one to accelerate their project forward by either avoiding some of the pitfalls of the choices I
+    made or building on them. 
+  </p>
+  <p>
+    Next time, I'd like to cover deployment to Netlify. See you then!
+  </p>
+</section>
