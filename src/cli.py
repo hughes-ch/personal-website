@@ -30,15 +30,7 @@ def run_static(host):
 
         :return: None
         """
-    builder = Builder(flask.current_app)
-    app = builder.host_static_app()
-
-    # The FLASK_RUN_FROM_CLI environment variable needs to be set
-    # to prevent duplicate calls to start the werkzeug server. In
-    # this case, since this is being called from a CLI, the server
-    # isn't being called anyways. It's safe to set the environment
-    # back to false and call app.run. Otherwise, would have to
-    # start the server directly with the werkzeug API. 
     os.environ['FLASK_RUN_FROM_CLI'] = 'false'
-    app.run(host=host)
+    builder = Builder(flask.current_app)
+    app = builder.host_static_app(host)
 
