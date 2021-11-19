@@ -69,6 +69,12 @@ class Renderer:
                     linenos=True,
                     wrapcode=True)
             },
+            'js': {
+                'lexer': pygments.lexers.JavascriptLexer(),
+                'formatter': pygments.formatters.HtmlFormatter(
+                    linenos=True,
+                    wrapcode=True)
+            },
             'py': {
                 'lexer': pygments.lexers.PythonLexer(),
                 'formatter': pygments.formatters.HtmlFormatter(

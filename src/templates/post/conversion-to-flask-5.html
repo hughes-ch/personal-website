@@ -1,0 +1,499 @@
+{#
+ #   Blog post contents
+ #
+ #   :copyright: Copyright (c) 2021 Chris Hughes
+ #   :license: MIT License. See LICENSE.md for details. All rights reserved for post contents
+ #}
+<!--
+This blog post is part 5 in a series on how to convert from a website builder to one built with
+Python. This post covers the deployment to Netlify.
+-->
+<h3><a href='{{ post_url }}' class='link'>Implementing my Website in Flask - Part 5</a></h3>
+<p class='post-caption' id='date'>Nov 18, 2021</p>
+<section>
+  <p>
+    This is part 5 in a series about implementing a personal blog in Python's
+    <a href='https://flask.palletsprojects.com/en/2.0.x/' target='_blank' class='underlined link'>
+      Flask framework</a>. In this post, I'll cover the deployment to
+    <a href='https://www.netlify.com/' target='_blank' class='underlined link'>Netlify</a>. I had a
+    really positive experience with Netlify, so this comes off as an advertisement, I want to say
+    that I'm not affiliated - just a happy customer. 
+  </p>
+  <p>
+    If you're interested, parts 1 through 4 can be found here:
+  </p>
+  <ul>
+    <li>
+      <a href='{{url_for("blog_post", name="conversion-to-flask-1") }}' class='underlined link'>
+        Part 1: Introduction and Project Outline
+      </a>
+    </li>
+    <li>
+      <a href='{{url_for("blog_post", name="conversion-to-flask-2") }}' class='underlined link'>
+        Part 2: Setting Up Static Resources and Styles
+      </a>
+    </li>
+    <li>
+      <a href='{{url_for("blog_post", name="conversion-to-flask-3") }}' class='underlined link'>
+        Part 3: Flask and Jinja
+      </a>
+    </li>
+    <li>
+      <a href='{{url_for("blog_post", name="conversion-to-flask-4") }}' class='underlined link'>
+        Part 4: Managing Posts and Highlighting Code Blurbs
+      </a>
+    </li>
+  </ul>
+</section>
+<h4>Introduction to Netlify</h4>
+<section>
+  <p>
+    Netlify is a Platform as a Service (PaaS) provider that markets themselves as a platform built for
+    scale, where developers only have to worry about writing code. Instead of leaving it to the developer
+    to manage webservers, set up a CI/CD pipelines, and handle scaling their service, Netlify seamlessly
+    integrates into services like Github to automatically deploy to the cloud.
+  </p>
+  <p>
+    As I'm currently working on a separate project where I decided to use a barebones AWS EC2 instance
+    instead of a PaaS, I can confidently say that I'll be running back to a PaaS due to the seamless
+    experience. Especially for small teams, it can save an incredible amount of time and provide the
+    confidence that everything under the hood is working correctly. 
+  </p>
+  <p>
+    As if the time savings weren't enough, Netlify provides a free tier of service which provides
+    100GB of bandwidth, 300 build minutes, and one concurrent build per "team." I find that this is
+    definitely enough for my site, since I'm the only developer on the team, and it's the only
+    website. They also provide Pro, Business, and Enterprise tiers of service.
+  </p>
+  <p>
+    Hosting a site is rediculously easy. First, you have to connect to a Git provider (Github in my
+    case), then pick a repository, then set your site settings:
+  </p>
+  <img src='{{ url_for("static", filename="img/conversion-to-flask-5-1.webp") }}'
+       alt='Settings page when initally hosting a repository on Netlify' />
+  <p>
+    I removed my repo and team name above since it would've confused things, but otherwise you can
+    see how simple this page is. Just add your team name as the owner (you'll create a team when you
+    set up an account), then select the branch to deploy in the repo. In this case, I have the main
+    branch being deployed. Any time 'main' is updated, I get a notification from Netlify that a new
+    build has started. Within a few minutes, the new version of the website is up. During the
+    deployment, there's no downtime.
+  </p>
+  <p>
+    One of the really neat things is that Netlify will also provide staging deployments for all the
+    other branches. It uses the same settings as provided for 'main' to build these branches. So if
+    you make a change and would like to check them out before actually deploying it, Netlify will
+    automatically set up that pipeline for you. When hooked up with a Github account, the preview
+    will automatically start with any push to Github. You can easily access the previews from the
+    pull request, where Netlify will add a comment:
+  </p>
+  <img src='{{ url_for("static", filename="img/conversion-to-flask-5-2.webp") }}'
+       alt='Netlify preview on Github pull request page' />
+  <p>
+    Back to the settings page, to specify a base directory other than the root of your repo, you can
+    set the 'Base directory' to a local directory in your repo. To use the root, leave the setting
+    blank. The 'Build command' setting is any script that needs to run to set up the application.
+    The 'Publish directory' is where the final static resources and scripts can be found in the
+    built repo.
+  </p>
+  <p>
+    Under 'Advanced build settings', you can add environment variables and serverless functions.
+  </p>
+</section>
+<h4>Serverless Architecture</h4>
+<section>
+  <p>
+    On the topic of serverless functions, one of the things to keep in mind with Netlify is that it
+    is a completely serverless architecture. It can serve static content, but any dynamic features
+    (like API requests) must be defined solely with the
+    <a href='https://docs.netlify.com/functions/overview/'
+       target='_blank'
+       class='underlined link'>function interface</a>. The Netlify service
+    handles all of the incoming traffic and provides your function code with single events to
+    process. It recommends making each function stateless and short lived. 
+  </p>
+  <p>
+    A really basic example of a Javascript function from their website is the one below:
+  </p>
+{{ codeify("
+exports.handler = async function(event, context) {  
+  return {
+    statusCode: 200,
+    body: JSON.stringify({message: 'Hello World'})
+  };
+}", lang='js') }}
+  <p>
+    In this example, {{ codeify('event') }} contains all of the information from the request, such
+    as the method, headers, URL, and any data in the body of the request. According to the docs,
+    {{ codeify('context') }} can have additional information about the client. Any request to this
+    API endpoint immediately receives the friendly JSON response "Hello World." 
+  </p>
+  <p>
+    The biggest benefit to this serverless architecture is that developers don't need to worry about
+    managing servers or managing a complex DevOps environment. However, it does take some
+    restructuring for apps like mine which need access to the filesystem and run on top of a web
+    server. The fact that functions need to be short lived means that things like Flask and Django
+    are out of the question.
+  </p>
+  <p>
+    Also, Netlify only accepts functions defined in Javascript and Go at the moment, so it looked
+    like I was going to be out of luck. Bummer.
+  </p>
+</section>
+<h4>Frozen-Flask Saves the Day</h4>
+<section>
+  <p>
+    Luckily for me, there's a way around the serverless architecture. Since my app doesn't use a
+    database or have any dynamic features, it doesn't change between pushes to Github. As far as
+    Netlify is concerned, it can be converted into a static website. My second stroke of luck was
+    that Python has a module called
+    <a href='https://pythonhosted.org/Frozen-Flask/' target='_blank' class='underlined link'>
+      Frozen-Flask</a> that's designed to do just this. When a website is ready to be deployed, this
+    module essentially traverses the entire sitemap, saving each rendered template into a static
+    file soley containing HTML, XML, JSON, etc. From their website: "the result can be hosted
+    without any server-side software."
+  </p>
+  <p>
+    Sweet! No functions needed, just static hosting. Netlify can do that easily. 
+  </p>
+  <p>
+    With Frozen-Flask, all of my local development is done in Python and Flask. Then on
+    deployment, I just 'build' it - almost like compiled languages like C++. Instead of a binary
+    output though, I get static assets.
+  </p>
+  <p>
+    Installation is really simple:
+  </p>
+{{ codeify("
+$ pip install Frozen-Flask
+", lang='bash') }}
+  <p>
+    Then you're ready to freeze your project!
+  </p>
+  <p>
+    The basic example from their website is intended to be run as a standalone script which imports
+    the Flask app instance and calls the {{ codeify('Freezer.freeze()') }} method on it:
+  </p>
+  {{ codeify("
+from flask_frozen import Freezer
+from myapplication import app
+
+freezer = Freezer(app)
+
+if __name__ == '__main__':
+    freezer.freeze()
+", lang='py') }}
+  <p>
+    In this case, {{ codeify('freezer.freeze()') }} traverses the URL structure of the
+    application, dumping all of the static resources into the 'build' subdirectory of the current
+    working directory.
+  </p>
+  <p>
+    While this use case is OK, a more professional solution would be to incorporate Flask-Freeze
+    into Flask's CLI. As we'll see later, it also makes deployment to Netlify a breeze.
+  </p>
+  <p>
+    For some background, Flask uses the
+    <a href='https://click.palletsprojects.com/en/8.0.x/' target='_blank' class='underlined link'>
+      Click project</a> to handle its command line interface. From its website, it markets itself
+    as "a Python package for creating beautiful command line interfaces ... with as little code as
+    necessary." I'm a fan of that.
+  </p>
+  <p>
+    It turns out adding new command line options certainly meet that promise. The previous example
+    can be written with just a few extra lines of code:
+  </p>
+{{ codeify("
+import flask
+
+from click import command
+from flask.cli import with_appcontext
+from flask_frozen import Freezer
+
+@command('build')
+@with_appcontext
+def build():
+    freezer = Freezer(flask.current_app)
+    freezer.freeze()
+", lang='py') }}
+  <p>
+    Now we can access this functionality using {{ codeify("flask build") }} at the command line,
+    just like we can use {{ codeify("flask run") }}. The first piece to make this work is using
+    the {{ codeify("@command") }} decorator. This lets Click know that there will be a new command
+    line argument, and that the {{ codeify('build()') }} function should be called to execute it.
+  </p>
+  <p>
+    The second piece is the {{ codeify('@with_appcontext') }} decorator. Unlike during requests,
+    methods invoked through Flask's command line do not automatically get an application context
+    pushed. This decorator notifies Flask to push a context so that the
+    {{ codeify("flask.current_app") }} proxy is available.
+  </p>
+  <p>
+    It's also really important to note that the new CLI functions have to be registered with the
+    Flask app at creation time. So wherever you create your app, you'll need to add these lines:
+  </p>
+{{ codeify("
+from myCliModule import build
+from myapplication import app  
+
+app.cli.add_command(build)
+", lang='py') }}
+</section>
+<h4>Some Caveats</h4>
+<section>
+  <p>
+    This solution works great for most pages, but Frozen-Flask ran into a few issues:
+  </p>
+  <ol>
+    <li>It wasn't able to find dynamic URLs out of the box</li>
+    <li>It didn't find my 404 page since it isn't associated with a URL</li>
+    <li>It didn't provide an easy way to run it from the command line</li>
+  </ol>
+  <p>
+    First, let me dive into why my URLs weren't fully discovered...
+  </p>
+  <p>
+    Frozen-Flask works sort of like a web crawler, using the Flask app definition as a site map. All
+    of the statically defined routes are rendered and saved as static resources. Then, the dynamically
+    created URLs are generated in a best-effort fashion. Like web crawlers need incoming links to
+    discover a website, Frozen-Flask needs calls to {{ codeify('url_for') }} to act as an incoming
+    link. If a page doesn't have incoming {{ codeify('url_for') }}s, you need to create
+    <a href='https://pythonhosted.org/Frozen-Flask/#url-generators'
+       target='_blank'
+       class='underlined link'>URL generators</a> to specify the full, valid URLs.
+  </p>
+  <p>
+    One case where this showed itself was in my blog post URLs. Because of the way I have to
+    pre-load them in Flask, an incoming {{ codeify('url_for') }} is never created for them.
+    Frozen-Flask doesn't has no way to know about their existance. No big deal. To generate the
+    URL for each post, I could use my
+    <a href='{{url_for("blog_post", name="conversion-to-flask-4") }}'
+       class='underlined link'>PostList from last blog post</a>. Since it stored the URL of each
+    post, I could simply loop over it and yield each value:
+  </p>
+{{ codeify("  
+def yield_blog_post_urls():
+    for post in PostList():
+        yield {'name': post.url}
+", lang='py') }}
+  <p>
+    Note that "name" here is the input parameter to the dynamically generated URL.
+  </p>
+  <p>
+    Then, like the CLI functions, make sure to register the generators with the calling class. In
+    this case, that's the freezer:
+  </p>
+{{ codeify("
+freezer = Freezer(flask.current_app)
+freezer.register_generator(yield_blog_post_urls)
+freezer.freeze()
+", lang='py') }}
+  <p>
+    As another simple example, consider a pagination feature. The generator could simply loop over a
+    range of numbers up to the maximum page value, yielding the page number as
+    {{ codeify("{'page': num}") }}.
+  </p>
+
+  <p>
+    With the URL generators hooked in, all of my dynamic URLs were turned into static resources as
+    expected. But now I hit my second issue while using Frozen-Flask. Since my 404 page isn't tied
+    to a URL, there's no way for Frozen-Flask to find it. 
+  </p>
+  <p>
+    The solution I came up with isn't really pretty, as Frozen-Flask doesn't offer support for this
+    feature. After building all the pages that could be reached with a URL, I rendered the 404
+    template and wrote it to a file in the same directory as the other files. Here's how it looks:
+  </p>
+{{ codeify("  
+with app.test_request_context(base_url=None):
+    write_path = pathlib.Path(freezer.root) / '404.html'
+    with write_path.open('w') as f_handle:
+        context = {
+            'title': 'Oops! Page not found!',
+        }
+
+        f_handle.write(flask.render_template('_404.html', **context))
+", lang='py') }}
+  <p>
+    Note that the {{ codeify('test_request_context') }} is needed here to render the template.
+    Without it, Flask doesn't know to push a request context and {{ codeify('flak.render_template') }}
+    won't have the resources it needs to generate the template. This is the same procedure that
+    Frozen-Flask uses under the hood to generate its static files.
+  </p>
+  <p>
+    Great! Now to test this out...
+  </p>
+  <p>
+    I elected to integrate this into the Flask CLI so that it would be just as easy to run the
+    frozen version of the website as it was the regular version. Another benefit was that the code
+    that ran the "standard" way (with {{ codeify('flask run') }} could be completely decoupled with
+    this new way of running. I decided to call this new command {{ codeify('flask run-static') }}.
+  </p>
+  <p>
+    Now the reason why this effort is in the "caveats" section is because Frozen-Flask was designed
+    to be run from the Python intepreter, not the Flask command line. Its {{ codeify('serve') }}
+    method (which starts a local server and serves the newly built static resources) calls 
+    {{ codeify("flask.current_app.run()") }} under the hood. Turns out Flask's CLI expressly forbids
+    this. The command fails immediately with this warning:
+  </p>
+{{ codeify('
+  /personal-website/lib/python3.8/site-packages/flask_frozen/__init__.py:397:
+  Warning: Silently ignoring app.run() because the application is run from the flask command line executable.
+  Consider putting app.run() behind an if __name__ == "__main__" guard to silence this warning.
+  app.run(**options)
+') }}
+  <p>
+    Instead of going back to the drawing board (as I probably should have), I decided to hack-and
+    slash around this. I found that Flask checks the OS environment variable
+    {{ codeify("FLASK_RUN_FROM_CLI") }} to determine if Flask was run from the command line. If
+    {{ codeify("False") }}, Flask allows {{ codeify("app.run()") }} to execute as expected.
+  </p>
+  <p>
+    Other than that caveat, our new command line interface to start a local static file server is
+    really simple. Flask-Freeze does all the heavy lifting:
+  </p>
+{{ codeify("
+@click.command('run-static')
+@click.argument('host')
+@flask.cli.with_appcontext
+def run_static(host):
+    os.environ['FLASK_RUN_FROM_CLI'] = 'false'
+    self.freezer = flask_frozen.Freezer(flask.current_app)
+    self.freezer.serve(host=host)
+", lang='py') }}
+  <p>
+    The first line defines the command {{ codeify("run-static") }}. The second line defines a
+    command line argument provides the caller to provide an address to host the server on
+    (typically 0.0.0.0). The third decorator notifies Flask to run the method with
+    app context so that {{ codeify("flask.current_app") }} is available to us. On line 5 is our
+    environment variable hack, and on line 7 is the call to Frozen-Flask which tells it to start
+    a local server that hosts our static files.
+  </p>
+  <p>
+    With those few lines of code, Frozen-Flask serves the static website on our local machine, and
+    everything looks the same as the dynamic website! Except since everything is already
+    pre-rendered, everything is FAST!
+  </p>
+  <p>
+    While this is a great intermediate step, the Frozen-Flask server isn't robust enough for hosting
+    a web-facing application. So back to Netlify...
+  </p>
+</section>
+<h4>Hooking Frozen-Flask into Netlify</h4>
+<section>
+  <p>
+    For static websites, Netlify needs three build settings so that it knows how to deploy the site:
+  </p>
+  <ol>
+    <li>
+      <strong>The base directory</strong> - Serves as the working directory during the deployment.
+    </li>
+    <li>
+      <strong>The publish directory</strong> - Serves as the website root where static content will
+      be served from.
+    </li>
+    <li>
+      <strong>The build command</strong> - Renders static content and places output files into the
+      publish directory.
+    </li>
+  </ol>
+  <p>
+    The easiest way to specify these settings is through the Netlify UI. However, they also provide
+    a way to <a href='https://docs.netlify.com/configure-builds/file-based-configuration/'
+                target='_blank'
+                class='underlined link'>configure projects through the use of a TOML file</a>. I
+    just used the UI for my application.
+  </p>
+  <p>
+    If you navigate to your site settings and select the 'Build & deploy' tab to the side of the
+    page, you'll see the build settings for the website. I've highlighted them below:
+  </p>
+  <img src='{{ url_for("static", filename="img/conversion-to-flask-5-4.webp") }}'
+       alt='Site settings page with build settings highlighted' />
+  <p>
+    You can see that I left the 'Base directory' setting as not set. This lets Netlify use its
+    default setting which is to use the root of the Git repository. That works for this project.
+  </p>
+  <p>
+    Next, to stage everything in the 'Publish directory,' I've specified that Netlify should use the
+    {{ codeify('flask build') }} command. Now, Netlify will pull all the source from Github and run
+    {{ codeify('flask build') }} from the root of the repo. All that's left to do is to tell it to
+    look in the right place for the HTML that it needs to serve. That's done with the 'Publish
+    directory' setting on the third highlighted line. 
+  <p>
+    Alternatively, if you know the settings that you need beforehand, these settings are available
+    to customize when creating a new site (see the image I posted way up at the top of the
+    "Introduction to Netlify" section).
+  </p>
+</section>
+<h4>Adding Custom DNS and HTTPS</h4>
+<section>
+  <p>
+    Netlify will host its web applications with its own domain names, using funny names like
+    {{ codeify('zen-engelbart-f16ad6.netlify.app') }}. If you'd like to use a memorable name, you'll
+    have to hook in your own domain name. 
+  </p>
+  <p>
+    I used <a href='https://domains.google.com/' target='_blank' class='underlined link'>
+      domains.google.com</a> to purchase my domain. Most are pretty cheap. For instance, this one
+    was only $12 for the year. It's also possible to purchase DNS through Netlify if you know that
+    the domain will always be hosted there.
+  </p>
+  <p>
+    To use one of your own domains, first go to the "Domain management" tab in "Site Settings" in
+    Netlify. There, you'll find the "Custom domains" box with the Netlify domain already listed:
+  </p>
+  <img src='{{ url_for("static", filename="img/conversion-to-flask-5-6.png") }}'
+       alt='Domains settings page' />
+  <p>
+    Here, my own domain is already added in the second row. To add a new domain, select "Add domain
+    alias" and enter the desired domain:
+  </p>
+  <div class='bordered-img-container'>
+    <img src='{{ url_for("static", filename="img/conversion-to-flask-5-7.png") }}'
+         alt='Entering a new domain alias'
+         class='thin-pic'/>
+  </div>
+  <p>
+    Netlify then instructs you to add a CNAME record pointing from your new domain to the Netlify
+    domain (in this case, {{ codeify('zen-engelbart-f16ad6.netlify.app') }}). Note that if you don't
+    do both steps (so that both sides are aware of the custom domain), you won't be able to access
+    the application through your new domain.
+  </p>
+  <p>
+    OK, those few steps were easy, but the easiest one is yet to come. Netlify is freakin' great in
+    that it automatically handles setting up HTTPS for the application. At the bottom of the "Domain
+    management" tab, you'll see this box:
+  </p>
+  <img src='{{ url_for("static", filename="img/conversion-to-flask-5-8.png") }}'
+       alt='HTTPS settings in Netlify' />
+  <p>
+    Within about 15 minutes of getting your custom domain set up, Netlify will provision a TLS
+    certificate from Let's Encrypt and your application will have HTTPS enabled. Even better, it
+    renews it periodically so you never have to worry about it. Don't even have to press a button.
+  </p>    
+</section>
+<h4>Summary</h4>
+<section>
+  <p>
+    With that, my website was available for all to see. With Netlify, I was able to get the speed of a
+    static website while using the development power of a Python web development framework. Plus, I'm
+    confident my app will be secure and available to whoever wants to look at it. I don't even need to
+    manage anything besides my application software. 
+  </p>
+  <p>
+    Plus, Netlify even offers shiny badges for your Github page!
+  </p>
+  <div class='bordered-img-container'>
+    <img src='{{ url_for("static", filename="img/conversion-to-flask-5-5.svg") }}'
+         alt='Netlify status badge example'
+         class='thin-pic'/>
+  </div>
+  <p>
+    ... and everyone knows that's what makes a good Github repo - how many status badges it has.
+  </p>
+  <p>
+    Next time, I'd like to cover one more topic about the blog, mostly because I haven't seen many
+    good tutorials online. That topic is a shorter one - how to manually add RSS.
+  </p>
+</section>

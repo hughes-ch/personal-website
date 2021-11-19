@@ -80,15 +80,10 @@ class Builder:
             with write_path.open('w') as f_handle:
                 f_handle.write(renderer.render_404()[0])
 
-    def host_static_app(self):
+    def host_static_app(self, host):
         """ Hosts the static application after it is built
 
             :return: Flask app instance
             """
         # Make a new app, hosted from the build area. 
-        app = self.freezer.make_static_app()
-
-        # Wrap new app with same settings as one created by Flask
-        app.wsgi_app = flask_frozen.script_name_middleware(app.wsgi_app, '')
-        self.freezer.init_app(app)
-        return app
+        self.freezer.serve(host=host)
