@@ -116,6 +116,9 @@ class PostList:
             :param: None
             :return: None
             """
+        if self._posts:
+            return
+        
         post_list = []
 
         post_path = (pathlib.Path(self._root_path) /
