@@ -19,19 +19,25 @@ from src.setting import Settings
 class TestBlog(unittest.TestCase):
     """Tests the Blog class"""
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         """ Initialize test client
 
             :param: None
             :return: None
             """
         os.environ['FLASK_APP'] = 'src'
-        self.config = test.util.load_test_config()
-        self.blog = Blog(self.config)
+        cls.config = test.util.load_test_config()
+        cls.blog = Blog(cls.config)
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         """ Clean up after each test """
         Settings.destroy()
+
+    def setUp(self):
+        self.config = TestBlog.config
+        self.blog = TestBlog.blog
 
     def get_index_page(self):
         """ Returns the contents of the index page
