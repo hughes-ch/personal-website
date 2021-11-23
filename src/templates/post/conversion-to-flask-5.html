@@ -13,9 +13,15 @@ Python. This post covers the deployment to Netlify.
 <section>
   <p>
     This is part 5 in a series about implementing a personal blog in Python's
-    <a href='https://flask.palletsprojects.com/en/2.0.x/' target='_blank' class='underlined link'>
+    <a href='https://flask.palletsprojects.com/en/2.0.x/'
+       target='_blank'
+       rel='noreferrer'
+       class='underlined link'>
       Flask framework</a>. In this post, I'll cover the deployment to
-    <a href='https://www.netlify.com/' target='_blank' class='underlined link'>Netlify</a>. I had a
+    <a href='https://www.netlify.com/'
+       target='_blank'
+       rel='noreferrer'
+       class='underlined link'>Netlify</a>. I had a
     really positive experience with Netlify, so this comes off as an advertisement, I want to say
     that I'm not affiliated - just a happy customer. 
   </p>
@@ -108,6 +114,7 @@ Python. This post covers the deployment to Netlify.
     (like API requests) must be defined solely with the
     <a href='https://docs.netlify.com/functions/overview/'
        target='_blank'
+       rel='noreferrer'
        class='underlined link'>function interface</a>. The Netlify service
     handles all of the incoming traffic and provides your function code with single events to
     process. It recommends making each function stateless and short lived. 
@@ -147,7 +154,10 @@ exports.handler = async function(event, context) {
     database or have any dynamic features, it doesn't change between pushes to Github. As far as
     Netlify is concerned, it can be converted into a static website. My second stroke of luck was
     that Python has a module called
-    <a href='https://pythonhosted.org/Frozen-Flask/' target='_blank' class='underlined link'>
+    <a href='https://pythonhosted.org/Frozen-Flask/'
+       target='_blank'
+       rel='noreferrer'
+       class='underlined link'>
       Frozen-Flask</a> that's designed to do just this. When a website is ready to be deployed, this
     module essentially traverses the entire sitemap, saving each rendered template into a static
     file soley containing HTML, XML, JSON, etc. From their website: "the result can be hosted
@@ -194,7 +204,10 @@ if __name__ == '__main__':
   </p>
   <p>
     For some background, Flask uses the
-    <a href='https://click.palletsprojects.com/en/8.0.x/' target='_blank' class='underlined link'>
+    <a href='https://click.palletsprojects.com/en/8.0.x/'
+       target='_blank'
+       rel='noreferrer'
+       class='underlined link'>
       Click project</a> to handle its command line interface. From its website, it markets itself
     as "a Python package for creating beautiful command line interfaces ... with as little code as
     necessary." I'm a fan of that.
@@ -260,6 +273,7 @@ app.cli.add_command(build)
     link. If a page doesn't have incoming {{ codeify('url_for') }}s, you need to create
     <a href='https://pythonhosted.org/Frozen-Flask/#url-generators'
        target='_blank'
+       rel='noreferrer'
        class='underlined link'>URL generators</a> to specify the full, valid URLs.
   </p>
   <p>
@@ -401,6 +415,7 @@ def run_static(host):
     The easiest way to specify these settings is through the Netlify UI. However, they also provide
     a way to <a href='https://docs.netlify.com/configure-builds/file-based-configuration/'
                 target='_blank'
+                rel='noreferrer'
                 class='underlined link'>configure projects through the use of a TOML file</a>. I
     just used the UI for my application.
   </p>
@@ -434,7 +449,10 @@ def run_static(host):
     have to hook in your own domain name. 
   </p>
   <p>
-    I used <a href='https://domains.google.com/' target='_blank' class='underlined link'>
+    I used <a href='https://domains.google.com/'
+              target='_blank'
+              rel='noreferrer'
+              class='underlined link'>
       domains.google.com</a> to purchase my domain. Most are pretty cheap. For instance, this one
     was only $12 for the year. It's also possible to purchase DNS through Netlify if you know that
     the domain will always be hosted there.

@@ -10,7 +10,7 @@
       <body>
         <div class='page-content'>
           <div class='rss'>
-            <a target='_blank' class='link'>
+            <a target='_blank' rel='noreferrer' class='link'>
               <xsl:attribute name='href'>
                 <xsl:value-of select='/rss/channel/link'/>
               </xsl:attribute>
@@ -18,7 +18,7 @@
             </a>
             <p class='caption'>A blog by Chris Hughes</p>
             <xsl:for-each select="/rss/channel/item">
-              <a target='_blank' class='link'>
+              <a target='_blank' rel='noreferrer' class='link'>
                 <xsl:attribute name='href'>
                   <xsl:value-of select='link'/>
                 </xsl:attribute>

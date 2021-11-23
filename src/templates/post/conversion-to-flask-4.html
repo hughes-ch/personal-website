@@ -13,7 +13,10 @@ Python. This post covers dynamic post rendering and making code blurbs pop.
 <section>
   <p>
     This is part 4 in a series about implementing a personal blog in Python's
-    <a href='https://flask.palletsprojects.com/en/2.0.x/' target='_blank' class='underlined link'>
+    <a href='https://flask.palletsprojects.com/en/2.0.x/'
+       target='_blank'
+       rel='noreferrer'
+       class='underlined link'>
       Flask framework</a>. In this post, I'll cover how I chose to add posts, access them, and
     render the syntax highlighting of the code.
   </p>
@@ -137,6 +140,7 @@ Python. This post covers dynamic post rendering and making code blurbs pop.
     If you'd like to take a look at my Github, the code I've been referencing is
     <a href='https://github.com/hughes-ch/personal-website/blob/main/src/postlist.py'
        target='_blank'
+       rel='noreferrer'
        class='underlined link'>here</a>.
   </p>
   <p>
@@ -158,7 +162,9 @@ Python. This post covers dynamic post rendering and making code blurbs pop.
     One of my biggest motivating factors to implement my website in Flask instead of using a
     drag-and-drop website builder was to have more control over the syntax highlighting in the code
     in my blog posts. To get the syntax highlighting I always dreamed of, I used the Python
-    <a href='https://pygments.org/' target='_blank' class='underlined link'>pygments module</a>.
+    <a href='https://pygments.org/'
+       target='_blank' rel='noreferrer'
+       class='underlined link'>pygments module</a>.
     This was actually surprisingly easy to set up and works great. 
   </p>
   <p>
@@ -191,6 +197,7 @@ $ pip install pygments
     symbols to highlight. Pygments provides 
     <a href='https://pygments.org/docs/lexers/' 
        target='_blank' 
+       rel='noreferrer'
        class='underlined link'>a ton of lexers to choose from</a> including HTML, Python, CSS, and
     many others. In this example, I've chosen Python so that {{ codeify('print') }} will be
     recognized as a keyword.
@@ -199,6 +206,7 @@ $ pip install pygments
     The third parameter is known as a "formatter". This lets pygments know how to output the
     highlighted code. <a href='https://pygments.org/docs/formatters/'
                          target='_blank'
+                         rel='noreferrer'
                          class='underlined link'>Pygments doesn't provide quite as many formatters</a>, 
     and the only ones that were useful to me were the NullFormatter (for plain text) and the 
     HtmlFormatter. However, the HtmlFormatter takes arguments which allow you to specify how the
@@ -211,6 +219,7 @@ $ pip install pygments
     provides a way through 
     <a href='https://flask.palletsprojects.com/en/2.0.x/templating/#context-processors' 
        target='_blank' 
+       rel='noreferrer'
        class='underlined link'>context processors</a>. These are functions which run before a
     template is rendered and inject new variables into the template context. They do so by
     returning a dict populated with the new variables. Each key is the variable in the template
@@ -324,6 +333,7 @@ def _codeify(self, code, lang=None):
   <p>
     Speaking of stylesheets, <a href='https://pygments.org/docs/quickstart/#command-line-usage'
                                 target='_blank'
+                                rel='noreferrer'
                                 class='underlined link'>the pygments quickstart page</a> provides
     a way to generate a stylesheet that can be used with any pygment-ized HTML. Just execute this
     on the command line after installing pygments:
