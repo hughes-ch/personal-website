@@ -14,13 +14,18 @@ Python. This post covers the Python setup and design using the Flask framework.
   Check out <a href='{{url_for("blog_post", name="conversion-to-flask-2") }}' class='underlined link'>
     part 2 of this series</a> for an overview of the HTML and CSS which is being served to display
   the content on this webpage. As I stated there, you can also
-  <a href='https://github.com/hughes-ch/personal-website' target='_blank' class='underlined link'>
+  <a href='https://github.com/hughes-ch/personal-website'
+     target='_blank'
+     rel='noreferrer'
+     class='underlined link'>
     find the website source on Github</a>.
 </p>
 <p>
   In this post, I'd like to cover the basics of serving a website with Python, particularly its
   really lightweight
-  <a href='https://flask.palletsprojects.com/en/2.0.x/' target='_blank' class='underlined link'>
+  <a href='https://flask.palletsprojects.com/en/2.0.x/'
+     target='_blank' rel='noreferrer'
+     class='underlined link'>
     Flask framework</a>, which I've decided to use for this project. 
 </p>
 <p>
@@ -104,7 +109,10 @@ if __name__ == '__main__':
   </p>
   <p>
     To dynamically render HTML, Flask is dependent on the
-    <a href='https://www.palletsprojects.com/p/jinja/' target='_blank' class='underlined link'>Jinja
+    <a href='https://www.palletsprojects.com/p/jinja/'
+       target='_blank'
+       rel='noreferrer'
+       class='underlined link'>Jinja
       template engine</a> and its handy HTML templates.
   </p>
   <p>
@@ -151,6 +159,7 @@ if __name__ == '__main__':
   <p> Jinja also provides more complex expressions to use in conditionals. For the complete list,
     <a href='https://jinja.palletsprojects.com/en/3.0.x/templates/#expressions'
        target='_blank'
+       rel='noreferrer'
        class='underlined link'>see the documentation</a>.
   </p>
   <p>
@@ -284,6 +293,7 @@ if __name__ == '__main__':
     I knew that the application would need multiple Python modules, so I followed what's called
     the <a href='https://flask.palletsprojects.com/en/2.0.x/tutorial/factory/'
            target='_blank'
+           rel='noreferrer'
            class='underlined link'>application factory design pattern</a>. This made it so that
     I wouldn't have to rely on access to a global variable in order to access my Flask instance.
     Instead, I could use the {{ codeify('flask.current_app') }} property to access my Flask
@@ -354,6 +364,7 @@ def create_app():
     Note that I elected to define all the routes within the {{ codeify('Blog') }} constructor. This
     is similar to the <a href='https://flask.palletsprojects.com/en/2.0.x/tutorial/factory/'
                          target='_blank'
+                         rel='noreferrer'
                          class='underlined link'>application factory pattern</a> shown in the Flask
     tutorial, just with all of the Flask-specific stuff wrapped in my {{ codeify('Blog') }} class.
   </p>
@@ -397,6 +408,7 @@ def blog_post(name=None):
     mentioned in the documentation. One thing that I regret not implementing, though, is
     <a href='https://flask.palletsprojects.com/en/2.0.x/blueprints/'
        target='_blank'
+       rel='noreferrer'
        class='underlined link'>
       Blueprints</a>. These provide a very modular approach that would have been easier to test and
     scale.
