@@ -1,0 +1,453 @@
+{#
+ #   Blog post contents
+ #
+ #   :copyright: Copyright (c) 2021 Chris Hughes
+ #   :license: MIT License. See LICENSE.md for details. All rights reserved for post contents
+ #}
+<!--
+This blog post is part 6 in a series on how to convert from a website builder to one built with
+Python. This post covers the RSS feed.
+-->
+<h3><a href='{{ post_url }}' class='link'>Implementing my Website in Flask - Part 6</a></h3>
+<p class='post-caption' id='date'>Dec 1, 2021</p>
+<section>
+  <p>
+    This is part 6 in a series about implementing a personal blog in Python's
+    <a href='https://flask.palletsprojects.com/en/2.0.x/'
+       target='_blank'
+       rel='noreferrer'
+       class='underlined link'>
+      Flask framework</a>. In this post, I'd like to cover something that I didn't find many good
+    tutorials on - how to create an RSS feed. While there were a few articles out there which
+    mentioned that RSS feeds were going out of style, they're still a relevant part of the internet
+    and are really easy to hook into a Flask website. Also, keeping track of your favorite sites via
+    RSS feeds is a great way to kick your social media habit. 
+  </p>
+  <p>
+    Each part of this series can be found below:
+  </p>
+  <ul>
+    <li>
+      <a href='{{url_for("blog_post", name="conversion-to-flask-1") }}' class='underlined link'>
+        Part 1: Introduction and Project Outline
+      </a>
+    </li>
+    <li>
+      <a href='{{url_for("blog_post", name="conversion-to-flask-2") }}' class='underlined link'>
+        Part 2: Setting Up Static Resources and Styles
+      </a>
+    </li>
+    <li>
+      <a href='{{url_for("blog_post", name="conversion-to-flask-3") }}' class='underlined link'>
+        Part 3: Flask and Jinja
+      </a>
+    </li>
+    <li>
+      <a href='{{url_for("blog_post", name="conversion-to-flask-4") }}' class='underlined link'>
+        Part 4: Managing Posts and Highlighting Code Blurbs
+      </a>
+    </li>
+    <li>
+      <a href='{{url_for("blog_post", name="conversion-to-flask-5") }}' class='underlined link'>
+        Part 5: Deployment to Netlify
+      </a>
+    </li>
+    <li>
+      <a href='{{url_for("blog_post", name="conversion-to-flask-6") }}' class='underlined link'>
+        Part 6: RSS Feed
+      </a>
+    </li>
+  </ul>
+  <p>
+    As always, you can find the source of this blog on
+    <a href='https://github.com/hughes-ch/personal-website'
+       target='_blank'
+       rel='noreferrer'
+       class='underlined link'>Github</a>.
+  </p>
+</section>
+<h4>RSS Feed Basics</h4>
+<section>
+  <p>
+    RSS (or Really Simple Sindication) is a specification for distilling a website down to a single
+    web feed. Through tools like news aggregators, it allows users to automatically monitor their
+    favorite websites without needing to periodically check back at each site or be tied to social
+    media to access their favorite content.
+  </p>
+  <p>
+    Behind the scenes, RSS is composed of an XML document. If you'd like a in-depth look at the
+    format, the <a href='https://validator.w3.org/feed/docs/rss2.html'
+                   target='_blank'
+                   rel='noreferrer'
+                   class='underlined link'>W3 RSS validator</a> provides a good explanation, even
+    if the website seems a bit dated.
+  </p>
+  <p>
+    I find it's easiest to first show an example of a basic RSS feed and then build from there. As
+    long as you are partially familiar with XML, the following example should be pretty
+    straightforward.
+  </p>
+  <p>
+    The basic document looks like this:
+  </p>
+{{ codeify('
+<?xml version="1.0" encoding="utf-8"?>
+ <rss version="2.0">
+   <channel>
+     <title>My RSS Feed</title>
+     <link>http://my.feed.com</link>
+     <description>A really basic RSS feed</description>
+   </channel>
+ </rss>
+', lang='xml') }}
+  <p>
+    The first line of the feed specifies that the document is an XML document. Note that XML is
+    <em>very</em> strict about whitespace and this line needs to be the first. That tripped me up
+    for a while, as I typically add comments describing the file and license information at the top
+    of each file.
+  </p>
+  <p>
+    After the XML version information comes the {{ codeify("<rss>") }} tag (used to
+    specify the RSS version) and the {{ codeify("<channel>") }} tag (used to encapsulate all of the
+    information about your channel). Within the {{ codeify("<channel>") }} tag are several pieces of
+    required information about the channel:
+  </p>
+  <ul>
+    <li>The title of the channel (within the {{ codeify("<title>") }} tags)</li>
+    <li>The URL to the channel's website (within the {{ codeify("<link>") }} tags)</li>
+    <li>The description of the channel (within the {{ codeify("<description>") }} tags)</li>
+  </ul>
+
+  <p>
+    There are several other optional tags if you'd like to specify more about your channel. Some
+    common ones are:
+  </p>
+  <ul>
+    <li>Language (through the {{ codeify("<language>") }} tag)</li>
+    <li>Copyright (through the {{ codeify("<copyright>") }} tag)</li>
+    <li>The latest publish date (through the {{ codeify("<pubDate>") }} tag)</li>
+    <li>An image (through the {{ codeify("<image>") }} tag)</li>
+  </ul>
+  <p>
+    When specifying an image, you also need to include three child elements:
+  </p>
+  <ul>
+    <li>
+      The {{ codeify("<url>") }} tag - The URL of the image
+    </li>
+    <li>
+      The {{ codeify("<title>") }} tag - The title of the image
+    </li>
+    <li>
+      The {{ codeify("<link>") }} tag - The URL of the site (so that the image serves as a link to
+      the channel)
+    </li>
+  </ul>
+  <p>
+    In practice, the {{ codeify("<title>") }} and {{ codeify("<link>") }} tags should match the
+    channel's. 
+  </p>
+  <p>
+    This is all great, but it doesn't make sense to try to specify a channel without content. To do
+    that, you can use the {{ codeify("<item>") }} tag. In theory, {{ codeify("<item>") }}s are
+    optional, as are all of the children of {{ codeify("<item>") }}s. However, these are what
+    represent individual pieces of content to the user, so it makes sense to have as much detail as
+    needed. A channel can have as many {{ codeify("<item>") }}s as desired, and the only requirement
+    is that either {{ codeify("<title>") }} or {{ codeify("<description>") }} are included as child
+    elements of the {{ codeify("<item>") }}. Here's a quick overview of tags I found useful for my
+    feed:
+  </p>
+  <ul>
+    <li>
+      {{ codeify("<author>") }} - Who created the content
+    </li>
+    <li>
+      {{ codeify("<description>") }} - A summary of the content
+    </li>
+    <li>
+      {{ codeify("<guid>") }} - A string that uniquely identifies the item (I used the URL)
+    </li>
+    <li>
+      {{ codeify("<link>") }} - The URL to the content
+    </li>
+    <li>
+      {{ codeify("<pubDate>") }} - The date the content was created
+    </li>
+    <li>
+      {{ codeify("<title>") }} - The title of the item (news article name, image name, etc)
+    </li>
+  </ul>
+  <p>
+    For the full list, <a href='https://validator.w3.org/feed/docs/rss2.html'
+                          target='_blank'
+                          rel='noreferrer'
+                          class='underlined link'>see the spec</a>.
+  </p>
+  <p>
+    For an example of how items could be used in our previous simple RSS example, see below:
+  </p>
+{{ codeify('
+<?xml version="1.0" encoding="utf-8"?>
+ <rss version="2.0">
+   <channel>
+     <title>My RSS Feed</title>
+     <link>http://my.feed.com</link>
+     <description>A really basic RSS feed</description>
+     <item>
+       <title>My First Blog Post!</title>
+       <link>http://my.feed.com/first</link>
+       <description>In my first blog post, I say "Hello World!"</description>
+       <pubDate>Thu, 1 Jan 1970 00:00:00 EST</pubDate>
+       <guid isPermaLink="false">http://my.feed.com/first</guid>
+     </item>
+     <item>
+       <title>How to Write RSS Feeds</title>
+       <link>http://my.feed.com/rss-feeds</link>
+       <description>A description of how to write RSS feeds</description>
+       <pubDate>Tue, 23 Nov 2021 20:22:50 EST</pubDate>
+       <guid isPermaLink="false">http://my.feed.com/rss-feeds</guid>
+     </item>
+   </channel>
+ </rss>
+', lang='xml') }}
+  <p>
+    With the newly added {{ codeify("<item>") }} tags, you now have a fully functioning RSS feed!
+    Any user who points their web feed at the URL that serves this XML will be able to see the
+    description and image of each new piece of content. With a simple click, they'll be redirected
+    to your website.
+  </p>
+  <p>
+    Before continuing further, I just wanted to mention one thing on dates. If you look closely
+    at the two {{ codeify("<pubDate>") }}s in the previous example, you'll see both are in what's
+    known as RFC822 format. It's the only format that's accepted by the RSS standard. To meet the
+    standard, you need the three-character representation of the day of the week followed by the
+    zero padded day of the month, the three-character representation of the month, and then the
+    year. Following the date is the 24-hour representation of the hours, minutes, and seconds, and
+    then <a href='https://en.wikipedia.org/wiki/List_of_time_zone_abbreviations'
+            target='_blank'
+            rel='noreferrer'
+            class='underlined link'>the time zone abbreviation</a>.
+  </p>
+</section>
+<h4>Styling an RSS Feed</h4>
+<section>
+  <p>
+    While the last example is good enough if you just want a simple feed, it can look pretty boring
+    in a news aggregator. Instead of showing off all the hard work that went into styling the actual
+    website, the RSS feed will have the default font, a white background, etc. If you want your RSS
+    feed to pop, you'll have to add a stylesheet (yes, XML has stylesheets too). 
+  </p>
+  <p>
+    The primary purpose of the XML stylesheet in regard to RSS feeds is to specify how to convert
+    the XML document into a XHTML document. XHTML documents (like the name suggests) are an
+    intermediate form between XML and HTML. It includes a really similar structure to HTML,
+    including a {{ codeify('<head>') }} section where you can link CSS stylesheets.
+  </p>
+  <p>
+    The mechanism to convert XML to XHTML is the XSLT transformation language.
+    <a href='https://www.w3.org/Style/XSL/WhatIsXSL.html'
+       target='_blank'
+       rel='noreferrer'
+       class='underlined link'>See here for an overview of the spec</a>. I found it helped to see
+    an example:
+  </p>
+{{ codeify('
+<?xml version="1.0" encoding="utf-8"?>
+<xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <xsl:output method="html" version="1.0" encoding="UTF-8" indent="yes"/>
+  <xsl:template match="/">
+    <html xmlns="http://www.w3.org/1999/xhtml">
+      <head>
+        <title>RSS Feed - <xsl:value-of select="/rss/channel/title"/></title>
+        <link href="/my/stylesheet" rel="stylesheet" type="text/css" media="screen"/>
+      </head>
+      <body>
+        <xsl:for-each select="/rss/channel/item">
+          <h2><xsl:value-of select="title"/></h2>
+          <time><xsl:value-of select="pubDate"/></time>
+          <p><xsl:value-of select="description"/></p>
+          <a>
+            <xsl:attribute name="href">
+              <xsl:value-of select="link"/>
+            </xsl:attribute>
+            See more...
+          </a>                    
+        </xsl:for-each>
+      </body>
+    </html>
+  </xsl:template>
+</xsl:stylesheet>
+', lang='xml') }}  
+  <p>
+    In the above example, the first five lines tell the XML parser that you are using the XSLT
+    language. Again, make sure that these lines are the first in your document (line 1 especially
+    needs to be above all else, even comments).
+  </p>
+  <p>
+    After these lines, the rest of the document is really similar to HTML. The only differences are
+    the tags that start with {{ codeify("xsl:") }}. These serve a really similar purpose to the
+    <a href='https://jinja.palletsprojects.com/en/3.0.x/'
+       target='_blank'
+       rel='noreferrer'
+       class='underlined link'>
+      Jinja template specifications</a>, but they're just specified in XML instead. The important
+    ones are:
+  </p>
+  <ul>
+    <li>
+      {{ codeify("<xsl::value-of>") }}: Substitutes a specified value for the tag (like Jinja's
+      {{ codeify("{ }") }} syntax).
+    </li>
+    <li>
+      {{ codeify("<xsl::for-each>") }}: Repeats the child elements for each XML element matching
+      the selection (like Jinja's {{ codeify("{% for %}") }} syntax).
+    </li>
+    <li>
+      {{ codeify("<xsl::attribute>") }}: Sets the attribute of the parent node. In this case, it's
+      setting the {{ codeify("href") }} attribute of the {{ codeify("<a>") }} tag.
+    </li>
+  </ul>
+  <p>
+    You'll notice that the first two tag-types in this list contain a {{ codeify('select') }}
+    attribute. This specifies where in the RSS feed to find the associated information. 
+  </p>
+  <p>
+    While these values look like file system paths, they're actually referring to nodes within the
+    RSS feed XML document. For example, {{ codeify('/rss/channel/title') }} actually means "retrieve
+    the {{ codeify("<title>") }} from each {{ codeify("<channel>") }} under the {{ codeify('<rss>') }}
+    tag". For my example RSS feed, this would return "My RSS Feed".
+  </p>
+  <p>
+    For the {{ codeify("<xsl::for-each>") }} tag case, {{ codeify('/rss/channel/item') }} means
+    "Repeat this section for each {{ codeify("<item>") }} in each {{ codeify("<channel>") }} in
+    the RSS document". For each child element, the relative paths referred to by
+    {{ codeify('select') }} refer to the {{ codeify("title") }}, {{ codeify("pubDate") }}, and
+    {{ codeify("description") }} of the items of the channel (instead of the channel itself). 
+  </p>
+  <p>
+    Now to link the XML stylesheet to the RSS feed, add the {{ codeify("<?xml-stylesheet?>") }}
+    tag to the top of the RSS feed like the following:
+  </p>
+{{ codeify('
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="/path/to/stylesheet.xsl" type="text/xsl"?>
+ <rss version="2.0">
+   <channel>
+...
+', lang='xml') }}
+  <p>
+    Now if you inspect the document after it is served to your browser, you'll notice that it
+    was actually provided something that looks like HTML. To style it, just use regular-old CSS. You
+    can link a CSS stylesheet with the {{ codeify("<link>") }} tag, like I did on line 8 in the
+    XSLT example two code snippets above. CSS selectors work exactly the same as they would in
+    regular HTML documents. And just like regular HTML, you can use {{ codeify("class") }} and
+    {{ codeify("id") }} attributes to refer to elements you wish to style.
+  </p>
+  <p>
+    One last tip about working with XSLT documents: be sure to close <strong>all</strong>
+    tags, even those that don't typically need to be closed in HTML. Otherwise, you could run into
+    parser errors. You'll notice in the example above that the {{ codeify("<link>") }} tag is closed
+    for this reason.
+  </p>
+</section>
+<h4>Serving the XML with Flask</h4>
+<section>
+  <p>
+    Serving an RSS feed with Flask is just as simple as any other page. Plus, XML can also be
+    rendered with the Jinja templating language, just like HTML content. You'll need two templates -
+    one for the actual RSS feed and another for the stylesheet. The stylesheet contents can mostly
+    be generated using the XSLT format from the last section rather than Jinja templating, but if
+    you find you still need Jinja templating, it's possible to use both.
+  </p>
+  <p>
+    Once the templates are defined, serving the XML and associated stylesheet is really simple. You
+    just need to define two additional routes:
+  </p>
+{{ codeify("
+import flask
+from myapplication import app, get_content  
+  
+@app.route('/path/to/my/feed.xml')
+def serve_rss_feed():
+    context = {
+        'title': 'My RSS Feed',
+        'content': get_content(),
+    }
+    rss_xml = flask.render_template('feed.xml.jinja', **context)
+            
+    response = flask.make_response(rss_xml)
+    response.headers['Content-Type'] = 'application/xml'
+    return response
+
+@app.route('/path/to/my/feed.xsl')
+def serve_rss_stylesheet():
+    context = {
+        'title': 'My RSS Feed',
+        'content': get_content(),
+    }
+    rss_xsl = flask.render_template('feed.xsl.jinja', **context)
+            
+    response = flask.make_response(rss_xsl)
+    response.headers['Content-Type'] = 'application/xml'
+    return response
+", lang='py') }}
+  <p>
+    If you find that the RSS stylesheet can be defined completely with the XSLT language, the second
+    path can be done away with. In that case, you can just put the stylesheet in the static content
+    directory and allow it to be served with your images, icons, and other static content. I elected
+    to use Jinja templating along with the XSLT language so that I could reuse some common code
+    within the {{ codeify("<head>") }} and {{ codeify("<footer>") }} sections of the document.
+  </p>
+</section>
+<h4>The Atom Syndication Format</h4>
+<section>
+  <p>
+    Another feed format which is used by a lot of news aggregators is called the
+    <a href='https://validator.w3.org/feed/docs/atom.html'
+       target='_blank'
+       class='underlined link'
+       rel='noreferrer'>Atom Syndication Format</a>. Just like RSS, it's XML based. Most RSS
+    validators recommend publishing feeds that meet both the RSS and Atom spec to be compatible with
+    the widest range of news aggregators. Luckily, it's really easy to convert an existing purely
+    RSS feed to an Atom and RSS feed.
+  </p>
+  <p>
+    First, add the Atom spec version to the {{ codeify("<rss>") }} tag of the feed XML document so
+    that the document parser knows how to parse the feed: 
+  </p>
+{{ codeify('
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="/feed.xsl" type="text/xsl"?>
+ <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+   <channel>
+...  
+', lang='xml') }}
+  <p>
+    Next, add the {{ codeify("<atom:link>") }} tag as one of the children of the {{ codeify("<channel>") }}
+    node. As the name implies, this serves as a URL which points the Atom feed to your feed or your
+    website. This can be done similar to below:
+  </p>
+{{ codeify('
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <atom:link href="http://my.feed.com" rel="self" type="application/rss+xml" />
+...
+', lang='xml') }}  
+  <p>
+    ...and now your feed meets the Atom spec! With those two simple changes, your feed will be
+    accessible over the widest range of news aggregators. 
+  </p>
+</section>
+<h4>Summary</h4>
+<section>
+  <p>
+    Though a little outdated, RSS feeds are still all over the place and a valuable way to reach
+    readers. They're also an invaluable way to follow your favorite online resources without having
+    to rely solely on social media. 
+  </p>
+  <p>
+    While XML itself is a little quirky and bulky, the feed itself is really easy to implement in
+    Flask - just make sure to watch out for the gotchas I've outlined above. If you run into any
+    issues or have questions, feel free to shoot me an email!
+  </p>
+</section>

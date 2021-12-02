@@ -11,20 +11,53 @@ Python. This covers the choices made in the HTML/CSS.
 <h3><a href='{{ post_url }}' class='link'>Implementing my Website in Flask - Part 2</a></h3>
 <p class='post-caption' id='date'>Oct 11, 2021</p>
 <p>
-  Check out <a href='{{url_for("blog_post", name="conversion-to-flask-1") }}' class='underlined link'>
-    part 1 of this series</a> for an introduction to the overall website design and layout. As I
-  stated there, you can also
+  This is part 2 in a series about implementing a personal blog in Python. In this blog post,
+  I'd like to cover some of the HTML/CSS choices that I made. This has been a iterative process,
+  and I'm sure after I publish this post I'll make adjustments (maybe even during this post as I
+  explain my rationale). If you look at the commit history, you can see I've come a long way from
+  the first static HTML page, and what Flask now serves.
+</p>
+<p>
+  If you're interested, other parts of this series can be found below:
+</p>
+<ul>
+  <li>
+    <a href='{{url_for("blog_post", name="conversion-to-flask-1") }}' class='underlined link'>
+      Part 1: Introduction and Project Outline
+    </a>
+  </li>
+  <li>
+    <a href='{{url_for("blog_post", name="conversion-to-flask-2") }}' class='underlined link'>
+      Part 2: Setting Up Static Resources and Styles
+    </a>
+  </li>
+  <li>
+    <a href='{{url_for("blog_post", name="conversion-to-flask-3") }}' class='underlined link'>
+      Part 3: Flask and Jinja
+    </a>
+  </li>
+  <li>
+    <a href='{{url_for("blog_post", name="conversion-to-flask-4") }}' class='underlined link'>
+      Part 4: Managing Posts and Highlighting Code Blurbs
+    </a>
+  </li>
+  <li>
+    <a href='{{url_for("blog_post", name="conversion-to-flask-5") }}' class='underlined link'>
+      Part 5: Deployment to Netlify
+    </a>
+  </li>
+  <li>
+    <a href='{{url_for("blog_post", name="conversion-to-flask-6") }}' class='underlined link'>
+      Part 6: RSS Feed
+    </a>
+  </li>
+</ul>
+<p>
+  If you are interested in further details, you can find the source of this blog on
   <a href='https://github.com/hughes-ch/personal-website'
      target='_blank'
      rel='noreferrer'
-     class='underlined link'>
-    find the source on Github</a>.
-</p>
-<p>
-  In this blog post, I'd like to cover some of the HTML/CSS choices that I made. This has been a
-  iterative process, and I'm sure after I publish this post I'll make adjustments (maybe even during
-  this post as I explain my rationale). If you look at the commit history, you can see I've come a
-  long way from the first static HTML page, and what Flask now serves.
+     class='underlined link'>Github</a>.
 </p>
 <h4>General HTML Choices</h4>
 <section>
