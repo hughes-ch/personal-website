@@ -5,29 +5,62 @@
  #   :license: MIT License. See LICENSE.md for details. All rights reserved for post contents
  #}
 <!--
-This blog post is part 4 in a series on how to convert from a website builder to one built with
+This blog post is part 3 in a series on how to convert from a website builder to one built with
 Python. This post covers the Python setup and design using the Flask framework. 
 -->
 <h3><a href='{{ post_url }}' class='link'>Implementing my Website in Flask - Part 3</a></h3>
 <p class='post-caption' id='date'>Oct 21, 2021</p>
 <p>
-  Check out <a href='{{url_for("blog_post", name="conversion-to-flask-2") }}' class='underlined link'>
-    part 2 of this series</a> for an overview of the HTML and CSS which is being served to display
-  the content on this webpage. As I stated there, you can also
-  <a href='https://github.com/hughes-ch/personal-website'
-     target='_blank'
-     rel='noreferrer'
-     class='underlined link'>
-    find the website source on Github</a>.
-</p>
-<p>
-  In this post, I'd like to cover the basics of serving a website with Python, particularly its
-  really lightweight
+  This is part 3 in a series about implementing a personal blog in Python. In this post, I'd like
+  to cover the basics of serving a website with Python, particularly its really lightweight
   <a href='https://flask.palletsprojects.com/en/2.0.x/'
      target='_blank' rel='noreferrer'
      class='underlined link'>
     Flask framework</a>, which I've decided to use for this project. 
 </p>
+<p>
+  If you're interested, other parts of this series can be found below:
+</p>
+<ul>
+  <li>
+    <a href='{{url_for("blog_post", name="conversion-to-flask-1") }}' class='underlined link'>
+      Part 1: Introduction and Project Outline
+    </a>
+  </li>
+  <li>
+    <a href='{{url_for("blog_post", name="conversion-to-flask-2") }}' class='underlined link'>
+      Part 2: Setting Up Static Resources and Styles
+    </a>
+  </li>
+  <li>
+    <a href='{{url_for("blog_post", name="conversion-to-flask-3") }}' class='underlined link'>
+      Part 3: Flask and Jinja
+    </a>
+  </li>
+  <li>
+    <a href='{{url_for("blog_post", name="conversion-to-flask-4") }}' class='underlined link'>
+      Part 4: Managing Posts and Highlighting Code Blurbs
+    </a>
+  </li>
+  <li>
+    <a href='{{url_for("blog_post", name="conversion-to-flask-5") }}' class='underlined link'>
+      Part 5: Deployment to Netlify
+    </a>
+  </li>
+  <li>
+    <a href='{{url_for("blog_post", name="conversion-to-flask-6") }}' class='underlined link'>
+      Part 6: RSS Feed
+    </a>
+  </li>
+</ul>
+<p>
+  As always, you can find the source of this blog on
+  <a href='https://github.com/hughes-ch/personal-website'
+     target='_blank'
+     rel='noreferrer'
+     class='underlined link'>Github</a>.
+</p>
+<h4>Introduction</h4>
 <p>
   In my search for the most well supported and well liked Python web frameworks, there were a few
   that always topped the chart. In the top three most popular on every tutorial I found were always

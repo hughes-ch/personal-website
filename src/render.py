@@ -86,6 +86,12 @@ class Renderer:
                 'formatter': pygments.formatters.HtmlFormatter(
                     wrapcode=True)
             },
+            'xml': {
+                'lexer': pygments.lexers.XmlLexer(),
+                'formatter': pygments.formatters.HtmlFormatter(
+                    linenos=True,
+                    wrapcode=True)
+            },                
         }
         
     def connect(self, app):
