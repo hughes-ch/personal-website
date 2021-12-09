@@ -18,10 +18,10 @@
      {% for post in posts %}
      <item>
        <title>{{ post.title }}</title>
-       <link>{{ settings['Routes']['BaseUrl'] }}{{ post.full_url }}/</link>
+       <link>{{ post.full_url }}/</link>
        <description>{{ post.description }}</description>
        <pubDate>{{ post.date_rfc822 }}</pubDate>
-       <guid isPermaLink="false">{{ settings['Routes']['BaseUrl'] }}{{ post.full_url }}/</guid>
+       <guid isPermaLink="false">{{ post.full_url }}/</guid>
      </item>
      {% endfor %}
    </channel>

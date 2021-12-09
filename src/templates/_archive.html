@@ -11,7 +11,7 @@
 <div class='archive'>
   {% for post in posts %}
   <div>
-    <a href='{{ post.full_url }}/' class='link highlight-on-hover'>
+    <a href='{{ post.rel_url }}/' class='link highlight-on-hover'>
       <p><strong>{{ post.datestr }}</strong></p>
       <p>{{ post.title }}</p>
     </a>

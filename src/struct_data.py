@@ -113,7 +113,7 @@ class StructuredDataBlogPost:
             'headline': self._post.title,
             'name': self._post.title,
             'url': (f'{self._settings["Struct"]["BaseUrl"]}'
-                    f'{self._post.full_url}')
+                    f'{self._post.rel_url}')
         }
 
 class StructuredDataBlog:
