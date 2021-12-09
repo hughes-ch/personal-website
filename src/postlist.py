@@ -24,15 +24,16 @@ class Post:
             """
         self.mod_date = datetime.fromtimestamp(post_path.stat().st_mtime)
         
-        self.rel_url = post_path.stem
-        self.full_url = (
+        self.url_stem = post_path.stem
+        self.rel_url = (
             pathlib.Path('/') / post_path.parent.stem / post_path.stem)
+        self.full_url = f'{Settings.instance()["Routes"]["BaseUrl"]}{self.rel_url}'
         self.rel_path = (
             pathlib.Path('/') / post_path.parent.stem / post_path.name)
         
         self.contents = flask.render_template(
             str(self.rel_path),
-            post_url=f'{self.full_url}/',
+            post_url=f'{self.rel_url}/',
             settings=Settings.instance())
         
         soup = bs4.BeautifulSoup(self.contents, 'html.parser')
@@ -134,6 +135,6 @@ class PostList:
             reverse=True)
 
         self._posts = collections.OrderedDict(
-            [(post.rel_url, post) for post in sorted_post_list])
+            [(post.url_stem, post) for post in sorted_post_list])
 
             

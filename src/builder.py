@@ -28,7 +28,7 @@ class Builder:
                 Settings.instance(),
                 flask.current_app.root_path):
         
-            yield {'name': post.rel_url}
+            yield {'name': post.url_stem}
 
     @staticmethod
     def index():

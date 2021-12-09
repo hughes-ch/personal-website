@@ -15,6 +15,7 @@ import pygments.formatters
 import pygments.lexers
 import pygments.util
 
+from datetime import datetime
 from .postlist import PostList
 from .struct_data import StructuredDataFactory
 
@@ -114,7 +115,11 @@ class Renderer:
         # Connect context processors
         @self._app.context_processor
         def _connect_context_processors():
-            return dict(codeify=self._codeify)
+            return {
+                'codeify': self._codeify,
+                'settings': self._settings,
+                'url': flask.request.url,
+            }
 
     def render_latest(self, page=1):
         """ Renders the latest blog posts
@@ -130,10 +135,11 @@ class Renderer:
         posts_per_page = self._find_posts_per_page(
             int(self._settings['Render']['RenderedPostCount']))
 
-        context = self._define_base_context()
-        context['title'] = self._settings['Render']['IndexTitle']
-        context['prev_page'] = None
-        context['next_page'] = None
+        context = {
+            'title': self._settings['Render']['IndexTitle'],
+            'prev_page': None,
+            'next_page': None,
+        }
         
         if len(posts_per_page) > 0:
             if page < 1 or page > len(posts_per_page):
@@ -156,12 +162,9 @@ class Renderer:
 
         # Render SEO content
         try: 
-            context['canonical_url'] = (
-                f'{self._settings["Routes"]["BaseUrl"]}'
-                f'{posts_per_page[page-1][0].full_url}/')
+            context['canonical_url'] = f'{posts_per_page[page-1][0].full_url}/'
         except IndexError:
-            context['canonical_url'] = (
-                f'{self._settings["Routes"]["BaseUrl"]}')
+            context['canonical_url'] = f'{self._settings["Routes"]["BaseUrl"]}'
 
         # Render json
         struct_data_factory = StructuredDataFactory(self._settings)
@@ -181,8 +184,9 @@ class Renderer:
         if not self._is_configured():
             raise RendererNotConfiguredException
 
-        context = self._define_base_context()
-        context['title'] =  self._settings['Render']['ErrorTitle']
+        context = {
+            'title': self._settings['Render']['ErrorTitle']
+        }
 
         return flask.render_template(
             self._settings['Templates']['Err404'],
@@ -201,18 +205,18 @@ class Renderer:
         try:
             post = self._postlist.get(post_name)
 
-            context = self._define_base_context()
-            context['post'] = flask.Markup(post.contents)
-            context['post_description'] = post.description
-            context['title'] = (
-                f'{post.title} - {self._settings["Render"]["BlogTitle"]}')
+            context = {
+                'post': flask.Markup(post.contents),
+                'post_description': post.description,
+                'title': f'{post.title} - {self._settings["Render"]["BlogTitle"]}',
+            }
             
         except ValueError:
             return self.render_404()
 
         # Render SEO
         context['canonical_url'] = (
-            f'{self._settings["Routes"]["BaseUrl"]}{post.full_url}/')
+            f'{post.full_url}/')
 
         # Render json
         struct_data_factory = StructuredDataFactory(self._settings)
@@ -236,12 +240,13 @@ class Renderer:
         if not self._is_configured():
             raise RendererNotConfiguredException
 
-        context = self._define_base_context()
-        context['canonical_url'] = (
+        context = {
+            'title': self._settings['Render']['AboutTitle'],
+            'canonical_url': (
                 f'{self._settings["Routes"]["BaseUrl"]}/'
-                f'{self._settings["Routes"]["AboutUrl"]}/')
-        context['title'] = self._settings['Render']['AboutTitle']
-
+                f'{self._settings["Routes"]["AboutUrl"]}/'),
+        }
+        
         # Render json
         struct_data_factory = StructuredDataFactory(self._settings)
         context['struct_data'] = struct_data_factory.create_about().as_dict()
@@ -259,13 +264,13 @@ class Renderer:
         if not self._is_configured():
             raise RendererNotConfiguredException
 
-        context = self._define_base_context()
-        context['settings'] = self._settings
-        context['posts'] = list(self._postlist)
-        context['title'] = self._settings['Render']['ArchiveTitle']
-        context['canonical_url'] = (
+        context = {
+            'posts': list(self._postlist),
+            'title': self._settings['Render']['ArchiveTitle'],
+            'canonical_url': (
                 f'{self._settings["Routes"]["BaseUrl"]}/'
-                f'{self._settings["Routes"]["ArchiveUrl"]}/')
+                f'{self._settings["Routes"]["ArchiveUrl"]}/'),
+        }
 
         # Render json
         struct_data_factory = StructuredDataFactory(self._settings)
@@ -287,9 +292,10 @@ class Renderer:
 
         postlist = list(self._postlist)
 
-        context = self._define_base_context()
-        context['last_pub_date'] = postlist[0].date_rfc822
-        context['posts'] = postlist
+        context = {
+            'last_pub_date': postlist[0].date_rfc822,
+            'posts': postlist,
+        }
 
         return flask.render_template(
             self._settings['Templates']['Feed'],
@@ -307,11 +313,34 @@ class Renderer:
         if not self._is_configured():
             raise RendererNotConfiguredException
 
-        postlist = list(self._postlist)
-        context = self._define_base_context()
+        return flask.render_template(self._settings['Templates']['FeedXsl'])
+
+    def render_sitemap(self):
+        """ Renders the sitemap
+
+            :param: None
+            :return: Page contents
+            """
+        context = {
+            'urls': [],
+        }
+
+        dateFormat = '%Y-%m-%d'
+        context['urls'].append({
+            'loc': (f'{self._settings["Routes"]["BaseUrl"]}/'
+                  f'{self._settings["Routes"]["AboutUrl"]}'),
+            'lastmod': datetime.today().strftime(dateFormat),
+        })
+        for post in self._postlist:
+            loc = post.full_url
+            lastmod = post.date.strftime(dateFormat)
+            context['urls'].append({
+                'loc': loc,
+                'lastmod': lastmod,
+            })
 
         return flask.render_template(
-            self._settings['Templates']['FeedXsl'],
+            self._settings['Templates']['Sitemap'],
             **context)
 
     def _is_configured(self):
@@ -375,13 +404,3 @@ class Renderer:
             code,
             self._lang_config.get(lang, fallback_config)['lexer'],
             self._lang_config.get(lang, fallback_config)['formatter'])
-
-    def _define_base_context(self):
-        """ Returns the base context of the class
-
-            :return: Context dict for every use case
-            """
-        return {
-            'settings': self._settings,
-            'url': flask.request.url
-        }

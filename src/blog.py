@@ -97,10 +97,7 @@ class Blog:
                 :param: None
                 :return: Page content
                 """
-            rss_xml = self.renderer.render_feed()
-            response = flask.make_response(rss_xml)
-            response.headers['Content-Type'] = 'application/xml'
-            return response
+            return self.serve_xml(self.renderer.render_feed)
 
         # Serve style for RSS feed
         @self.app.route(f'/{settings["Routes"]["RssFeedXsl"]}')
@@ -110,9 +107,25 @@ class Blog:
                 :param: None
                 :return: Page content
                 """
-            rss_xsl = self.renderer.render_feed_style()
-            response = flask.make_response(rss_xsl)
-            response.headers['Content-Type'] = 'application/xml'
-            return response
+            return self.serve_xml(self.renderer.render_feed_style)
+
+        # Serve sitemap
+        @self.app.route(f'/{settings["Routes"]["Sitemap"]}')
+        def serve_sitemap():
+            """ Serves the sitemap
+
+                :param: None
+                :return: Page content
+                """
+            return self.serve_xml(self.renderer.render_sitemap)
         
-        
+    def serve_xml(self, render_func):
+        """ Serves an XML route
+
+            :param render_func: Function handle that defines how to serve route
+            :return: Page content
+            """
+        xml_content = render_func()
+        response = flask.make_response(xml_content)
+        response.headers['Content-Type'] = 'application/xml'
+        return response
