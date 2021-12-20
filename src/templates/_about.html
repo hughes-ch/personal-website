@@ -9,36 +9,102 @@
 {% block content %}
 <h2 class='page-title'>About Me</h2>
 <article>
-  <img src='{{ settings["Struct"]["AuthorImage"] }}' alt='Picture of Chris Hughes'>
-  <p>Hi, I'm Chris Hughes, a freelance web developer specializing in Python.</p>
-  <p>
-    I started my career with Raytheon Technologies after graduating from Northeastern University
-    with a BS in Computer Engineering.
-  </p>
-  <p>
-    I spent five years at Raytheon and was fortunate enough for some awesome experiences
-    travelling, developing, integrating, and learning. My primary languages were C++, Perl, and
-    MATLAB, though I troubleshot several more (including a proprietary language - Yikes!). Due to
-    the incredible scale of the projects, I learned how to integrate massive multi-process systems.
-    I look forward to applying those skills in my career going forward.
-  </p>
-  <p>
-    Now that I'm out of the defense and aerospace industry, I look forward to diving into cutting-
-    edge software technologies. Though I'm new and self taught in the web development sphere, I'm
-    constantly adding to my Python, Flask, and Django knowledge.
-  </p>
-  <p>
-    For more information,
-    <a href='{{ settings["Routes"]["ResumeSrc"] }}' class='underlined link'>check out my resume</a>.
-  </p>
-  <p>
-    Thanks for stopping by. If you'd like to get in contact, the best way is to use the social media
-    links at the top or bottom of the page. I'm always learning, so if some of the content on the
-    blog needs clarification, don't be hesitant to reach out. 
-  </p>
-  <p>
-    - Chris
-  </p>
+  <section>
+    <p>
+      Hi, my name is Chris Hughes. When I'm sitting still, I'm a software engineer. Otherwise, I
+      enjoy getting lost outdoors and competing in the crazy world of strength sports. I've lived
+      in New England for nearly my entire life, and am currently residing in the beautiful state of
+      New Hampshire. 
+    </p>
+    <h3>Background</h3>
+    <section>
+      <p>
+        I grew up curious, and I was always good at math and the sciences, but it wasn't actually until
+        college that I started tinkering with code. At the time, I was a physics undergraduate at
+        Northeastern University working as an intern under a professor. After getting my hands on an
+        Arduino in the lab, I changed my course of study before I ever stepped foot in another physics
+        class.
+      </p>
+      <p>
+        Before graduating, I had two more awesome internship experiences. The first was a small company
+        called MC10 inc (now part of Medidata) and the second was at iRobot. In both of these roles, I
+        worked with digital electronics and low-level software languages like C and C++.
+      </p>
+      <p>
+        I found I really enjoyed the software side of things, so I set out after college to find a
+        company where I could focus exclusively on software. I was eventually brought on by Raytheon
+        (now RTX) as a software engineer. I stayed there for six years, working with development teams,
+        integration teams, and even touching on DevOps. I left in 2021 as a senior software engineer.
+      </p>
+  </section>
+  <h3>Current Work</h3>
+  <section>
+    <p>
+      My plan after leaving RTX was to freelance, but most of the technologies that I had
+      been using weren't applicable to things that I could freelance. Actually, they weren't really
+      applicable to anything outside of the defense and aerospace industry. But since I had the
+      hankering to try something new, I figured I'd take a few months off to polish up my skills with
+      open source and personal projects. You can find that work on my
+      <a href='https://github.com/hughes-ch'
+         target='_blank'
+         rel='noreferrer'
+         class='underlined link'>Github page</a>.
+    </p>
+    <p>
+      I've pinned the three most notable, but here are the direct links:
+    </p>
+    <ul>
+      <li>
+        <a href='https://github.com/hughes-ch/personal-website'
+           target='_blank'
+           rel='noreferrer'
+           class='underlined link'>This website</a>: Written with Python's Flask framework.
+      </li>
+      <li>
+        <a href='https://github.com/hughes-ch/personal-website'
+           target='_blank'
+           rel='noreferrer'
+           class='underlined link'>Asteroids</a>: A mobile-friendly version of the classic game,
+        implemented in Javascript.
+      </li>
+      <li>
+        <a href='https://github.com/hughes-ch/the-dash'
+           target='_blank'
+           rel='noreferrer'
+           class='underlined link'>The Dash</a>: An application dashboard that monitors status of
+        applications under my maintenance. 
+      </li>
+    </ul>
+  </section>
+  <h3>What I Can Offer</h3>
+  <section>
+    <p>
+      I just love making cool and useful stuff, and I'd be happy to do it in any language. But at
+      this point in my career, I'm using Javascript (particularly Node and React), and Python
+      (particularly Flask).
+    </p>
+    <p>
+      Even though my <em>favorite</em> part is the creation aspect, I think my biggest skill as a
+      developer is finding the root cause of complex issues and distilling it into concrete,
+      bite-sized steps that can be tackled individually. And from there, coming up with creative,
+      robust solutions to each bite-sized piece. This was what I did for very large part
+      of my time in the defense and aerospace world, and how I contribute to open-source projects.
+    </p>
+    <p>
+      If you'd like to know more,
+      <a href='{{ settings["Routes"]["ResumeSrc"] }}' class='underlined link'>check out my resume</a>.
+    </p>
+    <p>
+      To get in contact, the best way is to use the social media links at the top or bottom of the
+      page.
+    </p>
+    <p>
+      Thanks for stopping by.
+    </p>
+    <p>
+      - Chris
+    </p>
+  </section>
 </article>
 <hr>
 {% endblock %}
