@@ -4,6 +4,8 @@
 # My Blog and Online Resume
 This is the code repository for Chris Hughes' blog and online resume, developed with Python 3.8 and Flask 2.0.1.
 
+[Want to see it live?](https://blog.chrishughesdev.com) 
+
 ## Installation
 The easiest way to install onto a local machine is just by pulling from github. Next, create a virtual environment
 with:
