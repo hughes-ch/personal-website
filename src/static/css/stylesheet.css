@@ -25,6 +25,10 @@ article img {
     max-width: var(--max-width);
     width: 100%;
 }
+article video {
+    max-width: var(--max-width);
+    width: 100%;
+}
 body {
     font-family: 'Source Sans Pro', sans-serif;
 }
@@ -143,6 +147,12 @@ table.highlighttable .linenos {
 }
 .icon {
     height: 32px;
+}
+.light-border {
+    border-width: 2px;
+    border-style: solid;
+    border-color: var(--code-background);
+    box-sizing: border-box;
 }
 .link {
     color: black;
