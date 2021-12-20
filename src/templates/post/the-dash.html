@@ -1,0 +1,80 @@
+{#
+ #   Blog post contents
+ #
+ #   :copyright: Copyright (c) 2021 Chris Hughes
+ #   :license: MIT License. See LICENSE.md for details. All rights reserved for post contents
+ #}
+<!--
+This blog post is about a personal project I just completed - a dashboard to monitor the sites
+I'm maintaining.
+-->
+<h3><a href='{{ post_url }}' class='link'>My Pet Project: THE DASH</a></h3>
+<p class='post-caption' id='date'>Dec 20, 2021</p>
+<section>
+  <p>
+    My favorite part of being a developer is making cool and useful stuff. While my
+    <a href='{{url_for("blog_post", name="asteroids") }}'
+       target='_blank'
+       rel='noreferrer'
+       class='underlined link'>last personal project</a> was fun to implement, I can't make myself
+    believe that it's actually useful to anyone, even as a diversion. 
+  </p>
+  <p>
+    One thing that I knew I <em>needed</em> to do before starting to work on any number of projects
+    was to find a way to monitor any aplications that I was in charge of maintaining. This seemed
+    like an excellent opportunity to polish up some skills by developing a dashboard that monitored
+    that status of all of applications. Plus, this one could actually be useful!
+  </p>
+</section>
+<h4>Enter THE DASH</h4>
+<section>
+  <p>
+    What I came up with was a simple project dashboard that I affectionately call THE DASH. You can
+    find the full source code <a href='https://github.com/hughes-ch/the-dash'
+                                 target='_blank'
+                                 rel='noreferrer'
+                                 class='underlined link'>here</a>. 
+  </p>
+  <p>
+    THE DASH is a single page application developed with React and hosted with Netlify. It's
+    completely serverless, leveraging Netlify's Function feature and AWS Lambda. Website statuses
+    are stored in AWS's DynamoDB and user credentials are managed through AWS Cognito. 
+  </p>
+  <p>
+    The user experience is pretty straightforward. They are first shown a public screen with a
+    description of the service and an option to login:
+  </p>
+  <img src='{{ url_for("static", filename="img/the-dash-1.png") }}'
+       class='light-border'
+       alt='Picture of THE DASH public screen' />
+  <p>
+    Once the client selects the login button, they are navigated to AWS Cognito's hosted UI, where
+    they enter their credentials. If the credentials are correct, Cognito routes the client back to
+    the Dashboard page along with an API token. If the Dashboard can verify the API token, the
+    client is shown the Dashboard:
+  </p>
+  <video autoplay loop muted>
+    <source src='https://static.chrishughesdev.com/the-dash-3.webm'
+            type="video/webm">
+      Sorry, your browser doesn't support embedded videos.
+  </video>
+  <p>
+    From the Dashboard, the user can see any ongoing alarms, a detailed overview, and detailed
+    status for each web application. They also have controls to refresh, add and delete
+    applications. 
+  </p>
+  <p>
+    When a client isn't actively using THE DASH, it still monitors application status through AWS
+    Lambdas scheduled at regular intervals. If something is determined to be down, an email is
+    sent to users through AWS SES. That way, users can always be sure that their web applications
+    are working, even if they are not logged into THE DASH.
+  </p>
+  <p>
+    If you're interested in a more in-depth look into the project's design, check out
+    <a href='https://github.com/hughes-ch/the-dash'
+                 target='_blank'
+                 rel='noreferrer'
+                 class='underlined link'>the project README</a>.
+  </p>
+</section>
+
