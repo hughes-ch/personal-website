@@ -1,0 +1,158 @@
+{#
+ #   Blog post contents
+ #
+ #   :copyright: Copyright (c) 2022 Chris Hughes
+ #   :license: MIT License. See LICENSE.md for details. All rights reserved for post contents
+ #}
+<!--
+This blog post takes a look into my first dive into web3 - a social media app built on Ethereum.
+-->
+<h3><a href='{{ post_url }}' class='link'>A Dive into Web3</a></h3>
+<p class='post-caption' id='date'>Jan 28, 2022</p>
+<section>
+  <p>
+    Around the holidays, I found myself with a few hours of free time. I decided to try to answer my
+    question of "what's the big deal about web3?" So I took a dive in, and holy moly it's pretty
+    cool.
+  </p>
+  <p>
+    Even if you don't buy <em>all</em> of the hype, apps built on top of blockchains and
+    decentralized protocols theoretically get some of the features of really robust apps of today
+    for free. Namely redundancy, security, and global availability (kind of like a CDN being
+    spatially close to its end users). 
+  </p>
+  <p>
+    To learn some of the neat new techologies characteristic of Web3 applications, I built my own!
+    It's certainly not a great business model and won't make me any money any time soon, but it was
+    pretty fun to make. 
+  </p>
+</section>
+<h4>Introduction</h4>
+<section>
+  <p>
+    What I came up with is a high-stakes social media app, powered by
+    <a href='https://ipfs.io/'
+       target='_blank'
+       rel='noreferrer'
+       class='underlined link'>IPFS</a> and the Ethereum blockchain. I call it "Stakes."
+  </p>
+  <p>
+    Users first buy into the app by purchasing the native token, called Karma. From there, all
+    transactions are paid for with this token instead of the user's ETH balance. Users can post
+    content, follow others, and support their favorite content by adding Karma to it. Any Karma
+    added to someone's content is immediately deposited in their wallet. If a user likes a piece of
+    content enough, they can even outright buy it from another so it is added to their own
+    collection. The best part is that content isn't limited to this platform. Since user posts are
+    managed by an Ethereum contract meeting
+    <a href='https://docs.openzeppelin.com/contracts/4.x/api/token/erc721#IERC721'
+       target='_blank'
+       rel='noreferrer'
+       class='underlined link'>the NFT specification</a>, they can be traded in any NFT marketplace.
+  </p>
+</section>
+<h4>Demo</h4>
+<section>
+  <p>
+    Users are first directed to a login page, where they can connect with a
+    <a href='https://metamask.io/'
+       target='_blank'
+       rel='noreferrer'
+       class='underlined link'>Metamask account</a>:
+  </p>
+  <video autoplay loop muted>
+    <source src='https://static.chrishughesdev.com/stakes-1.webm'
+            type="video/webm">
+      Sorry, your browser doesn't support embedded videos.
+  </video>
+  <p>
+    Just as a note: the accounts on these demos are imported from my local test blockchain and not
+    real accounts.
+  </p>
+  <p>
+    Users are shown the top content for other users which they are "staked." Note that staking
+    happens on the Blockchain, so it's a much more serious commitment than just following someone
+    on another social media site:
+  </p>
+  <video autoplay loop muted>
+    <source src='https://static.chrishughesdev.com/stakes-2.webm'
+            type="video/webm">
+      Sorry, your browser doesn't support embedded videos.
+  </video>
+  <p>
+    And finally, each post is just an NFT. They're free to be purchased and put on display as
+    pieces of your own content if you enjoy them enough:
+  </p>
+  <video autoplay loop muted>
+    <source src='https://static.chrishughesdev.com/stakes-3.webm'
+            type="video/webm">
+      Sorry, your browser doesn't support embedded videos.
+  </video>
+  <p>
+    Stakes is currently hosted (and is always planned to be hosted) on the Rinkeby test network so
+    it's free to use and fool around with. Users will first need to fund a Metamask account using a
+    Rinkeby faucet (totally for free). I found
+    <a href='https://faucets.chain.link/rinkeby'
+       target='_blank'
+       rel='noreferrer'
+       class='underlined link'>this one from chain.link to work reliably</a>. If on mobile,
+    Metamask provides an app for iOS and Android with a built in browser that can view the site. 
+  </p>
+  <p>
+    If you have yourself a funded account on the Rinkeby network and would like to dive in,
+    <a href='https://stakes.chrishughesdev.com/'
+       target='_blank'
+       rel='noreferrer'
+       class='underlined link'>find it here</a>! 
+  </p>
+</section>
+<h4>Technologies</h4>
+<section>
+  <p>
+    Transactions between users are managed by the Ethereum blockchain. Smart contracts are written
+    in Solidity using the <a href='https://trufflesuite.com/index.html'
+                             target='_blank'
+                             rel='noreferrer'
+                             class='underlined link'>Truffle development environment</a>. 
+  </p>
+  <p>
+    The frontend is using the React framework, interacting with the Ethereum blockchain with using
+    Truffle, <a href='https://web3js.readthedocs.io/en/v1.5.2/#'
+                target='_blank'
+                rel='noreferrer'
+                class='underlined link'>web3js</a>, and Metamask.
+  </p>
+  <p>
+    User pictures are managed by IPFS, as putting the data on-chain would be infeasible. Uploads
+    and downloads are handled via a local
+    <a href='https://github.com/ipfs/js-ipfs'
+       target='_blank'
+       rel='noreferrer'
+       class='underlined link'>js-ipfs</a> node started directly in the browser.
+  </p>
+  <p>
+    The frontend is also stored with IPFS and can actually be connected to with
+    <a href='ipns://stakes.chrishughesdev.com'
+       target='_blank'
+       rel='noreferrer'
+       class='underlined link'>ipns://stakes.chrishughesdev.com</a> if IPFS is supported in your
+    browser. Otherwise, it is connected to via a
+    <a href='https://docs.ipfs.io/how-to/address-ipfs-on-web/#http-gateways'
+       target='_blank'
+       rel='noreferrer'
+       class='underlined link'>HTTP gateway</a>. 
+  </p>
+  <p>
+    However, since the application is using entirely IPFS and the Ethereum Blockchain, it's not
+    actually <em>hosted</em> on anything. It's just served peer-to-peer. 
+  </p>
+  <p>
+    Pretty cool, huh?
+  </p>
+  <p>
+    For a more of a technical overview, see <a href='https://github.com/hughes-ch/stakes'
+                                               target='_blank'
+                                               rel='noreferrer'
+                                               class='underlined link'>my repo on Github</a>.
+  </p>
+</section>
+
