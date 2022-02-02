@@ -99,10 +99,41 @@
     <p>
       If you'd like to know more,
       <a href='{{ settings["Routes"]["ResumeSrc"] }}' class='underlined link'>check out my resume</a>.
+      You can also check out some of my latest projects below:
     </p>
+    <a href='{{ url_for("blog_post", name="stakes") }}' class='link'>
+      <div class='portfolio-project'>
+        <span>Web3 social media proof-of-concept</span>
+        <div>
+          <img src='{{ url_for("static", filename="img/portfolio-web3-social-media.png") }}'
+               alt='A preview of the "Stakes" app - a Web3 social media proof-of-concept'>
+        </div>
+      </div>
+    </a>
+    <a href='{{ url_for("blog_post", name="the-dash") }}' class='link'>
+      <div class='portfolio-project'>
+        <span>Project Dashboard</span>
+        <div>
+          <img src='{{ url_for("static", filename="img/portfolio-project-dashboard.png") }}'
+               alt='A preview of "the Dash" app - a project dashboard'>
+        </div>
+      </div>
+    </a>
+    <a href='{{ url_for("blog_post", name="asteroids") }}' class='link'>
+      <div class='portfolio-project'>
+        <span>Asteroids!</span>
+        <div>
+          <img src='{{ url_for("static", filename="img/portfolio-asteroids.png") }}'
+               alt='A preview of the "Asteroids!" app - a modern take on the classic game'>
+        </div>
+      </div>
+    </a>
     <p>
       To get in contact, the best way is to use the social media links at the top or bottom of the
-      page.
+      page. 
+    </p>
+    <p>
+      Thanks for stopping by and I hope I can work with you in the future!
     </p>
   </section>
 </article>

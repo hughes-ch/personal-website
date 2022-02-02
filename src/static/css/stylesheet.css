@@ -158,6 +158,10 @@ table.highlighttable .linenos {
     color: black;
     text-decoration: none;
 }
+.link:hover {
+    color: var(--title-color);
+    text-decoration: none;
+}
 .link-block {
     display: flex;
     flex-flow: row nowrap;
@@ -197,6 +201,36 @@ table.highlighttable .linenos {
     font-size: 1.5em;
     text-align: center;
 }
+.portfolio-project {
+    align-items: center;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 1rem;
+}
+.portfolio-project > div {
+    border-radius: 1rem;
+    display: inherit;
+    overflow: hidden;
+}
+.portfolio-project img {
+    border-radius: 1rem;
+    object-fit: cover;
+    opacity: 100%;
+    transform: scale(1);
+    transition: all 0.5s;
+    width: 100%;
+}
+.portfolio-project:hover img {
+    opacity: 50%;
+    transform: scale(1.1);
+}
+.portfolio-project > span {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
 .rss {
     max-width: 40em;
 }
@@ -225,6 +259,9 @@ table.highlighttable .linenos {
     margin-bottom: 1em;
 }
 .underlined {
+    text-decoration: underline;
+}
+.underlined:hover {
     text-decoration: underline;
 }
 #next-nav {
